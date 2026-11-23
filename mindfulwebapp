@@ -1,0 +1,3614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mindful — Structured CBT</title>
+  <meta name="description" content="Structured Cognitive Behavioral Therapy PWA." />
+  <meta name="theme-color" content="#F9F8F5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mindful" />
+
+  <!-- Typography: Newsreader (Editorial Serif), Inter (Clean Sans), JetBrains Mono (Timers/Diagnostics) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF for clean client-side Medical Record PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- PDF.js for reading uploaded lab PDFs during annual intake -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#F9F8F5',
+            surface: '#FFFFFF',
+            stone: '#F2EFE9',
+            hairline: '#E6E2DA',
+            ink: '#1E1D1B',
+            muted: '#6E6A63',
+            sage: {
+              DEFAULT: '#2D4F3E',
+              hover: '#223D30',
+              light: '#EDF3F0',
+              border: '#D3E1DA'
+            },
+            amber: {
+              ink: '#855517',
+              bg: '#FBF5EA',
+              border: '#EEDBB9'
+            },
+            terra: {
+              ink: '#8C3830',
+              bg: '#FAF0EE',
+              border: '#ECCBC6'
+            }
+          },
+          fontFamily: {
+            serif: ['Newsreader', 'Georgia', 'serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    html, body {
+      background-color: #F9F8F5;
+      color: #1E1D1B;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #DBD6CC; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #C4BEB2; }
+
+    .clinical-prose p + p { margin-top: 0.75rem; }
+    .clinical-prose ul, .clinical-prose ol { margin-top: 0.5rem; margin-bottom: 0.5rem; padding-left: 1.25rem; }
+    .clinical-prose ul { list-style-type: disc; }
+    .clinical-prose ol { list-style-type: decimal; }
+    .clinical-prose li + li { margin-top: 0.25rem; }
+    .clinical-prose strong { font-weight: 600; color: #1E1D1B; }
+    .clinical-prose em { font-style: italic; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fadeUp 0.22s ease-out forwards; }
+
+    @keyframes softPulse {
+      0%, 100% { opacity: 0.35; }
+      50% { opacity: 1; }
+    }
+    .dot-pulse { animation: softPulse 1.4s infinite ease-in-out; }
+  </style>
+</head>
+<body class="h-[100dvh] flex flex-col overflow-hidden selection:bg-sage-light selection:text-sage">
+
+  <!-- ==================== AUTHENTICATION GATE ==================== -->
+  <section id="auth-gate" class="h-full w-full flex items-center justify-center p-4 bg-paper overflow-y-auto">
+    <div class="w-full max-w-sm rounded-2xl bg-surface border border-hairline shadow-sm p-7 sm:p-8 space-y-6 animate-fade-up">
+      <div class="space-y-2">
+        <div class="w-9 h-9 rounded-lg bg-sage text-paper flex items-center justify-center font-serif text-lg font-medium select-none">
+          M
+        </div>
+        <h1 class="font-serif text-2xl text-ink font-medium tracking-tight">Sign in to Mindful</h1>
+        <p class="text-xs text-muted leading-relaxed">
+          Your sessions, annual medical intake, and longitudinal chart are kept private to your account.
+        </p>
+      </div>
+
+      <!-- Google Sign-In -->
+      <button id="google-signin-btn" type="button" class="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl bg-surface border border-hairline hover:bg-stone/70 text-sm font-medium text-ink transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+          <path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.565 24 12.255 24z"/>
+          <path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/>
+          <path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.69 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="relative flex items-center justify-center">
+        <div class="border-t border-hairline w-full"></div>
+        <span class="bg-surface px-3 text-[11px] uppercase tracking-wider text-muted shrink-0">or email</span>
+        <div class="border-t border-hairline w-full"></div>
+      </div>
+
+      <!-- Email / Password Form -->
+      <form id="email-auth-form" class="space-y-3">
+        <!-- Sign-Up Personalization Fields -->
+        <div id="signup-profile-fields" class="hidden space-y-3 pb-1">
+          <div class="flex items-center gap-3.5 p-3 rounded-xl bg-paper border border-hairline">
+            <div id="signup-avatar-preview" class="w-12 h-12 rounded-full bg-sage-light text-sage border border-sage-border flex items-center justify-center font-serif text-lg font-medium overflow-hidden shrink-0">
+              <span>+</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="text-xs font-medium text-ink">Profile Photo <span class="text-muted font-normal">(optional)</span></div>
+              <div class="text-[11px] text-muted mt-0.5">Personalizes your account &amp; chart</div>
+            </div>
+            <input id="signup-photo-input" type="file" accept="image/*" class="hidden" />
+            <button id="signup-photo-btn" type="button" class="text-xs font-medium px-2.5 py-1.5 rounded-lg border border-hairline bg-surface text-ink hover:bg-stone transition-colors shrink-0">
+              Choose
+            </button>
+          </div>
+
+          <div>
+            <label for="auth-name" class="block text-[11px] font-medium text-muted mb-1">Full Name</label>
+            <input id="auth-name" type="text" autocomplete="name" placeholder="e.g. Jordan Taylor" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-sage/60 transition-colors" />
+          </div>
+
+          <div>
+            <label for="auth-gender" class="block text-[11px] font-medium text-muted mb-1">Gender</label>
+            <select id="auth-gender" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60 transition-colors">
+              <option value="">Prefer not to say</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Non-binary">Non-binary</option>
+              <option value="Transgender Female">Transgender Female</option>
+              <option value="Transgender Male">Transgender Male</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="auth-email" class="block text-[11px] font-medium text-muted mb-1">Email address</label>
+          <input id="auth-email" type="email" required autocomplete="email" placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-sage/60 transition-colors" />
+        </div>
+        <div>
+          <label for="auth-password" class="block text-[11px] font-medium text-muted mb-1">Password</label>
+          <input id="auth-password" type="password" required minlength="6" autocomplete="current-password" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink placeholder:text-muted/60 focus:outline-none focus:border-sage/60 transition-colors" />
+        </div>
+
+        <div id="auth-error-box" class="hidden p-3 rounded-xl bg-terra-bg border border-terra-border text-xs text-terra-ink leading-relaxed"></div>
+
+        <button id="email-auth-submit" type="submit" class="w-full py-2.5 rounded-xl bg-sage text-white text-sm font-medium hover:bg-sage-hover disabled:opacity-50 transition-colors">
+          Sign In
+        </button>
+      </form>
+
+      <div class="text-center text-xs text-muted">
+        <span id="auth-mode-prompt">New to Mindful?</span>
+        <button id="toggle-auth-mode-btn" type="button" class="text-sage font-medium hover:underline ml-1">Create an account</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ANNUAL INTAKE INTERVIEW GATE ==================== -->
+  <section id="intake-gate" class="hidden h-full flex flex-col bg-paper">
+    <header class="shrink-0 bg-paper/95 backdrop-blur border-b border-hairline">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-md bg-sage text-paper flex items-center justify-center font-serif text-sm font-medium select-none">M</div>
+          <div>
+            <span class="font-serif text-base font-medium text-ink">Annual Clinical Intake</span>
+            <span class="hidden sm:inline text-xs text-muted ml-2">Completed once per year</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="complete-intake-btn" disabled class="text-xs font-medium px-3.5 py-1.5 rounded-lg bg-sage text-white hover:bg-sage-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+            Complete &amp; Save to My Chart
+          </button>
+          <button id="intake-signout-btn" class="text-xs font-medium px-2.5 py-1.5 rounded-lg border border-hairline text-muted hover:text-ink transition-colors">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-1 min-h-0 flex flex-col max-w-3xl mx-auto w-full">
+      <div class="shrink-0 px-4 sm:px-6 py-3 bg-sage-light/60 border-b border-sage-border flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-sage">
+        <div>
+          <strong class="font-semibold">Pre-Clinical Interview:</strong>
+          Reviewing past medical history, whether conditions are controlled, medications (dosage, timing &amp; side effects), and recent lab work. You can upload photos, PDFs, or text copies of recent labs below.
+        </div>
+      </div>
+
+      <div id="intake-scroll-container" class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+        <div id="intake-messages" class="space-y-6"></div>
+        <div id="intake-typing-indicator" class="hidden animate-fade-up">
+          <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Intake Clinician</div>
+          <div class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface border border-hairline">
+            <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse" style="animation-delay: 0.2s;"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse" style="animation-delay: 0.4s;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="shrink-0 px-4 sm:px-6 pb-4 pt-2 bg-paper border-t border-hairline/60">
+        <div id="intake-attachment-bar" class="hidden mb-2.5 flex items-center gap-3 p-2.5 rounded-xl bg-surface border border-hairline">
+          <img id="intake-attachment-thumb" src="" alt="Lab preview" class="hidden w-11 h-11 rounded-lg object-cover border border-hairline" />
+          <div id="intake-attachment-doc-icon" class="hidden w-11 h-11 rounded-lg bg-sage-light text-sage border border-sage-border flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div id="intake-attachment-name" class="text-xs font-medium text-ink truncate">recent-labs.pdf</div>
+            <div class="text-[11px] text-muted">Attached for clinical intake review</div>
+          </div>
+          <button type="button" id="remove-intake-attachment-btn" class="p-1.5 text-muted hover:text-ink rounded-lg hover:bg-stone transition-colors" aria-label="Remove lab attachment">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <form id="intake-form" class="flex items-end gap-2 bg-surface border border-hairline rounded-2xl p-2 shadow-sm focus-within:border-sage/50 transition-colors">
+          <input id="intake-file-input" type="file" accept="image/*,.pdf,.txt,.csv" class="hidden" />
+          <button type="button" id="intake-attach-btn" title="Upload recent labs, PDF, or medication list" class="shrink-0 p-2.5 rounded-xl text-muted hover:text-ink hover:bg-stone transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/>
+            </svg>
+          </button>
+          <textarea
+            id="intake-input"
+            rows="1"
+            placeholder="Answer here or attach recent labs (photo, PDF, or text)…"
+            class="flex-1 max-h-40 py-2.5 px-1 bg-transparent text-sm text-ink placeholder:text-muted/70 focus:outline-none resize-none leading-relaxed"
+          ></textarea>
+          <button type="submit" id="intake-send-btn" class="shrink-0 p-2.5 rounded-xl bg-sage text-white hover:bg-sage-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors" aria-label="Send intake response">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+            </svg>
+          </button>
+        </form>
+        <div class="flex items-center justify-between mt-2 px-1">
+          <span class="text-[11px] text-muted">Upload recent labs (image, PDF, TXT) using the paperclip · Click <strong class="text-ink font-medium">Complete &amp; Save to My Chart</strong> when done.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== AUTHENTICATED APP SHELL ==================== -->
+  <div id="app-shell" class="hidden h-full flex flex-col overflow-hidden">
+
+    <!-- ==================== TOP NAVIGATION ==================== -->
+    <header class="shrink-0 bg-paper/95 backdrop-blur border-b border-hairline z-20">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-6 h-6 rounded-md bg-sage text-paper flex items-center justify-center font-serif text-sm font-medium select-none">
+            M
+          </div>
+          <span class="font-serif text-lg tracking-tight text-ink font-medium">Mindful</span>
+        </div>
+
+        <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Primary">
+          <button data-tab="session" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-stone text-ink">
+            Session
+          </button>
+          <button data-tab="schedule" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-muted hover:text-ink hover:bg-stone/60">
+            Schedule
+          </button>
+          <button data-tab="careplan" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-muted hover:text-ink hover:bg-stone/60">
+            Care Plan
+          </button>
+          <button data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-muted hover:text-ink hover:bg-stone/60">
+            History
+          </button>
+          <button data-tab="settings" class="nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-muted hover:text-ink hover:bg-stone/60">
+            Settings
+          </button>
+          <button id="nav-tab-engines" data-tab="engines" class="hidden nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-muted hover:text-ink hover:bg-stone/60">
+            Engines
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ==================== CRISIS GUARDRAIL BANNER ==================== -->
+    <div id="crisis-banner" class="hidden shrink-0 bg-terra-bg border-b border-terra-border px-4 py-3 z-20">
+      <div class="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-terra-ink">
+        <div>
+          <strong class="font-semibold">Immediate support is available.</strong>
+          If you are in crisis or thinking about harming yourself, please reach out to a real person right now:
+          call or text <strong class="underline">988</strong> (US/Canada), text <strong>HOME</strong> to <strong>741741</strong>, or contact local emergency services.
+        </div>
+        <button id="dismiss-crisis-btn" class="self-start sm:self-center shrink-0 text-xs font-medium px-2.5 py-1 rounded-md border border-terra-border hover:bg-white/60 transition-colors">
+          Dismiss
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN WORKSPACE ==================== -->
+    <main class="flex-1 min-h-0 relative overflow-hidden">
+
+      <!-- ==================== VIEW 1: LIVE SESSION ==================== -->
+      <section id="view-session" class="h-full flex flex-col max-w-3xl mx-auto w-full">
+        <!-- OFFICE LOCKED / WAITING ROOM -->
+        <div id="session-locked-view" class="hidden flex-1 overflow-y-auto px-4 sm:px-6 py-10 flex items-center justify-center">
+          <div class="w-full max-w-lg rounded-2xl bg-surface border border-hairline shadow-sm p-7 sm:p-8 space-y-6 animate-fade-up">
+            <div class="space-y-2">
+              <span id="locked-status-pill" class="inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-stone text-muted border border-hairline">
+                Between Sessions
+              </span>
+              <h1 id="locked-heading" class="font-serif text-2xl sm:text-3xl text-ink leading-snug">
+                Your therapy room opens at your scheduled appointment.
+              </h1>
+              <p id="locked-description" class="text-sm text-muted leading-relaxed">
+                Structured spacing between sessions gives CBT skills time to work in daily life and keeps your care grounded in healthy boundaries.
+              </p>
+            </div>
+
+            <div id="locked-appt-card" class="p-4 rounded-xl bg-paper border border-hairline space-y-1.5">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-muted">Next Scheduled Appointment</div>
+              <div id="locked-appt-time" class="text-sm font-medium text-ink">No appointment scheduled</div>
+              <div id="locked-appt-meta" class="text-xs text-muted">Open the Schedule tab to book your next session slot.</div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <button id="locked-join-btn" type="button" class="hidden flex-1 py-2.5 px-4 rounded-xl bg-sage text-white text-sm font-medium hover:bg-sage-hover transition-colors">
+                Enter Scheduled Session
+              </button>
+              <button id="locked-goto-schedule-btn" type="button" class="flex-1 py-2.5 px-4 rounded-xl bg-ink text-paper text-sm font-medium hover:bg-ink/85 transition-colors">
+                Manage Schedule
+              </button>
+              <button id="open-triage-btn" type="button" class="py-2.5 px-4 rounded-xl border border-terra-border bg-terra-bg text-terra-ink text-sm font-medium hover:bg-terra-border/30 transition-colors">
+                Request Urgent Session
+              </button>
+            </div>
+
+            <p class="text-[11px] text-muted leading-relaxed border-t border-hairline pt-4">
+              If you are experiencing acute distress or clinical decline, <strong class="text-ink font-medium">Request Urgent Session</strong> connects you with the Intake Clinician to evaluate whether an immediate unscheduled session is warranted. For life-threatening emergencies, call or text <strong class="text-ink font-medium">988</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- ACTIVE SESSION WORKSPACE -->
+        <div id="session-active-workspace" class="flex-1 min-h-0 flex flex-col">
+          <div class="shrink-0 px-4 sm:px-6 py-3 border-b border-hairline/80 flex items-center justify-between gap-3 bg-paper">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h1 id="session-title-label" class="font-serif text-base font-medium text-ink truncate">Session 1</h1>
+                <span id="session-timer-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone text-ink border border-hairline">
+                  0 / 45 min
+                </span>
+                <span id="session-brief-badge" class="hidden text-[11px] font-medium px-2 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">
+                  Care plan active
+                </span>
+              </div>
+              <p id="session-focus-preview" class="text-xs text-muted truncate mt-0.5">
+                Initial intake &amp; open conversation
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button id="new-session-btn" class="hidden text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-surface text-muted hover:text-ink hover:border-ink/20 transition-colors">
+                Reset
+              </button>
+              <button id="end-analyze-btn" disabled class="text-xs font-medium px-3.5 py-1.5 rounded-lg bg-sage text-white hover:bg-sage-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                End Session
+              </button>
+            </div>
+          </div>
+
+          <div id="session-taper-banner" class="hidden shrink-0 px-4 sm:px-6 py-2 bg-amber-bg border-b border-amber-border text-xs text-amber-ink flex items-center justify-between gap-2">
+            <span id="session-taper-text">Approaching the end of today's session. Begin wrapping up key takeaways.</span>
+          </div>
+
+          <div id="chat-scroll-container" class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-6">
+            <div id="chat-empty-state" class="py-10 sm:py-16 max-w-xl mx-auto">
+              <p class="text-xs font-medium uppercase tracking-widest text-sage mb-2">Cognitive Behavioral Therapy</p>
+              <h2 class="font-serif text-2xl sm:text-3xl text-ink leading-snug">
+                What has been weighing on your mind lately?
+              </h2>
+              <p class="text-sm text-muted mt-3 leading-relaxed">
+                Take your time. Share a recent situation, a recurring thought, or even a photo of a handwritten journal entry. When you finish, click <span class="text-ink font-medium">End Session</span> to save your progress notes and update your care plan.
+              </p>
+
+              <div id="starter-prompts" class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button class="starter-btn text-left p-3.5 rounded-xl bg-surface border border-hairline hover:border-sage/40 transition-colors">
+                  <div class="text-xs font-medium text-ink">Unpack a stressful moment</div>
+                  <div class="text-xs text-muted mt-0.5">Walk through what happened and what went through my head.</div>
+                </button>
+                <button class="starter-btn text-left p-3.5 rounded-xl bg-surface border border-hairline hover:border-sage/40 transition-colors">
+                  <div class="text-xs font-medium text-ink">Notice a recurring pattern</div>
+                  <div class="text-xs text-muted mt-0.5">Explore a habit, worry loop, or core belief I keep running into.</div>
+                </button>
+              </div>
+            </div>
+
+            <div id="chat-messages" class="space-y-6 hidden"></div>
+
+            <div id="typing-indicator" class="hidden animate-fade-up">
+              <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Therapist</div>
+              <div class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-surface border border-hairline">
+                <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse" style="animation-delay: 0.2s;"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-sage dot-pulse" style="animation-delay: 0.4s;"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="shrink-0 px-4 sm:px-6 pb-4 pt-2 bg-paper border-t border-hairline/60">
+            <div id="attachment-preview-bar" class="hidden mb-2.5 flex items-center gap-3 p-2 rounded-xl bg-surface border border-hairline">
+              <img id="attachment-thumb" src="" alt="Attachment preview" class="w-11 h-11 rounded-lg object-cover border border-hairline" />
+              <div class="flex-1 min-w-0">
+                <div id="attachment-name" class="text-xs font-medium text-ink truncate">journal-note.jpg</div>
+                <div class="text-[11px] text-muted">Attached to share in session</div>
+              </div>
+              <button id="remove-attachment-btn" class="p-1.5 text-muted hover:text-ink rounded-lg hover:bg-stone transition-colors" aria-label="Remove attachment">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <form id="chat-form" class="flex items-end gap-2 bg-surface border border-hairline rounded-2xl p-2 shadow-sm focus-within:border-sage/50 transition-colors">
+              <input id="image-file-input" type="file" accept="image/*" class="hidden" />
+              <button type="button" id="attach-image-btn" title="Attach image (e.g. handwritten journal)" class="shrink-0 p-2.5 rounded-xl text-muted hover:text-ink hover:bg-stone transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/>
+                </svg>
+              </button>
+
+              <textarea
+                id="chat-input"
+                rows="1"
+                placeholder="Write a message…"
+                class="flex-1 max-h-40 py-2.5 px-1 bg-transparent text-sm text-ink placeholder:text-muted/70 focus:outline-none resize-none leading-relaxed"
+              ></textarea>
+
+              <button type="submit" id="send-btn" class="shrink-0 p-2.5 rounded-xl bg-sage text-white hover:bg-sage-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors" aria-label="Send message">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/>
+                </svg>
+              </button>
+            </form>
+            <div class="flex items-center justify-between mt-2 px-1">
+              <span class="text-[11px] text-muted">Enter to send · Shift+Enter for new line</span>
+              <span id="active-engine1-label" class="hidden text-[11px] font-mono text-muted truncate max-w-[55%]">Loading model…</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 1B: SCHEDULING & CADENCE ==================== -->
+      <section id="view-schedule" class="hidden h-full overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-hairline pb-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-widest text-sage">Clinical Scheduling</p>
+              <h1 class="font-serif text-2xl sm:text-3xl text-ink mt-1">Appointments &amp; Cadence</h1>
+            </div>
+            <button id="recalc-cadence-btn" type="button" class="self-start sm:self-auto text-xs font-medium px-3.5 py-2 rounded-lg bg-surface border border-hairline text-ink hover:bg-stone transition-colors">
+              Refresh Cadence
+            </button>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Recommended Therapy Cadence</h2>
+              <span id="cadence-source-badge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">
+                Standard CBT Cadence
+              </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+                <div class="text-[10px] uppercase tracking-wider text-muted">Frequency</div>
+                <div id="cadence-freq-val" class="font-serif text-xl text-ink mt-0.5">1 / week</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+                <div class="text-[10px] uppercase tracking-wider text-muted">Target Length</div>
+                <div id="cadence-duration-val" class="font-serif text-xl text-ink mt-0.5">45 min</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+                <div class="text-[10px] uppercase tracking-wider text-muted">Min Spacing</div>
+                <div id="cadence-spacing-val" class="font-serif text-xl text-ink mt-0.5">4 days</div>
+              </div>
+            </div>
+            <p id="cadence-rationale" class="text-xs text-muted leading-relaxed pt-1">
+              Weekly 45-minute structured sessions allow space to practice cognitive behavioral tools between appointments while maintaining healthy boundaries.
+            </p>
+          </div>
+
+          <div id="current-appointment-card" class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+            <div class="flex items-center justify-between gap-2">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Current Appointment</h2>
+              <span id="sched-appt-status-badge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-stone text-muted border border-hairline">
+                None Scheduled
+              </span>
+            </div>
+            <div id="sched-appt-details" class="text-sm text-muted">
+              You do not have an upcoming appointment booked. Select a day and time below.
+            </div>
+            <div id="sched-appt-actions" class="hidden flex flex-wrap items-center gap-2 pt-1">
+              <button id="sched-join-btn" type="button" class="hidden text-xs font-medium px-4 py-2 rounded-lg bg-sage text-white hover:bg-sage-hover transition-colors">
+                Enter Session Now
+              </button>
+              <button id="sched-cancel-btn" type="button" class="text-xs font-medium px-3.5 py-2 rounded-lg border border-hairline bg-paper text-muted hover:text-ink transition-colors">
+                Cancel &amp; Reschedule
+              </button>
+            </div>
+          </div>
+
+          <form id="book-appointment-form" class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+            <div>
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Book or Reschedule Appointment</h2>
+              <p id="booking-policy-note" class="text-xs text-muted mt-1">
+                Appointments open 10 minutes before start time and have a 15-minute grace period. Missed slots must be rescheduled for another day or time.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="appt-date-input" class="block text-[11px] font-medium text-muted mb-1">Date</label>
+                <input id="appt-date-input" type="date" required class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+              </div>
+              <div>
+                <label for="appt-time-input" class="block text-[11px] font-medium text-muted mb-1">Start Time</label>
+                <input id="appt-time-input" type="time" required class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+              </div>
+            </div>
+
+            <div id="booking-error-box" class="hidden p-3 rounded-xl bg-terra-bg border border-terra-border text-xs text-terra-ink"></div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <button id="schedule-urgent-btn" type="button" class="text-xs font-medium text-terra-ink hover:underline">
+                Need an urgent unscheduled session? Request clinical triage →
+              </button>
+              <button type="submit" class="px-4 py-2.5 rounded-xl bg-sage text-white text-xs font-medium hover:bg-sage-hover transition-colors">
+                Confirm Appointment Slot
+              </button>
+            </div>
+          </form>
+
+          <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Appointment Log</h2>
+            <div id="schedule-history-list" class="space-y-2.5 text-xs text-muted">
+              No appointments recorded yet.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 2: CARE PLAN & DIAGNOSIS ==================== -->
+      <section id="view-careplan" class="hidden h-full overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-hairline pb-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-widest text-sage">Clinical Overview</p>
+              <h1 class="font-serif text-2xl sm:text-3xl text-ink mt-1">Diagnosis &amp; Care Plan</h1>
+            </div>
+            <p id="careplan-updated-at" class="text-xs text-muted">No sessions recorded yet</p>
+          </div>
+
+          <div id="careplan-empty" class="p-8 rounded-2xl bg-surface border border-hairline text-center">
+            <p class="font-serif text-xl text-ink">Your longitudinal care plan will appear here.</p>
+            <p class="text-sm text-muted mt-2 max-w-md mx-auto leading-relaxed">
+              Complete a conversation in the <strong class="text-ink font-medium">Session</strong> tab and click <strong class="text-ink font-medium">End Session</strong>. Your therapist will organize your clinical notes, working diagnostic hypotheses, and personalized treatment plan here.
+            </p>
+          </div>
+
+          <div id="careplan-content" class="hidden space-y-6">
+            <div class="p-6 rounded-2xl bg-surface border border-hairline">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted mb-2.5">Clinical Formulation</h2>
+              <p id="cp-formulation" class="text-sm text-ink leading-relaxed"></p>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-sage-light/60 border border-sage-border">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-sage">Between-Session Practice</h2>
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-surface text-sage border border-sage-border">Active</span>
+              </div>
+              <h3 id="cp-homework-title" class="font-serif text-lg text-ink font-medium"></h3>
+              <p id="cp-homework-instructions" class="text-sm text-ink/85 mt-1.5 leading-relaxed"></p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Working Diagnostic Hypotheses</h2>
+                <span class="text-[11px] text-muted">Updated longitudinally · Not a formal medical record</span>
+              </div>
+              <div id="cp-diagnoses-list" class="space-y-3"></div>
+            </div>
+
+            <div class="space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Treatment Goals &amp; CBT Interventions</h2>
+              <div id="cp-goals-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            </div>
+
+            <!-- Diagnostics-only: Engine handoff brief -->
+            <details id="cp-brief-diagnostics" class="hidden group rounded-2xl bg-surface border border-hairline overflow-hidden">
+              <summary class="px-6 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-ink select-none hover:bg-stone/40 transition-colors">
+                <span>Engine 3 → Engine 1 Handoff Brief (Next Session)</span>
+                <span class="text-xs text-muted group-open:hidden">Inspect</span>
+                <span class="text-xs text-muted hidden group-open:inline">Hide</span>
+              </summary>
+              <div class="px-6 pb-5 pt-2 border-t border-hairline bg-paper/50">
+                <p class="text-[11px] text-muted mb-2">Automatically injected into Engine 1's system prompt at the start of your next session.</p>
+                <div id="cp-next-brief" class="text-xs font-mono text-ink/90 whitespace-pre-wrap leading-relaxed bg-surface p-4 rounded-xl border border-hairline"></div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 3: SESSION HISTORY ==================== -->
+      <section id="view-history" class="hidden h-full overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="border-b border-hairline pb-5">
+            <p class="text-xs font-medium uppercase tracking-widest text-sage">Clinical Archive</p>
+            <h1 class="font-serif text-2xl sm:text-3xl text-ink mt-1">Session History</h1>
+          </div>
+
+          <div id="history-empty" class="p-8 rounded-2xl bg-surface border border-hairline text-center">
+            <p class="font-serif text-xl text-ink">No archived sessions yet.</p>
+            <p class="text-sm text-muted mt-2">
+              Completed sessions, SOAP progress notes, cognitive patterns, and transcripts will be stored here.
+            </p>
+          </div>
+
+          <div id="history-list" class="space-y-4"></div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 4: SETTINGS & MY CHART ==================== -->
+      <section id="view-settings" class="hidden h-full overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-hairline pb-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-widest text-sage">Patient Record &amp; Preferences</p>
+              <h1 class="font-serif text-2xl sm:text-3xl text-ink mt-1">Settings</h1>
+            </div>
+
+            <div class="inline-flex p-1 rounded-xl bg-stone border border-hairline self-start sm:self-auto">
+              <button data-settings-sub="mychart" class="settings-sub-btn px-3.5 py-1.5 rounded-lg text-xs font-medium bg-surface text-ink shadow-sm transition-colors">
+                My Chart
+              </button>
+              <button data-settings-sub="account" class="settings-sub-btn px-3.5 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink transition-colors">
+                Account &amp; Diagnostics
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW A: MY CHART -->
+          <div id="settings-sub-mychart" class="space-y-6">
+            <div class="p-5 rounded-2xl bg-surface border border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-muted">Annual Clinical Intake</div>
+                <p id="chart-intake-status" class="text-sm text-ink mt-1">Not completed yet</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button id="copy-chart-btn" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-paper text-ink hover:bg-stone transition-colors">
+                  Copy Summary
+                </button>
+                <button id="redo-intake-btn" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-surface text-muted hover:text-ink transition-colors">
+                  Update Intake
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Past Medical &amp; Psychiatric History</h2>
+              <p id="chart-intake-summary" class="text-sm text-ink leading-relaxed">No intake summary recorded yet.</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-hairline/70">
+                <div>
+                  <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Medical Conditions &amp; Control Status</div>
+                  <ul id="chart-medical-list" class="text-xs text-ink/85 space-y-2"></ul>
+                </div>
+                <div>
+                  <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Psychiatric History &amp; Allergies</div>
+                  <ul id="chart-psych-list" class="text-xs text-ink/85 space-y-1.5 list-disc pl-4"></ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Recent Labs &amp; Physiological Baselines</h2>
+              <div id="chart-labs-list" class="space-y-2"></div>
+              <div id="chart-baselines" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-hairline/70 text-xs"></div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Current Medications</h2>
+                <button id="toggle-add-med-btn" class="text-xs font-medium text-sage hover:underline">+ Add Medication</button>
+              </div>
+
+              <form id="add-med-form" class="hidden p-4 rounded-xl bg-paper border border-hairline space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <input id="med-name-input" type="text" required placeholder="Medication name" class="px-3 py-2 rounded-lg bg-surface border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+                  <input id="med-dosage-input" type="text" required placeholder="Dosage (e.g. 50mg)" class="px-3 py-2 rounded-lg bg-surface border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+                  <input id="med-timing-input" type="text" required placeholder="Timing (e.g. Morning)" class="px-3 py-2 rounded-lg bg-surface border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+                </div>
+                <div class="flex items-center gap-2">
+                  <input id="med-purpose-input" type="text" placeholder="Purpose / notes (optional)" class="flex-1 px-3 py-2 rounded-lg bg-surface border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+                  <button type="submit" class="px-3.5 py-2 rounded-lg bg-sage text-white text-xs font-medium hover:bg-sage-hover transition-colors">Save</button>
+                </div>
+              </form>
+
+              <div id="chart-medications-list" class="space-y-2.5"></div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Mental Health Diagnoses &amp; Working Hypotheses</h2>
+                <span class="text-[11px] text-muted">Synced from Care Plan</span>
+              </div>
+              <div id="chart-diagnoses-list" class="space-y-2.5"></div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Care Plan &amp; Treatment Goals</h2>
+              <p id="chart-formulation" class="text-sm text-ink leading-relaxed"></p>
+              <div id="chart-goals-list" class="space-y-2 pt-1"></div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Progress Notes</h2>
+              <div id="chart-progress-notes" class="space-y-3"></div>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Urgent Triage &amp; Clinical Decline Log</h2>
+                <span class="text-[11px] text-muted">Tracked for Care Plan &amp; Cadence</span>
+              </div>
+              <div id="chart-triage-log" class="space-y-2.5"></div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-surface border border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold uppercase tracking-wider text-muted">Medical Record Export</div>
+                <p class="text-xs text-muted mt-1 leading-relaxed">
+                  Download a plain black-and-white PDF containing your medical history, medications, labs, treatment plan, and SOAP progress notes.
+                </p>
+              </div>
+              <button id="export-pdf-btn" type="button" class="self-start sm:self-center shrink-0 inline-flex items-center gap-2 text-xs font-medium px-4 py-2.5 rounded-xl bg-ink text-paper hover:bg-ink/85 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                </svg>
+                Export
+              </button>
+            </div>
+          </div>
+
+          <!-- SUB-VIEW B: ACCOUNT & DIAGNOSTICS -->
+          <div id="settings-sub-account" class="hidden space-y-5">
+            <div class="p-6 rounded-2xl bg-surface border border-hairline space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5 min-w-0">
+                  <div id="account-avatar" class="w-12 h-12 rounded-full bg-sage-light text-sage border border-sage-border flex items-center justify-center font-serif text-lg font-medium overflow-hidden shrink-0">
+                    U
+                  </div>
+                  <div class="min-w-0">
+                    <div id="account-name" class="text-sm font-medium text-ink truncate">Signed-in User</div>
+                    <div id="account-email" class="text-xs text-muted truncate">user@example.com</div>
+                    <div id="account-gender-badge" class="hidden text-[11px] text-muted mt-0.5"></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 self-start sm:self-auto">
+                  <button id="toggle-edit-profile-btn" type="button" class="text-xs font-medium px-3 py-2 rounded-lg border border-hairline bg-paper text-ink hover:bg-stone transition-colors">
+                    Edit Profile
+                  </button>
+                  <button id="signout-btn" class="text-xs font-medium px-3.5 py-2 rounded-lg border border-terra-border bg-terra-bg text-terra-ink hover:bg-terra-border/30 transition-colors">
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+
+              <form id="edit-profile-form" class="hidden pt-4 border-t border-hairline space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label for="profile-name-input" class="block text-[11px] font-medium text-muted mb-1">Full Name</label>
+                    <input id="profile-name-input" type="text" placeholder="Your name" class="w-full px-3 py-2 rounded-lg bg-paper border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+                  </div>
+                  <div>
+                    <label for="profile-gender-input" class="block text-[11px] font-medium text-muted mb-1">Gender</label>
+                    <select id="profile-gender-input" class="w-full px-3 py-2 rounded-lg bg-paper border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60">
+                      <option value="">Prefer not to say</option>
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Transgender Female">Transgender Female</option>
+                      <option value="Transgender Male">Transgender Male</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <input id="profile-photo-input" type="file" accept="image/*" class="hidden" />
+                    <button id="profile-photo-btn" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-paper text-ink hover:bg-stone transition-colors">
+                      Change Photo
+                    </button>
+                    <span id="profile-photo-status" class="text-[11px] text-muted"></span>
+                  </div>
+                  <button type="submit" class="px-4 py-1.5 rounded-lg bg-sage text-white text-xs font-medium hover:bg-sage-hover transition-colors">
+                    Save Profile
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="p-6 rounded-2xl bg-surface border border-hairline flex items-center justify-between gap-4">
+              <div>
+                <div class="text-sm font-medium text-ink">Diagnostics Mode</div>
+                <p class="text-xs text-muted mt-1 leading-relaxed">
+                  Reveals the <strong class="text-ink font-medium">Engines</strong> tab, model identifiers, internal session handoff briefs, and live telemetry logs.
+                </p>
+              </div>
+              <button id="diagnostics-toggle-btn" type="button" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-hairline transition-colors duration-200 focus:outline-none">
+                <span id="diagnostics-toggle-knob" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 translate-x-0"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 5: ENGINES & FIREBASE DIAGNOSTICS (DIAGNOSTICS ONLY) ==================== -->
+      <section id="view-engines" class="hidden h-full overflow-y-auto">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-hairline pb-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-widest text-sage">OpenRouter × Firebase</p>
+              <h1 class="font-serif text-2xl sm:text-3xl text-ink mt-1">Engine Configuration</h1>
+            </div>
+            <button id="reload-firebase-btn" class="self-start sm:self-auto text-xs font-medium px-3.5 py-2 rounded-lg bg-surface border border-hairline text-ink hover:bg-stone transition-colors">
+              Sync from Firebase
+            </button>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-surface border border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-wider text-muted">Firestore Backend</div>
+              <div class="text-sm text-ink mt-1 font-mono">mindful-cabbd / backend</div>
+              <p id="storage-mode-note" class="text-xs text-muted mt-1">Checking Firestore connectivity…</p>
+            </div>
+            <span id="engines-ready-badge" class="self-start sm:self-center text-xs font-medium px-2.5 py-1 rounded-full bg-stone text-muted border border-hairline">
+              Loading…
+            </span>
+          </div>
+
+          <div id="engine-cards-grid" class="grid grid-cols-1 gap-4"></div>
+
+          <div class="rounded-2xl bg-surface border border-hairline overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-hairline flex items-center justify-between">
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Pipeline Telemetry Log</h2>
+              <button id="clear-log-btn" class="text-xs text-muted hover:text-ink transition-colors">Clear</button>
+            </div>
+            <div id="telemetry-log" class="p-4 max-h-60 overflow-y-auto font-mono text-[11px] space-y-1.5 text-muted bg-paper/60">
+              <div>Initializing Mindful PWA…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div><!-- /#app-shell -->
+
+  <!-- ==================== SAVING SESSION MODAL (CALM PROGRESS BAR) ==================== -->
+  <div id="save-session-modal" class="hidden fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-surface border border-hairline shadow-xl p-6 space-y-5">
+      <div>
+        <p class="text-xs font-medium uppercase tracking-widest text-sage">Closing Appointment</p>
+        <h2 id="save-modal-title" class="font-serif text-2xl text-ink mt-1">Saving Your Session</h2>
+        <p id="save-modal-status" class="text-xs text-muted mt-1.5 leading-relaxed">
+          Finalizing your progress note and updating your care plan…
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="w-full h-2 rounded-full bg-stone overflow-hidden">
+          <div id="save-progress-bar" class="h-full bg-sage rounded-full transition-all duration-500 ease-out" style="width: 12%;"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-muted">
+          <span id="save-progress-label">Preparing notes…</span>
+          <span id="save-progress-pct" class="font-mono">12%</span>
+        </div>
+      </div>
+
+      <div id="save-modal-error" class="hidden p-3 rounded-xl bg-terra-bg border border-terra-border text-xs text-terra-ink leading-relaxed"></div>
+
+      <div id="save-modal-actions" class="hidden flex items-center justify-end gap-2 pt-1">
+        <button id="save-close-btn" class="text-xs font-medium px-3.5 py-2 rounded-lg border border-hairline text-muted hover:text-ink transition-colors">
+          Close
+        </button>
+        <button id="save-view-plan-btn" class="text-xs font-medium px-4 py-2 rounded-lg bg-sage text-white hover:bg-sage-hover transition-colors">
+          View Care Plan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CONFIRMATION MODAL ==================== -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-surface border border-hairline shadow-xl p-6 space-y-4">
+      <h3 id="confirm-title" class="font-serif text-xl text-ink">Confirm action</h3>
+      <p id="confirm-body" class="text-sm text-muted leading-relaxed"></p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="confirm-cancel-btn" class="text-xs font-medium px-3.5 py-2 rounded-lg border border-hairline text-muted hover:text-ink transition-colors">
+          Cancel
+        </button>
+        <button id="confirm-ok-btn" class="text-xs font-medium px-4 py-2 rounded-lg bg-sage text-white hover:bg-sage-hover transition-colors">
+          Continue
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== URGENT CLINICAL TRIAGE MODAL ==================== -->
+  <div id="triage-modal" class="hidden fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+    <div class="w-full max-w-lg max-h-[88dvh] flex flex-col rounded-2xl bg-surface border border-hairline shadow-xl overflow-hidden">
+      <div class="shrink-0 px-6 py-4 border-b border-hairline flex items-center justify-between gap-3 bg-paper">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-widest text-terra-ink">Urgent Clinical Triage</p>
+          <h2 class="font-serif text-xl text-ink">Intake Clinician Assessment</h2>
+        </div>
+        <button id="close-triage-btn" type="button" class="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-stone transition-colors" aria-label="Close triage">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="shrink-0 px-6 py-2.5 bg-terra-bg border-b border-terra-border text-[11px] text-terra-ink leading-relaxed">
+        <strong>Immediate emergency?</strong> Call or text <strong>988</strong> (US/Canada) or local emergency services. The Intake Clinician will evaluate whether your current distress warrants unlocking an urgent CBT session and will record the assessment in My Chart.
+      </div>
+
+      <div id="triage-scroll" class="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-paper/40">
+        <div id="triage-messages" class="space-y-4"></div>
+        <div id="triage-typing" class="hidden text-xs text-muted italic">Intake Clinician is evaluating…</div>
+      </div>
+
+      <div id="triage-decision-bar" class="hidden shrink-0 px-6 py-3.5 border-t border-hairline bg-surface space-y-2.5">
+        <div id="triage-decision-summary" class="text-xs text-ink leading-relaxed"></div>
+        <div class="flex items-center justify-end gap-2">
+          <button id="triage-dismiss-btn" type="button" class="text-xs font-medium px-3.5 py-2 rounded-lg border border-hairline text-muted hover:text-ink">
+            Close
+          </button>
+          <button id="triage-enter-urgent-btn" type="button" class="hidden text-xs font-medium px-4 py-2 rounded-lg bg-sage text-white hover:bg-sage-hover">
+            Enter Urgent Session Now
+          </button>
+        </div>
+      </div>
+
+      <form id="triage-form" class="shrink-0 p-3 border-t border-hairline bg-surface flex items-end gap-2">
+        <textarea id="triage-input" rows="2" placeholder="Describe what is happening right now and why you need an urgent session…" class="flex-1 px-3 py-2 rounded-xl bg-paper border border-hairline text-sm text-ink placeholder:text-muted/70 focus:outline-none focus:border-sage/60 resize-none"></textarea>
+        <button id="triage-send-btn" type="submit" class="shrink-0 px-4 py-2.5 rounded-xl bg-sage text-white text-xs font-medium hover:bg-sage-hover disabled:opacity-40 transition-colors">
+          Send
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== INLINE TOAST NOTIFICATION ==================== -->
+  <div id="toast-box" class="hidden fixed bottom-5 right-5 z-50 max-w-xs px-4 py-3 rounded-xl bg-ink text-paper text-xs font-medium shadow-lg animate-fade-up"></div>
+
+  <!-- ==================== APPLICATION SCRIPT ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      collection,
+      getDocs,
+      addDoc
+    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // =========================================================================
+    // 1. PWA MANIFEST INJECTION
+    // =========================================================================
+    (function setupPWAManifest() {
+      const svgIcon = encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#2D4F3E"/><text x="96" y="126" font-family="Georgia,serif" font-size="108" fill="#F9F8F5" text-anchor="middle">M</text></svg>`
+      );
+      const manifest = {
+        name: "Mindful — Structured CBT",
+        short_name: "Mindful",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#F9F8F5",
+        theme_color: "#2D4F3E",
+        icons: [
+          { src: `data:image/svg+xml,${svgIcon}`, sizes: "192x192", type: "image/svg+xml" },
+          { src: `data:image/svg+xml,${svgIcon}`, sizes: "512x512", type: "image/svg+xml" }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+      const link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = URL.createObjectURL(blob);
+      document.head.appendChild(link);
+    })();
+
+    // =========================================================================
+    // 2. FIREBASE INITIALIZATION
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtSUbIzU45-bf2gS2lbH5iJMeq2c6piLc",
+      authDomain: "mindful-cabbd.firebaseapp.com",
+      projectId: "mindful-cabbd",
+      storageBucket: "mindful-cabbd.firebasestorage.app",
+      messagingSenderId: "663102632335",
+      appId: "1:663102632335:web:a643dc1001616692c5dbfa",
+      measurementId: "G-LVH8053YLS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
+    // =========================================================================
+    // 3. APPLICATION STATE
+    // =========================================================================
+    const state = {
+      user: null,
+      userProfile: { name: "", gender: "", photoDataUrl: "" },
+      pendingSignupPhotoDataUrl: null,
+      pendingEditPhotoDataUrl: null,
+      authMode: "signin",
+      diagnosticsEnabled: false,
+      engines: {
+        conversation: { docId: "conversationengine", label: "Engine 1 · Conversation", role: "Live empathetic CBT therapist (time-aware)", api: "", slug: "", loaded: false, error: null },
+        interpreter:  { docId: "interpreterengine",  label: "Engine 2 · Interpreter",  role: "Post-session structured SOAP & JSON scribe", api: "", slug: "", loaded: false, error: null },
+        careplan:     { docId: "diagnosiscareplanengine", label: "Engine 3 · Diagnosis & Care Plan", role: "Longitudinal clinical supervisor", api: "", slug: "", loaded: false, error: null },
+        intake:       { docId: "intakeinterview", label: "Engine 4 · Intake & Urgent Triage", role: "Annual medical intake & crisis override clinician", api: "", slug: "", loaded: false, error: null },
+        planning:     { docId: "planningengine", label: "Engine 5 · Scheduling & Cadence", role: "Determines session frequency & duration limits", api: "", slug: "", loaded: false, error: null }
+      },
+      firestoreWritable: true,
+      currentSessionId: null,
+      messages: [],
+      intakeMessages: [],
+      triageMessages: [],
+      isTriageSending: false,
+      pendingIntakeFile: null,
+      isIntakeSending: false,
+      pendingImageDataUrl: null,
+      pendingImageName: "",
+      isSending: false,
+      sessionsHistory: [],
+      carePlan: null,
+      chart: null,
+      schedule: {
+        cadence: {
+          sessions_per_week: 1,
+          session_duration_minutes: 45,
+          minimum_days_between_sessions: 4,
+          rationale: "Weekly 45-minute structured sessions allow space to practice CBT tools in real life while maintaining healthy boundaries.",
+          source: "Standard CBT Cadence",
+          updatedAt: null
+        },
+        appointments: [],
+        triageEvents: []
+      },
+      activeAppointmentId: null
+    };
+
+    // =========================================================================
+    // 4. DOM REFERENCES
+    // =========================================================================
+    const els = {
+      authGate: document.getElementById("auth-gate"),
+      intakeGate: document.getElementById("intake-gate"),
+      appShell: document.getElementById("app-shell"),
+      googleSigninBtn: document.getElementById("google-signin-btn"),
+      emailAuthForm: document.getElementById("email-auth-form"),
+      signupProfileFields: document.getElementById("signup-profile-fields"),
+      signupAvatarPreview: document.getElementById("signup-avatar-preview"),
+      signupPhotoInput: document.getElementById("signup-photo-input"),
+      signupPhotoBtn: document.getElementById("signup-photo-btn"),
+      authName: document.getElementById("auth-name"),
+      authGender: document.getElementById("auth-gender"),
+      authEmail: document.getElementById("auth-email"),
+      authPassword: document.getElementById("auth-password"),
+      authErrorBox: document.getElementById("auth-error-box"),
+      emailAuthSubmit: document.getElementById("email-auth-submit"),
+      authModePrompt: document.getElementById("auth-mode-prompt"),
+      toggleAuthModeBtn: document.getElementById("toggle-auth-mode-btn"),
+
+      intakeScroll: document.getElementById("intake-scroll-container"),
+      intakeMessages: document.getElementById("intake-messages"),
+      intakeTypingIndicator: document.getElementById("intake-typing-indicator"),
+      intakeForm: document.getElementById("intake-form"),
+      intakeInput: document.getElementById("intake-input"),
+      intakeSendBtn: document.getElementById("intake-send-btn"),
+      intakeAttachBtn: document.getElementById("intake-attach-btn"),
+      intakeFileInput: document.getElementById("intake-file-input"),
+      intakeAttachmentBar: document.getElementById("intake-attachment-bar"),
+      intakeAttachmentThumb: document.getElementById("intake-attachment-thumb"),
+      intakeAttachmentDocIcon: document.getElementById("intake-attachment-doc-icon"),
+      intakeAttachmentName: document.getElementById("intake-attachment-name"),
+      removeIntakeAttachmentBtn: document.getElementById("remove-intake-attachment-btn"),
+      completeIntakeBtn: document.getElementById("complete-intake-btn"),
+      intakeSignoutBtn: document.getElementById("intake-signout-btn"),
+
+      navTabs: document.querySelectorAll(".nav-tab"),
+      navTabEngines: document.getElementById("nav-tab-engines"),
+      views: {
+        session: document.getElementById("view-session"),
+        schedule: document.getElementById("view-schedule"),
+        careplan: document.getElementById("view-careplan"),
+        history: document.getElementById("view-history"),
+        settings: document.getElementById("view-settings"),
+        engines: document.getElementById("view-engines")
+      },
+      crisisBanner: document.getElementById("crisis-banner"),
+      dismissCrisisBtn: document.getElementById("dismiss-crisis-btn"),
+
+      sessionLockedView: document.getElementById("session-locked-view"),
+      sessionActiveWorkspace: document.getElementById("session-active-workspace"),
+      lockedStatusPill: document.getElementById("locked-status-pill"),
+      lockedHeading: document.getElementById("locked-heading"),
+      lockedDescription: document.getElementById("locked-description"),
+      lockedApptTime: document.getElementById("locked-appt-time"),
+      lockedApptMeta: document.getElementById("locked-appt-meta"),
+      lockedJoinBtn: document.getElementById("locked-join-btn"),
+      lockedGotoScheduleBtn: document.getElementById("locked-goto-schedule-btn"),
+      openTriageBtn: document.getElementById("open-triage-btn"),
+      sessionTitleLabel: document.getElementById("session-title-label"),
+      sessionTimerBadge: document.getElementById("session-timer-badge"),
+      sessionTaperBanner: document.getElementById("session-taper-banner"),
+      sessionTaperText: document.getElementById("session-taper-text"),
+      sessionBriefBadge: document.getElementById("session-brief-badge"),
+      sessionFocusPreview: document.getElementById("session-focus-preview"),
+      newSessionBtn: document.getElementById("new-session-btn"),
+      endAnalyzeBtn: document.getElementById("end-analyze-btn"),
+      chatScroll: document.getElementById("chat-scroll-container"),
+      chatEmpty: document.getElementById("chat-empty-state"),
+      chatMessages: document.getElementById("chat-messages"),
+      typingIndicator: document.getElementById("typing-indicator"),
+      chatForm: document.getElementById("chat-form"),
+      chatInput: document.getElementById("chat-input"),
+      sendBtn: document.getElementById("send-btn"),
+      attachImageBtn: document.getElementById("attach-image-btn"),
+      imageFileInput: document.getElementById("image-file-input"),
+      attachmentBar: document.getElementById("attachment-preview-bar"),
+      attachmentThumb: document.getElementById("attachment-thumb"),
+      attachmentName: document.getElementById("attachment-name"),
+      removeAttachmentBtn: document.getElementById("remove-attachment-btn"),
+      activeEngine1Label: document.getElementById("active-engine1-label"),
+
+      recalcCadenceBtn: document.getElementById("recalc-cadence-btn"),
+      cadenceSourceBadge: document.getElementById("cadence-source-badge"),
+      cadenceFreqVal: document.getElementById("cadence-freq-val"),
+      cadenceDurationVal: document.getElementById("cadence-duration-val"),
+      cadenceSpacingVal: document.getElementById("cadence-spacing-val"),
+      cadenceRationale: document.getElementById("cadence-rationale"),
+      schedApptStatusBadge: document.getElementById("sched-appt-status-badge"),
+      schedApptDetails: document.getElementById("sched-appt-details"),
+      schedApptActions: document.getElementById("sched-appt-actions"),
+      schedJoinBtn: document.getElementById("sched-join-btn"),
+      schedCancelBtn: document.getElementById("sched-cancel-btn"),
+      bookAppointmentForm: document.getElementById("book-appointment-form"),
+      apptDateInput: document.getElementById("appt-date-input"),
+      apptTimeInput: document.getElementById("appt-time-input"),
+      bookingErrorBox: document.getElementById("booking-error-box"),
+      scheduleUrgentBtn: document.getElementById("schedule-urgent-btn"),
+      scheduleHistoryList: document.getElementById("schedule-history-list"),
+
+      careplanUpdatedAt: document.getElementById("careplan-updated-at"),
+      careplanEmpty: document.getElementById("careplan-empty"),
+      careplanContent: document.getElementById("careplan-content"),
+      cpFormulation: document.getElementById("cp-formulation"),
+      cpHomeworkTitle: document.getElementById("cp-homework-title"),
+      cpHomeworkInstructions: document.getElementById("cp-homework-instructions"),
+      cpDiagnosesList: document.getElementById("cp-diagnoses-list"),
+      cpGoalsList: document.getElementById("cp-goals-list"),
+      cpBriefDiagnostics: document.getElementById("cp-brief-diagnostics"),
+      cpNextBrief: document.getElementById("cp-next-brief"),
+
+      historyEmpty: document.getElementById("history-empty"),
+      historyList: document.getElementById("history-list"),
+
+      settingsSubBtns: document.querySelectorAll(".settings-sub-btn"),
+      settingsSubMychart: document.getElementById("settings-sub-mychart"),
+      settingsSubAccount: document.getElementById("settings-sub-account"),
+      chartIntakeStatus: document.getElementById("chart-intake-status"),
+      copyChartBtn: document.getElementById("copy-chart-btn"),
+      redoIntakeBtn: document.getElementById("redo-intake-btn"),
+      chartIntakeSummary: document.getElementById("chart-intake-summary"),
+      chartMedicalList: document.getElementById("chart-medical-list"),
+      chartPsychList: document.getElementById("chart-psych-list"),
+      chartLabsList: document.getElementById("chart-labs-list"),
+      chartBaselines: document.getElementById("chart-baselines"),
+      toggleAddMedBtn: document.getElementById("toggle-add-med-btn"),
+      addMedForm: document.getElementById("add-med-form"),
+      medNameInput: document.getElementById("med-name-input"),
+      medDosageInput: document.getElementById("med-dosage-input"),
+      medTimingInput: document.getElementById("med-timing-input"),
+      medPurposeInput: document.getElementById("med-purpose-input"),
+      chartMedicationsList: document.getElementById("chart-medications-list"),
+      chartDiagnosesList: document.getElementById("chart-diagnoses-list"),
+      chartFormulation: document.getElementById("chart-formulation"),
+      chartGoalsList: document.getElementById("chart-goals-list"),
+      chartProgressNotes: document.getElementById("chart-progress-notes"),
+      chartTriageLog: document.getElementById("chart-triage-log"),
+      exportPdfBtn: document.getElementById("export-pdf-btn"),
+      accountAvatar: document.getElementById("account-avatar"),
+      accountName: document.getElementById("account-name"),
+      accountEmail: document.getElementById("account-email"),
+      accountGenderBadge: document.getElementById("account-gender-badge"),
+      toggleEditProfileBtn: document.getElementById("toggle-edit-profile-btn"),
+      editProfileForm: document.getElementById("edit-profile-form"),
+      profileNameInput: document.getElementById("profile-name-input"),
+      profileGenderInput: document.getElementById("profile-gender-input"),
+      profilePhotoInput: document.getElementById("profile-photo-input"),
+      profilePhotoBtn: document.getElementById("profile-photo-btn"),
+      profilePhotoStatus: document.getElementById("profile-photo-status"),
+      signoutBtn: document.getElementById("signout-btn"),
+      diagnosticsToggleBtn: document.getElementById("diagnostics-toggle-btn"),
+      diagnosticsToggleKnob: document.getElementById("diagnostics-toggle-knob"),
+
+      reloadFirebaseBtn: document.getElementById("reload-firebase-btn"),
+      storageModeNote: document.getElementById("storage-mode-note"),
+      enginesReadyBadge: document.getElementById("engines-ready-badge"),
+      engineCardsGrid: document.getElementById("engine-cards-grid"),
+      telemetryLog: document.getElementById("telemetry-log"),
+      clearLogBtn: document.getElementById("clear-log-btn"),
+
+      saveSessionModal: document.getElementById("save-session-modal"),
+      saveModalTitle: document.getElementById("save-modal-title"),
+      saveModalStatus: document.getElementById("save-modal-status"),
+      saveProgressBar: document.getElementById("save-progress-bar"),
+      saveProgressLabel: document.getElementById("save-progress-label"),
+      saveProgressPct: document.getElementById("save-progress-pct"),
+      saveModalError: document.getElementById("save-modal-error"),
+      saveModalActions: document.getElementById("save-modal-actions"),
+      saveCloseBtn: document.getElementById("save-close-btn"),
+      saveViewPlanBtn: document.getElementById("save-view-plan-btn"),
+
+      triageModal: document.getElementById("triage-modal"),
+      closeTriageBtn: document.getElementById("close-triage-btn"),
+      triageScroll: document.getElementById("triage-scroll"),
+      triageMessages: document.getElementById("triage-messages"),
+      triageTyping: document.getElementById("triage-typing"),
+      triageDecisionBar: document.getElementById("triage-decision-bar"),
+      triageDecisionSummary: document.getElementById("triage-decision-summary"),
+      triageDismissBtn: document.getElementById("triage-dismiss-btn"),
+      triageEnterUrgentBtn: document.getElementById("triage-enter-urgent-btn"),
+      triageForm: document.getElementById("triage-form"),
+      triageInput: document.getElementById("triage-input"),
+      triageSendBtn: document.getElementById("triage-send-btn"),
+
+      confirmModal: document.getElementById("confirm-modal"),
+      confirmTitle: document.getElementById("confirm-title"),
+      confirmBody: document.getElementById("confirm-body"),
+      confirmCancelBtn: document.getElementById("confirm-cancel-btn"),
+      confirmOkBtn: document.getElementById("confirm-ok-btn"),
+      toastBox: document.getElementById("toast-box")
+    };
+
+    // =========================================================================
+    // 5. CORE UTILITIES (ESCAPE, TOAST, CONFIRM, TELEMETRY, IMAGE & PDF HELPERS)
+    // =========================================================================
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    let toastTimer = null;
+    function showToast(msg, duration = 3200) {
+      els.toastBox.textContent = msg;
+      els.toastBox.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => els.toastBox.classList.add("hidden"), duration);
+    }
+
+    function showConfirm({ title, body, okLabel = "Continue" }) {
+      return new Promise((resolve) => {
+        els.confirmTitle.textContent = title;
+        els.confirmBody.textContent = body;
+        els.confirmOkBtn.textContent = okLabel;
+        els.confirmModal.classList.remove("hidden");
+
+        const cleanup = (result) => {
+          els.confirmModal.classList.add("hidden");
+          els.confirmOkBtn.removeEventListener("click", onOk);
+          els.confirmCancelBtn.removeEventListener("click", onCancel);
+          resolve(result);
+        };
+        const onOk = () => cleanup(true);
+        const onCancel = () => cleanup(false);
+
+        els.confirmOkBtn.addEventListener("click", onOk);
+        els.confirmCancelBtn.addEventListener("click", onCancel);
+      });
+    }
+
+    function logTelemetry(message, level = "info") {
+      const ts = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      const line = document.createElement("div");
+      const colorClass = level === "error" ? "text-terra-ink" : level === "success" ? "text-sage" : "text-muted";
+      line.className = colorClass;
+      line.textContent = `[${ts}] ${message}`;
+      els.telemetryLog.appendChild(line);
+      els.telemetryLog.scrollTop = els.telemetryLog.scrollHeight;
+    }
+
+    function maskApiKey(key) {
+      if (!key) return "Missing";
+      if (key.length <= 12) return "••••••••";
+      return `${key.slice(0, 8)}••••${key.slice(-4)}`;
+    }
+
+    function autoResizeTextarea(el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 160) + "px";
+    }
+
+    function compressImageToDataUrl(file, maxSize = 256, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Could not read image."));
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => reject(new Error("Invalid image file."));
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function extractPdfText(file) {
+      if (!window.pdfjsLib) {
+        return `[PDF attached: ${file.name} — PDF text reader unavailable; please summarize key values if needed.]`;
+      }
+      try {
+        const buf = await file.arrayBuffer();
+        const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+        const maxPages = Math.min(pdf.numPages, 8);
+        const chunks = [];
+        for (let p = 1; p <= maxPages; p++) {
+          const page = await pdf.getPage(p);
+          const content = await page.getTextContent();
+          const pageText = content.items.map((item) => item.str).join(" ").trim();
+          if (pageText) chunks.push(`--- Page ${p} ---\n${pageText}`);
+        }
+        return chunks.length
+          ? chunks.join("\n\n")
+          : `[Scanned PDF attached: ${file.name} — no selectable text found. Consider uploading a screenshot/photo of the lab page.]`;
+      } catch (err) {
+        logTelemetry(`PDF extraction error: ${err.message}`, "error");
+        return `[PDF attached: ${file.name} — could not parse text automatically.]`;
+      }
+    }
+
+    function formatDateTime(ms) {
+      if (!ms) return "—";
+      return new Date(ms).toLocaleString([], {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function uidKey(suffix) {
+      return `mindful_${state.user?.uid || "anon"}_${suffix}`;
+    }
+
+    // =========================================================================
+    // 6. CLINICAL MARKDOWN, HARDENED JSON EXTRACTION & SAFETY GUARDRAIL
+    // =========================================================================
+    function formatClinicalMarkdown(text) {
+      const safe = escapeHtml(text || "");
+      const blocks = safe.split(/\n{2,}/);
+      return blocks.map((block) => {
+        const lines = block.split("\n");
+        if (lines.every((l) => /^\s*[-*•]\s+/.test(l))) {
+          const items = lines.map((l) => `<li>${formatInlineMd(l.replace(/^\s*[-*•]\s+/, ""))}</li>`).join("");
+          return `<ul>${items}</ul>`;
+        }
+        if (lines.every((l) => /^\s*\d+\.\s+/.test(l))) {
+          const items = lines.map((l) => `<li>${formatInlineMd(l.replace(/^\s*\d+\.\s+/, ""))}</li>`).join("");
+          return `<ol>${items}</ol>`;
+        }
+        return `<p>${lines.map(formatInlineMd).join("<br>")}</p>`;
+      }).join("");
+    }
+
+    function formatInlineMd(line) {
+      return line
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.+?)\*/g, "<em>$1</em>");
+    }
+
+    function repairCommonJsonIssues(str) {
+      let s = String(str || "").trim();
+      s = s.replace(/,\s*([}\]])/g, "$1");
+      s = s.replace(/(\}|\])\s*\n(\s*\{)/g, "$1,\n$2");
+      s = s.replace(/("\s*)\n(\s*")/g, "$1,\n$2");
+      s = s.replace(/(\d|true|false|null)\s*\n(\s*")/g, "$1,\n$2");
+
+      let out = "";
+      let inString = false;
+      let escaped = false;
+      for (let i = 0; i < s.length; i++) {
+        const ch = s[i];
+        if (inString) {
+          if (escaped) {
+            out += ch;
+            escaped = false;
+          } else if (ch === "\\") {
+            out += ch;
+            escaped = true;
+          } else if (ch === '"') {
+            out += ch;
+            inString = false;
+          } else if (ch === "\n") {
+            out += "\\n";
+          } else if (ch === "\r") {
+            out += "\\r";
+          } else if (ch === "\t") {
+            out += "\\t";
+          } else {
+            out += ch;
+          }
+        } else {
+          if (ch === '"') inString = true;
+          out += ch;
+        }
+      }
+      return out;
+    }
+
+    function extractJSON(rawText) {
+      const withoutThink = String(rawText || "")
+        .replace(/<think>[\s\S]*?<\/think>/gi, "")
+        .trim();
+      const fenced = withoutThink.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      const base = fenced ? fenced[1].trim() : withoutThink;
+
+      const candidates = [base];
+      const firstBrace = base.indexOf("{");
+      const lastBrace = base.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        candidates.push(base.slice(firstBrace, lastBrace + 1));
+      }
+
+      let lastErr = null;
+      for (const candidate of candidates) {
+        try {
+          return JSON.parse(candidate);
+        } catch (err) {
+          lastErr = err;
+          try {
+            return JSON.parse(repairCommonJsonIssues(candidate));
+          } catch (repairErr) {
+            lastErr = repairErr;
+          }
+        }
+      }
+      throw new Error(lastErr?.message || "Could not parse structured response.");
+    }
+
+    function checkCrisisGuardrail(text) {
+      const pattern = /\b(kill myself|end my life|suicid(e|al)|want to die|better off dead|hurt myself|self[- ]?harm|overdose|jump off)\b/i;
+      if (pattern.test(text || "")) {
+        els.crisisBanner.classList.remove("hidden");
+        logTelemetry("Crisis guardrail triggered — displayed 988 support banner.", "error");
+        return true;
+      }
+      return false;
+    }
+
+    // =========================================================================
+    // 7. FIREBASE ENGINE CONFIG & USER DATA PERSISTENCE
+    // =========================================================================
+    async function loadEngineConfigsFromFirebase() {
+      logTelemetry("Syncing backend configs from Firestore (mindful-cabbd/backend)…");
+      let loadedCount = 0;
+
+      for (const key of Object.keys(state.engines)) {
+        const eng = state.engines[key];
+        try {
+          const snap = await getDoc(doc(db, "backend", eng.docId));
+          if (snap.exists()) {
+            const d = snap.data();
+            eng.api = (d.api || "").trim();
+            eng.slug = (d.slug || "").trim();
+            eng.loaded = Boolean(eng.api && eng.slug);
+            eng.error = eng.loaded ? null : "Missing api or slug field in document.";
+            if (eng.loaded) loadedCount++;
+          } else {
+            eng.loaded = false;
+            eng.error = `Document backend/${eng.docId} not found.`;
+          }
+        } catch (err) {
+          eng.loaded = false;
+          eng.error = err.message;
+          logTelemetry(`Failed loading backend/${eng.docId}: ${err.message}`, "error");
+        }
+      }
+
+      els.enginesReadyBadge.textContent = `${loadedCount} / 5 Ready`;
+      els.enginesReadyBadge.className = loadedCount === 5
+        ? "self-start sm:self-center text-xs font-medium px-2.5 py-1 rounded-full bg-sage-light text-sage border border-sage-border"
+        : "self-start sm:self-center text-xs font-medium px-2.5 py-1 rounded-full bg-amber-bg text-amber-ink border border-amber-border";
+
+      els.activeEngine1Label.textContent = state.engines.conversation.loaded
+        ? `Engine 1: ${state.engines.conversation.slug}`
+        : "Engine 1 not configured";
+
+      renderEngineCards();
+      logTelemetry(`Loaded ${loadedCount}/5 OpenRouter engines from Firebase.`, loadedCount === 5 ? "success" : "error");
+    }
+
+    function renderEngineCards() {
+      els.engineCardsGrid.innerHTML = Object.entries(state.engines).map(([, eng]) => {
+        const badge = eng.loaded
+          ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">Connected</span>`
+          : `<span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-terra-bg text-terra-ink border border-terra-border">Unavailable</span>`;
+        return `
+          <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <div class="text-sm font-medium text-ink">${escapeHtml(eng.label)}</div>
+              ${badge}
+            </div>
+            <p class="text-xs text-muted">${escapeHtml(eng.role)}</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-hairline/70 text-[11px] font-mono">
+              <div><span class="text-muted">Doc:</span> backend/${escapeHtml(eng.docId)}</div>
+              <div><span class="text-muted">Key:</span> ${escapeHtml(maskApiKey(eng.api))}</div>
+              <div class="sm:col-span-2 truncate"><span class="text-muted">Slug:</span> ${escapeHtml(eng.slug || "—")}</div>
+            </div>
+            ${eng.error ? `<div class="text-xs text-terra-ink pt-1">${escapeHtml(eng.error)}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadUserData() {
+      const uid = state.user.uid;
+      try {
+        const localProfile = JSON.parse(localStorage.getItem(uidKey("profile")) || "null");
+        if (localProfile) state.userProfile = { ...state.userProfile, ...localProfile };
+        const localChart = JSON.parse(localStorage.getItem(uidKey("chart")) || "null");
+        if (localChart) state.chart = localChart;
+        const localPlan = JSON.parse(localStorage.getItem(uidKey("careplan")) || "null");
+        if (localPlan) state.carePlan = localPlan;
+        const localSched = JSON.parse(localStorage.getItem(uidKey("schedule")) || "null");
+        if (localSched) state.schedule = { ...state.schedule, ...localSched };
+        const localHist = JSON.parse(localStorage.getItem(uidKey("sessions")) || "null");
+        if (Array.isArray(localHist)) state.sessionsHistory = localHist;
+      } catch (_) {}
+
+      try {
+        const [accSnap, chartSnap, planSnap, schedSnap, sessSnap] = await Promise.all([
+          getDoc(doc(db, "users", uid, "profile", "account")),
+          getDoc(doc(db, "users", uid, "profile", "chart")),
+          getDoc(doc(db, "users", uid, "profile", "care_plan")),
+          getDoc(doc(db, "users", uid, "profile", "schedule")),
+          getDocs(collection(db, "users", uid, "sessions"))
+        ]);
+
+        if (accSnap.exists()) state.userProfile = { ...state.userProfile, ...accSnap.data() };
+        if (chartSnap.exists()) state.chart = chartSnap.data();
+        if (planSnap.exists()) state.carePlan = planSnap.data();
+        if (schedSnap.exists()) {
+          const sd = schedSnap.data();
+          state.schedule = {
+            cadence: { ...state.schedule.cadence, ...(sd.cadence || {}) },
+            appointments: Array.isArray(sd.appointments) ? sd.appointments : [],
+            triageEvents: Array.isArray(sd.triageEvents) ? sd.triageEvents : []
+          };
+        }
+
+        const remoteSessions = [];
+        sessSnap.forEach((d) => remoteSessions.push({ id: d.id, ...d.data() }));
+        if (remoteSessions.length) {
+          remoteSessions.sort((a, b) => (b.timestampMs || 0) - (a.timestampMs || 0));
+          state.sessionsHistory = remoteSessions;
+        }
+
+        state.firestoreWritable = true;
+        els.storageModeNote.textContent = `Connected to Firestore (users/${uid.slice(0, 8)}…)`;
+      } catch (err) {
+        state.firestoreWritable = false;
+        els.storageModeNote.textContent = `Firestore user sync restricted (${err.code || err.message}) — using local storage.`;
+        logTelemetry(`Firestore user read fallback: ${err.message}`, "error");
+      }
+
+      if (!state.userProfile.name) {
+        state.userProfile.name = state.user.displayName || state.user.email?.split("@")[0] || "Patient";
+      }
+      if (!state.userProfile.photoDataUrl && state.user.photoURL) {
+        state.userProfile.photoDataUrl = state.user.photoURL;
+      }
+    }
+
+    async function saveProfileDoc(docName, data, localKey) {
+      localStorage.setItem(uidKey(localKey), JSON.stringify(data));
+      if (!state.user) return;
+      try {
+        await setDoc(doc(db, "users", state.user.uid, "profile", docName), data, { merge: true });
+      } catch (err) {
+        logTelemetry(`Saved ${docName} locally (Firestore write error: ${err.message})`, "error");
+      }
+    }
+
+    async function saveSessionRecord(record) {
+      state.sessionsHistory.unshift(record);
+      localStorage.setItem(uidKey("sessions"), JSON.stringify(state.sessionsHistory));
+      if (!state.user) return;
+      try {
+        const ref = await addDoc(collection(db, "users", state.user.uid, "sessions"), record);
+        record.id = ref.id;
+      } catch (err) {
+        logTelemetry(`Saved session locally (Firestore write error: ${err.message})`, "error");
+      }
+    }
+
+    // Mid-session draft protection (prevents losing live chat on browser refresh)
+    function saveLiveDraft() {
+      if (!state.user || !state.activeAppointmentId) return;
+      try {
+        const draft = {
+          appointmentId: state.activeAppointmentId,
+          messages: state.messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+            timestamp: m.timestamp,
+            hasImage: Boolean(m.imageDataUrl)
+          })),
+          savedAt: Date.now()
+        };
+        localStorage.setItem(uidKey("live_draft"), JSON.stringify(draft));
+      } catch (_) {}
+    }
+
+    function loadLiveDraft(appointmentId) {
+      if (!state.user || !appointmentId) return null;
+      try {
+        const raw = localStorage.getItem(uidKey("live_draft"));
+        if (!raw) return null;
+        const draft = JSON.parse(raw);
+        if (draft.appointmentId === appointmentId && Array.isArray(draft.messages) && draft.messages.length > 0) {
+          return draft.messages;
+        }
+      } catch (_) {}
+      return null;
+    }
+
+    function clearLiveDraft() {
+      if (!state.user) return;
+      try {
+        localStorage.removeItem(uidKey("live_draft"));
+      } catch (_) {}
+    }
+
+    // =========================================================================
+    // 8. OPENROUTER API CLIENT (WITH JSON MODE & AUTO SELF-REPAIR)
+    // =========================================================================
+    async function callOpenRouter({ engineKey, messages, temperature = 0.6, maxTokens = 1200, jsonMode = false }) {
+      const engine = state.engines[engineKey];
+      if (!engine || !engine.loaded) {
+        logTelemetry(`${engine?.label || engineKey} is not configured in Firebase.`, "error");
+        throw new Error(state.diagnosticsEnabled
+          ? `${engine?.label || engineKey} is not configured in Firebase.`
+          : "Unable to connect right now. Please check your connection and try again."
+        );
+      }
+
+      const sendRequest = async (useJsonFormat) => {
+        const body = {
+          model: engine.slug,
+          messages,
+          temperature,
+          max_tokens: maxTokens
+        };
+        if (useJsonFormat) {
+          body.response_format = { type: "json_object" };
+        }
+        return fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${engine.api}`,
+            "HTTP-Referer": window.location.origin || "https://mindful-cabbd.web.app",
+            "X-Title": "Mindful CBT PWA"
+          },
+          body: JSON.stringify(body)
+        });
+      };
+
+      let response = await sendRequest(jsonMode);
+      let data = await response.json().catch(() => ({}));
+
+      if (!response.ok && jsonMode && response.status === 400) {
+        logTelemetry(`${engine.slug} rejected json_object mode — retrying with standard prompt JSON.`);
+        response = await sendRequest(false);
+        data = await response.json().catch(() => ({}));
+      }
+
+      if (!response.ok) {
+        const apiErr = data?.error?.message || `HTTP ${response.status}`;
+        logTelemetry(`OpenRouter (${engine.slug}): ${apiErr}`, "error");
+        throw new Error(state.diagnosticsEnabled
+          ? `OpenRouter (${engine.slug}): ${apiErr}`
+          : "There was a temporary issue reaching your therapist service. Please try again in a moment."
+        );
+      }
+
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) {
+        throw new Error("Empty response received. Please try again.");
+      }
+      return content;
+    }
+
+    async function callOpenRouterJSON({ engineKey, messages, temperature = 0.2, maxTokens = 2400 }) {
+      const raw = await callOpenRouter({ engineKey, messages, temperature, maxTokens, jsonMode: true });
+      try {
+        return extractJSON(raw);
+      } catch (parseErr) {
+        logTelemetry(`Malformed JSON from ${engineKey} (${parseErr.message}) — running automatic JSON repair…`, "error");
+        const repairedRaw = await callOpenRouter({
+          engineKey,
+          messages: [
+            {
+              role: "system",
+              content: "You are a strict JSON syntax repair utility. Fix the malformed JSON below so it is 100% valid RFC 8259 JSON. Properly escape any quotes inside strings, add any missing commas, and remove trailing commas. Preserve all clinical meaning. Output ONLY the raw valid JSON object with no markdown fences or commentary."
+            },
+            {
+              role: "user",
+              content: `JSON PARSE ERROR: ${parseErr.message}\n\nMALFORMED JSON:\n${raw}`
+            }
+          ],
+          temperature: 0,
+          maxTokens: maxTokens + 400,
+          jsonMode: true
+        });
+        return extractJSON(repairedRaw);
+      }
+    }
+
+    // =========================================================================
+    // 9. CLINICAL CONTEXT BUILDERS & BACKGROUND CLINICAL WORKFLOW
+    // =========================================================================
+    function buildPatientChartContext() {
+      const p = state.userProfile;
+      const c = state.chart;
+      const lines = [
+        `Patient Name: ${p.name || "Unknown"}`,
+        `Gender: ${p.gender || "Not specified"}`
+      ];
+      if (!c) {
+        lines.push("Annual Medical Intake: Not completed yet.");
+        return lines.join("\n");
+      }
+      lines.push(`Intake Summary: ${c.summary || "None"}`);
+      const conds = (c.medical_conditions || []).map((m) =>
+        typeof m === "string" ? m : `${m.condition} (${m.control_status || "unknown"}${m.notes ? " — " + m.notes : ""})`
+      );
+      lines.push(`Medical Conditions: ${conds.length ? conds.join("; ") : "None reported"}`);
+      lines.push(`Psychiatric History: ${(c.psychiatric_history || []).join("; ") || "None reported"}`);
+      lines.push(`Allergies: ${(c.allergies || []).join("; ") || "None reported"}`);
+      const meds = (c.medications || []).map((m) => `${m.name} ${m.dosage} (${m.timing})${m.purpose ? " — " + m.purpose : ""}`);
+      lines.push(`Current Medications: ${meds.length ? meds.join("; ") : "None reported"}`);
+      const labs = (c.recent_labs || []).map((l) => `${l.panel_or_test}: ${l.findings}${l.date ? " (" + l.date + ")" : ""}`);
+      lines.push(`Recent Labs: ${labs.length ? labs.join("; ") : "None uploaded"}`);
+      if (c.physiological_baselines) {
+        lines.push(`Baselines — Sleep: ${c.physiological_baselines.sleep || "N/A"} | Caffeine/Substances: ${c.physiological_baselines.caffeine_substances || "N/A"} | Exercise/Diet: ${c.physiological_baselines.lifestyle || "N/A"}`);
+      }
+      if (state.schedule.triageEvents?.length) {
+        const recent = state.schedule.triageEvents.slice(0, 3).map((t) =>
+          `${new Date(t.timestampMs).toLocaleDateString()}: ${t.decision} (${t.severity}) — ${t.clinical_note}`
+        );
+        lines.push(`Recent Urgent Triage Events: ${recent.join(" | ")}`);
+      }
+      return lines.join("\n");
+    }
+
+    function getActiveAppointment() {
+      return state.schedule.appointments.find((a) => a.id === state.activeAppointmentId) || null;
+    }
+
+    function getElapsedSessionMinutes() {
+      const appt = getActiveAppointment();
+      if (!appt || !appt.startedAtMs) return 0;
+      return Math.max(0, Math.floor((Date.now() - appt.startedAtMs) / 60000));
+    }
+
+    function buildTherapistSystemPrompt() {
+      const appt = getActiveAppointment();
+      const targetMin = appt?.durationMinutes || state.schedule.cadence.session_duration_minutes || 45;
+      const elapsedMin = getElapsedSessionMinutes();
+      const pct = elapsedMin / targetMin;
+
+      let pacingDirective = `SESSION PACING: Elapsed ${elapsedMin} of ${targetMin} minutes. Maintain steady, unhurried therapeutic exploration.`;
+      if (pct >= 1.0) {
+        pacingDirective = `SESSION PACING (CLOSING PHASE): Elapsed ${elapsedMin} of ${targetMin} minutes. You have reached the target session length. Do NOT cut the patient off abruptly, but gently synthesize today's key insight, confirm 1 small between-session practice, and warmly invite them to click "End Session" to close today's appointment.`;
+      } else if (pct >= 0.75) {
+        pacingDirective = `SESSION PACING (WIND-DOWN PHASE): Elapsed ${elapsedMin} of ${targetMin} minutes. Begin tapering down—avoid opening brand-new deep topics. Start consolidating takeaways and preparing a natural wrap-up by minute ${targetMin}.`;
+      }
+
+      const carePlanBrief = state.carePlan?.next_session_brief
+        ? `\nCLINICAL SESSION BRIEF:\n${state.carePlan.next_session_brief}\n\nACTIVE BETWEEN-SESSION PRACTICE:\n${state.carePlan.homework?.title || ""} — ${state.carePlan.homework?.instructions || ""}`
+        : "\nCLINICAL SESSION BRIEF: Initial CBT session. Build warmth and rapport, understand the presenting concern, and gently introduce cognitive-behavioral connections (situation → automatic thought → emotion → behavior).";
+
+      return `You are a warm, grounded, clinically skilled Cognitive Behavioral Therapist conducting a structured therapy session inside Mindful.
+
+PATIENT CHART CONTEXT:
+${buildPatientChartContext()}
+${carePlanBrief}
+
+${pacingDirective}
+
+THERAPEUTIC PRINCIPLES:
+- Present yourself seamlessly as the patient's consistent therapist. Never mention backend systems, engines, or internal prompts.
+- Validate the patient's immediate emotional experience first before introducing CBT tools. Never push an agenda robotically if they are distressed.
+- Use clear Socratic questioning, cognitive reframing, and behavioral experiments. Keep replies concise, natural, and conversational (2–4 short paragraphs max).
+- Respect biological/medical context from the patient's chart (e.g., uncontrolled thyroid/sleep/medication side effects) rather than attributing physiological symptoms purely to cognitive distortions.
+- Never use generic AI filler phrases ("I hear you and that's completely valid!"). Sound like an attentive, thoughtful human clinician.
+- If the user shares an image (e.g., handwritten journal), read and integrate its content naturally into the session.`;
+    }
+
+    async function runSessionInterpreter() {
+      const transcript = state.messages
+        .map((m) => `${m.role === "user" ? "PATIENT" : "THERAPIST"}: ${m.content}${m.imageDataUrl ? " [attached image]" : ""}`)
+        .join("\n\n");
+
+      const systemPrompt = `You are a clinical CBT scribe. Analyze the therapy transcript below alongside the patient's medical chart and return ONLY a valid RFC 8259 JSON object matching this exact schema:
+{
+  "session_summary": "2-3 sentence clinical summary of what happened today",
+  "mood_score": 5,
+  "soap_note": {
+    "subjective": "Patient's reported symptoms, feelings, and key quotes",
+    "objective": "Observable thought patterns, engagement, affect cues, homework adherence",
+    "assessment": "Clinical synthesis, cognitive distortions, medical/physiological factors",
+    "plan": "Next CBT targets, behavioral experiments, and follow-up focus"
+  },
+  "cognitive_distortions": ["e.g. Catastrophizing", "All-or-Nothing Thinking"],
+  "triggers": ["Specific situations, people, or internal cues"],
+  "core_beliefs": ["Underlying beliefs surfaced"],
+  "working_hypotheses": [
+    {
+      "pattern": "e.g. Generalized Anxiety traits",
+      "confidence": "Low | Medium | High",
+      "supporting_evidence": ["Evidence from transcript"],
+      "open_questions": ["Questions to test in future sessions"]
+    }
+  ],
+  "homework_adherence": "Completed | Partial | Not completed | Not applicable",
+  "risk_flags": "None or brief note on clinical decline/distress"
+}
+Output strictly valid JSON with no markdown commentary.`;
+
+      const userPrompt = `PATIENT CHART:\n${buildPatientChartContext()}\n\nTRANSCRIPT:\n${transcript}`;
+
+      logTelemetry(`Invoking Engine 2 (${state.engines.interpreter.slug})…`);
+      const parsed = await callOpenRouterJSON({
+        engineKey: "interpreter",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.2,
+        maxTokens: 2600
+      });
+
+      logTelemetry("Engine 2 structured JSON & SOAP note extracted.", "success");
+      return parsed;
+    }
+
+    async function runCarePlanSynthesis(latestInterpretation) {
+      const pastSummaries = state.sessionsHistory.slice(0, 6).map((s, idx) => ({
+        session_number: state.sessionsHistory.length - idx,
+        date: s.dateLabel,
+        summary: s.interpretation?.session_summary,
+        mood_score: s.interpretation?.mood_score,
+        distortions: s.interpretation?.cognitive_distortions,
+        hypotheses: s.interpretation?.working_hypotheses
+      }));
+
+      const systemPrompt = `You are a longitudinal CBT clinical supervisor.
+Review the patient's medical chart, prior Care Plan, past session summaries, urgent triage history, and today's clinical interpretation.
+Synthesize an updated longitudinal Care Plan and a concise Next Session Brief for the therapist.
+Return ONLY valid RFC 8259 JSON matching this exact schema:
+{
+  "clinical_formulation": "3-5 sentence longitudinal CBT conceptualization integrating medical/biological factors and recurring patterns.",
+  "working_diagnoses": [
+    {
+      "label": "Working diagnostic hypothesis (e.g. Generalized Anxiety Disorder - Working Hypothesis)",
+      "confidence": "Low | Medium | High",
+      "rationale": "Longitudinal evidence supporting this pattern",
+      "differentials_or_open_questions": "Medical or psychological rule-outs to continue exploring"
+    }
+  ],
+  "treatment_goals": [
+    {
+      "goal": "Clear measurable CBT goal",
+      "intervention": "Specific CBT technique (e.g. Thought Record, Exposure Hierarchy, Behavioral Activation)",
+      "status": "Active | Emerging | Improving"
+    }
+  ],
+  "homework": {
+    "title": "Short title for between-session practice",
+    "instructions": "Clear, realistic step-by-step practice before next appointment"
+  },
+  "next_session_brief": "Actionable clinical instructions for the next session: what to check in on, what open diagnostic question to explore gently, and which CBT exercise to offer if the patient is receptive.",
+  "recommended_cadence": {
+    "override_requested": false,
+    "sessions_per_week": 1,
+    "session_duration_minutes": 45,
+    "minimum_days_between_sessions": 4,
+    "clinical_reason": "Brief justification for session frequency and length"
+  }
+}`;
+
+      const userPrompt = JSON.stringify({
+        patient_chart: buildPatientChartContext(),
+        prior_care_plan: state.carePlan,
+        recent_sessions: pastSummaries,
+        latest_interpretation: latestInterpretation
+      }, null, 2);
+
+      logTelemetry(`Invoking Engine 3 (${state.engines.careplan.slug})…`);
+      const parsed = await callOpenRouterJSON({
+        engineKey: "careplan",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.3,
+        maxTokens: 2800
+      });
+
+      parsed.updatedAt = new Date().toISOString();
+      logTelemetry("Engine 3 longitudinal Care Plan & Next Session Brief synthesized.", "success");
+      return parsed;
+    }
+
+    async function runCadencePlanner(carePlan) {
+      const missedCount = state.schedule.appointments.filter((a) => a.status === "missed").length;
+      const urgentCount = (state.schedule.triageEvents || []).filter((t) => t.grantedUrgent).length;
+
+      const systemPrompt = `You are a clinical scheduling planner for structured CBT.
+Review the Care Plan, missed appointment count, and recent urgent triage overrides to prescribe healthy CBT session frequency and duration.
+Default is 1 session/week, 45 minutes, minimum 4 days between sessions.
+Only increase frequency (max 3/week) or duration (30–60 min) if the Care Plan or clinical decline clearly warrants it.
+Never mention engines or internal systems in your rationale—speak calmly to the patient.
+Return ONLY valid RFC 8259 JSON:
+{
+  "sessions_per_week": 1,
+  "session_duration_minutes": 45,
+  "minimum_days_between_sessions": 4,
+  "rationale": "1-2 sentences explaining the recommended schedule to the patient"
+}`;
+
+      const userPrompt = JSON.stringify({
+        care_plan_cadence: carePlan?.recommended_cadence || null,
+        formulation: carePlan?.clinical_formulation || "",
+        missed_appointments_total: missedCount,
+        urgent_triage_overrides_total: urgentCount,
+        current_cadence: state.schedule.cadence
+      }, null, 2);
+
+      try {
+        logTelemetry(`Invoking Engine 5 (${state.engines.planning.slug})…`);
+        const parsed = await callOpenRouterJSON({
+          engineKey: "planning",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          temperature: 0.2,
+          maxTokens: 1000
+        });
+
+        const spw = Math.min(3, Math.max(0.5, Number(parsed.sessions_per_week) || 1));
+        const dur = Math.min(60, Math.max(25, Math.round(Number(parsed.session_duration_minutes) || 45)));
+        const minDays = Math.min(14, Math.max(1, Math.round(Number(parsed.minimum_days_between_sessions) || (spw >= 2 ? 2 : 4))));
+
+        state.schedule.cadence = {
+          sessions_per_week: spw,
+          session_duration_minutes: dur,
+          minimum_days_between_sessions: minDays,
+          rationale: parsed.rationale || "Tailored based on your care plan and recent progress.",
+          source: "Personalized Cadence",
+          updatedAt: new Date().toISOString()
+        };
+        await saveProfileDoc("schedule", state.schedule, "schedule");
+        logTelemetry(`Engine 5 updated cadence: ${spw}/wk, ${dur} min, min ${minDays}d spacing.`, "success");
+        return { usedFallback: false, cadence: state.schedule.cadence };
+      } catch (err) {
+        logTelemetry(`Engine 5 unavailable (${err.message}) — falling back to Engine 3 cadence.`, "error");
+        const rec = carePlan?.recommended_cadence;
+        if (rec) {
+          state.schedule.cadence = {
+            sessions_per_week: Math.min(3, Math.max(0.5, Number(rec.sessions_per_week) || 1)),
+            session_duration_minutes: Math.min(60, Math.max(25, Math.round(Number(rec.session_duration_minutes) || 45))),
+            minimum_days_between_sessions: Math.min(14, Math.max(1, Math.round(Number(rec.minimum_days_between_sessions) || 4))),
+            rationale: rec.clinical_reason || state.schedule.cadence.rationale,
+            source: "Personalized Cadence",
+            updatedAt: new Date().toISOString()
+          };
+          await saveProfileDoc("schedule", state.schedule, "schedule");
+        }
+        return { usedFallback: true, error: err.message, cadence: state.schedule.cadence };
+      }
+    }
+
+    // =========================================================================
+    // 10. SCHEDULING, APPOINTMENT GATING & SOFT 45-MINUTE TAPER
+    // =========================================================================
+    function refreshAppointmentStatuses() {
+      const now = Date.now();
+      let changed = false;
+      const GRACE_MS = 15 * 60 * 1000;
+
+      for (const appt of state.schedule.appointments) {
+        if (appt.status === "scheduled" && now > appt.scheduledStartMs + GRACE_MS) {
+          appt.status = "missed";
+          changed = true;
+          logTelemetry(`Appointment ${formatDateTime(appt.scheduledStartMs)} marked as MISSED (past 15m grace window).`, "error");
+        }
+      }
+      if (changed) {
+        saveProfileDoc("schedule", state.schedule, "schedule");
+      }
+    }
+
+    function getJoinableOrUpcomingAppointment() {
+      refreshAppointmentStatuses();
+      const now = Date.now();
+      const EARLY_OPEN_MS = 10 * 60 * 1000;
+      const GRACE_MS = 15 * 60 * 1000;
+
+      const inProgress = state.schedule.appointments.find((a) => a.status === "in_progress");
+      if (inProgress) return { appt: inProgress, state: "in_progress" };
+
+      const scheduled = state.schedule.appointments
+        .filter((a) => a.status === "scheduled")
+        .sort((a, b) => a.scheduledStartMs - b.scheduledStartMs);
+
+      if (!scheduled.length) return { appt: null, state: "none" };
+      const next = scheduled[0];
+      if (now >= next.scheduledStartMs - EARLY_OPEN_MS && now <= next.scheduledStartMs + GRACE_MS) {
+        return { appt: next, state: "ready" };
+      }
+      return { appt: next, state: "upcoming" };
+    }
+
+    function updateSessionGateUI() {
+      const info = getJoinableOrUpcomingAppointment();
+
+      if (info.state === "in_progress" && state.activeAppointmentId === info.appt.id) {
+        els.sessionLockedView.classList.add("hidden");
+        els.sessionActiveWorkspace.classList.remove("hidden");
+        updateSessionTimerUI();
+        return;
+      }
+
+      if (info.state === "in_progress" && !state.activeAppointmentId) {
+        enterAppointmentSession(info.appt);
+        return;
+      }
+
+      els.sessionLockedView.classList.remove("hidden");
+      els.sessionActiveWorkspace.classList.add("hidden");
+
+      if (info.state === "ready") {
+        els.lockedStatusPill.textContent = "Appointment Window Open";
+        els.lockedStatusPill.className = "inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border";
+        els.lockedHeading.textContent = "Your session room is ready.";
+        els.lockedApptTime.textContent = formatDateTime(info.appt.scheduledStartMs);
+        els.lockedApptMeta.textContent = `${info.appt.durationMinutes} min target · Join within 15 minutes of start time.`;
+        els.lockedJoinBtn.classList.remove("hidden");
+      } else if (info.state === "upcoming") {
+        els.lockedStatusPill.textContent = "Between Sessions";
+        els.lockedStatusPill.className = "inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-stone text-muted border border-hairline";
+        els.lockedHeading.textContent = "Your therapy room opens at your scheduled appointment.";
+        els.lockedApptTime.textContent = formatDateTime(info.appt.scheduledStartMs);
+        els.lockedApptMeta.textContent = `${info.appt.durationMinutes} min target · Opens 10 minutes prior to start.`;
+        els.lockedJoinBtn.classList.add("hidden");
+      } else {
+        els.lockedStatusPill.textContent = "No Appointment Booked";
+        els.lockedStatusPill.className = "inline-block text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-amber-bg text-amber-ink border border-amber-border";
+        els.lockedHeading.textContent = "Schedule your next session to begin.";
+        els.lockedApptTime.textContent = "No upcoming appointment";
+        els.lockedApptMeta.textContent = `Recommended cadence: ${state.schedule.cadence.sessions_per_week}/week (${state.schedule.cadence.session_duration_minutes} min).`;
+        els.lockedJoinBtn.classList.add("hidden");
+      }
+    }
+
+    function enterAppointmentSession(appt) {
+      if (appt.status !== "in_progress") {
+        appt.status = "in_progress";
+        appt.startedAtMs = Date.now();
+        saveProfileDoc("schedule", state.schedule, "schedule");
+      }
+      state.activeAppointmentId = appt.id;
+
+      const restored = loadLiveDraft(appt.id);
+      if (restored && state.messages.length === 0) {
+        state.messages = restored;
+        showToast("Restored your in-progress session.");
+      }
+
+      renderChatMessages();
+      updateSessionHeader();
+      updateSessionGateUI();
+      renderScheduleView();
+    }
+
+    function updateSessionTimerUI() {
+      const appt = getActiveAppointment();
+      if (!appt) return;
+      const target = appt.durationMinutes || 45;
+      const elapsed = getElapsedSessionMinutes();
+      const pct = elapsed / target;
+
+      els.sessionTimerBadge.textContent = `${elapsed} / ${target} min${appt.isUrgent ? " · Urgent" : ""}`;
+      if (pct >= 1.0) {
+        els.sessionTimerBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded-full bg-terra-bg text-terra-ink border border-terra-border";
+        els.sessionTaperBanner.classList.remove("hidden");
+        els.sessionTaperText.textContent = `Target session time (${target} min) reached. Wrap up your final thought and click "End Session" to save your notes.`;
+      } else if (pct >= 0.75) {
+        els.sessionTimerBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded-full bg-amber-bg text-amber-ink border border-amber-border";
+        els.sessionTaperBanner.classList.remove("hidden");
+        els.sessionTaperText.textContent = `Wind-down phase (${target - elapsed} min remaining). Begin consolidating takeaways and between-session practice.`;
+      } else {
+        els.sessionTimerBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone text-ink border border-hairline";
+        els.sessionTaperBanner.classList.add("hidden");
+      }
+    }
+
+    function renderScheduleView() {
+      const cad = state.schedule.cadence;
+      const cleanSource = (cad.source || "").includes("Engine") ? "Personalized Cadence" : (cad.source || "Standard CBT Cadence");
+      els.cadenceSourceBadge.textContent = cleanSource;
+      els.cadenceFreqVal.textContent = `${cad.sessions_per_week} / week`;
+      els.cadenceDurationVal.textContent = `${cad.session_duration_minutes} min`;
+      els.cadenceSpacingVal.textContent = `${cad.minimum_days_between_sessions} days`;
+      els.cadenceRationale.textContent = cad.rationale || "";
+
+      const info = getJoinableOrUpcomingAppointment();
+      if (info.appt) {
+        const badgeMap = {
+          in_progress: ["In Progress", "bg-sage-light text-sage border-sage-border"],
+          ready: ["Ready to Join", "bg-sage-light text-sage border-sage-border"],
+          upcoming: ["Scheduled", "bg-stone text-ink border-hairline"]
+        };
+        const [lbl, cls] = badgeMap[info.state] || ["Scheduled", "bg-stone text-ink border-hairline"];
+        els.schedApptStatusBadge.textContent = lbl;
+        els.schedApptStatusBadge.className = `text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${cls}`;
+        els.schedApptDetails.innerHTML = `
+          <div class="font-medium text-ink">${escapeHtml(formatDateTime(info.appt.scheduledStartMs))}</div>
+          <div class="text-xs text-muted mt-0.5">${info.appt.durationMinutes} min target${info.appt.isUrgent ? " · Urgent Override" : ""}</div>
+        `;
+        els.schedApptActions.classList.remove("hidden");
+        els.schedJoinBtn.classList.toggle("hidden", info.state !== "ready" && info.state !== "in_progress");
+        els.schedCancelBtn.classList.toggle("hidden", info.state === "in_progress");
+      } else {
+        els.schedApptStatusBadge.textContent = "None Scheduled";
+        els.schedApptStatusBadge.className = "text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-stone text-muted border border-hairline";
+        els.schedApptDetails.textContent = "You do not have an upcoming appointment booked. Select a day and time below.";
+        els.schedApptActions.classList.add("hidden");
+      }
+
+      if (!els.apptDateInput.value) {
+        const now = new Date();
+        els.apptDateInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        els.apptTimeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      }
+
+      const sorted = [...state.schedule.appointments].sort((a, b) => b.scheduledStartMs - a.scheduledStartMs);
+      if (!sorted.length) {
+        els.scheduleHistoryList.innerHTML = `<div class="text-xs text-muted">No appointments recorded yet.</div>`;
+      } else {
+        els.scheduleHistoryList.innerHTML = sorted.slice(0, 12).map((a) => {
+          const pillColors = {
+            completed: "bg-sage-light text-sage border-sage-border",
+            missed: "bg-terra-bg text-terra-ink border-terra-border",
+            cancelled: "bg-stone text-muted border-hairline",
+            in_progress: "bg-amber-bg text-amber-ink border-amber-border",
+            scheduled: "bg-paper text-ink border-hairline"
+          };
+          return `
+            <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-paper border border-hairline">
+              <div>
+                <div class="text-xs font-medium text-ink">${escapeHtml(formatDateTime(a.scheduledStartMs))}${a.isUrgent ? ' <span class="text-terra-ink">(Urgent)</span>' : ""}</div>
+                <div class="text-[11px] text-muted">${a.durationMinutes} min target</div>
+              </div>
+              <span class="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border ${pillColors[a.status] || pillColors.scheduled}">
+                ${escapeHtml(a.status.replace("_", " "))}
+              </span>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    setInterval(() => {
+      if (!state.user) return;
+      updateSessionGateUI();
+      if (state.activeAppointmentId) updateSessionTimerUI();
+    }, 30000);
+
+    // =========================================================================
+    // 11. RENDERING FUNCTIONS (SESSION, CARE PLAN, HISTORY, MY CHART, ACCOUNT)
+    // =========================================================================
+    function updateSessionHeader() {
+      const num = state.sessionsHistory.length + 1;
+      els.sessionTitleLabel.textContent = `Session ${num}`;
+      if (state.carePlan?.next_session_brief) {
+        els.sessionBriefBadge.classList.remove("hidden");
+        els.sessionFocusPreview.textContent = state.carePlan.homework?.title
+          ? `Active practice: ${state.carePlan.homework.title}`
+          : "Continuing from your care plan";
+      } else {
+        els.sessionBriefBadge.classList.add("hidden");
+        els.sessionFocusPreview.textContent = "Initial session & open conversation";
+      }
+      const hasEnough = state.messages.filter((m) => m.role === "user").length >= 1;
+      els.endAnalyzeBtn.disabled = !hasEnough || state.isSending;
+      els.newSessionBtn.classList.toggle("hidden", state.messages.length === 0);
+    }
+
+    function renderChatMessages() {
+      if (!state.messages.length) {
+        els.chatEmpty.classList.remove("hidden");
+        els.chatMessages.classList.add("hidden");
+        els.chatMessages.innerHTML = "";
+        updateSessionHeader();
+        return;
+      }
+      els.chatEmpty.classList.add("hidden");
+      els.chatMessages.classList.remove("hidden");
+
+      els.chatMessages.innerHTML = state.messages.map((m) => {
+        if (m.role === "user") {
+          return `
+            <div class="flex flex-col items-end animate-fade-up">
+              <div class="max-w-[85%] rounded-2xl rounded-br-md bg-stone border border-hairline px-4 py-3 text-sm text-ink leading-relaxed">
+                ${m.imageDataUrl ? `<img src="${m.imageDataUrl}" alt="Attached journal" class="mb-2.5 max-h-56 rounded-xl border border-hairline object-contain" />` : ""}
+                <div class="whitespace-pre-wrap">${escapeHtml(m.content)}</div>
+              </div>
+              <span class="text-[10px] text-muted mt-1 px-1">${escapeHtml(m.timestamp || "")}</span>
+            </div>
+          `;
+        }
+        return `
+          <div class="animate-fade-up max-w-[92%]">
+            <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Therapist</div>
+            <div class="clinical-prose text-sm text-ink leading-relaxed bg-surface border border-hairline rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
+              ${formatClinicalMarkdown(m.content)}
+            </div>
+            <span class="block text-[10px] text-muted mt-1 px-1">${escapeHtml(m.timestamp || "")}</span>
+          </div>
+        `;
+      }).join("");
+
+      els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+      updateSessionHeader();
+    }
+
+    function renderCarePlan() {
+      const cp = state.carePlan;
+      if (!cp) {
+        els.careplanEmpty.classList.remove("hidden");
+        els.careplanContent.classList.add("hidden");
+        els.careplanUpdatedAt.textContent = "No sessions recorded yet";
+        return;
+      }
+
+      els.careplanEmpty.classList.add("hidden");
+      els.careplanContent.classList.remove("hidden");
+      els.careplanUpdatedAt.textContent = cp.updatedAt
+        ? `Updated ${new Date(cp.updatedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+        : "Updated";
+
+      els.cpFormulation.textContent = cp.clinical_formulation || "";
+      els.cpHomeworkTitle.textContent = cp.homework?.title || "Between-session reflection";
+      els.cpHomeworkInstructions.textContent = cp.homework?.instructions || "";
+      els.cpNextBrief.textContent = cp.next_session_brief || "";
+
+      els.cpDiagnosesList.innerHTML = (cp.working_diagnoses || []).map((d) => `
+        <div class="p-4 rounded-xl bg-surface border border-hairline space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="font-medium text-sm text-ink">${escapeHtml(d.label)}</div>
+            <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-stone text-muted border border-hairline">${escapeHtml(d.confidence || "Working")}</span>
+          </div>
+          <p class="text-xs text-ink/85 leading-relaxed">${escapeHtml(d.rationale || "")}</p>
+          ${d.differentials_or_open_questions ? `<p class="text-[11px] text-muted pt-1"><strong>Open questions / rule-outs:</strong> ${escapeHtml(d.differentials_or_open_questions)}</p>` : ""}
+        </div>
+      `).join("") || `<p class="text-xs text-muted">No working hypotheses generated yet.</p>`;
+
+      els.cpGoalsList.innerHTML = (cp.treatment_goals || []).map((g) => `
+        <div class="p-4 rounded-xl bg-surface border border-hairline space-y-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-sage">${escapeHtml(g.status || "Active")}</span>
+          </div>
+          <div class="text-sm font-medium text-ink">${escapeHtml(g.goal)}</div>
+          <div class="text-xs text-muted">${escapeHtml(g.intervention || "")}</div>
+        </div>
+      `).join("") || `<p class="text-xs text-muted">No treatment goals recorded yet.</p>`;
+    }
+
+    function renderHistory() {
+      if (!state.sessionsHistory.length) {
+        els.historyEmpty.classList.remove("hidden");
+        els.historyList.innerHTML = "";
+        return;
+      }
+      els.historyEmpty.classList.add("hidden");
+
+      els.historyList.innerHTML = state.sessionsHistory.map((s, idx) => {
+        const interp = s.interpretation || {};
+        const distortions = (interp.cognitive_distortions || []).map((d) =>
+          `<span class="text-[11px] px-2 py-0.5 rounded-full bg-stone text-ink border border-hairline">${escapeHtml(d)}</span>`
+        ).join("");
+        const soap = interp.soap_note;
+        return `
+          <details class="group rounded-2xl bg-surface border border-hairline overflow-hidden">
+            <summary class="px-5 py-4 cursor-pointer flex items-center justify-between gap-4 hover:bg-stone/40 transition-colors select-none">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-serif text-base font-medium text-ink">Session ${state.sessionsHistory.length - idx}</span>
+                  <span class="text-xs text-muted">${escapeHtml(s.dateLabel || "")}</span>
+                  ${interp.mood_score != null ? `<span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">Mood ${escapeHtml(interp.mood_score)}/10</span>` : ""}
+                </div>
+                <p class="text-xs text-muted truncate mt-0.5">${escapeHtml(interp.session_summary || "Completed session")}</p>
+              </div>
+              <span class="text-xs text-muted shrink-0 group-open:hidden">Expand</span>
+              <span class="text-xs text-muted shrink-0 hidden group-open:inline">Close</span>
+            </summary>
+            <div class="px-5 pb-5 pt-3 border-t border-hairline bg-paper/40 space-y-4 text-xs">
+              ${distortions ? `<div class="flex flex-wrap gap-1.5">${distortions}</div>` : ""}
+              ${soap ? `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div class="p-3 rounded-xl bg-surface border border-hairline"><strong class="text-muted uppercase text-[10px] block mb-1">Subjective</strong>${escapeHtml(soap.subjective || "")}</div>
+                  <div class="p-3 rounded-xl bg-surface border border-hairline"><strong class="text-muted uppercase text-[10px] block mb-1">Objective</strong>${escapeHtml(soap.objective || "")}</div>
+                  <div class="p-3 rounded-xl bg-surface border border-hairline"><strong class="text-muted uppercase text-[10px] block mb-1">Assessment</strong>${escapeHtml(soap.assessment || "")}</div>
+                  <div class="p-3 rounded-xl bg-surface border border-hairline"><strong class="text-muted uppercase text-[10px] block mb-1">Plan</strong>${escapeHtml(soap.plan || "")}</div>
+                </div>
+              ` : ""}
+              <div class="space-y-2 pt-2 border-t border-hairline/70">
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Transcript</div>
+                ${(s.transcript || []).map((m) => `
+                  <div class="leading-relaxed"><strong class="text-ink">${m.role === "user" ? "You" : "Therapist"}:</strong> <span class="text-ink/85">${escapeHtml(m.content)}</span></div>
+                `).join("")}
+              </div>
+            </div>
+          </details>
+        `;
+      }).join("");
+    }
+
+    function renderMyChart() {
+      const c = state.chart;
+      if (c?.completedAtMs) {
+        const completedDate = new Date(c.completedAtMs).toLocaleDateString();
+        const nextDue = new Date(c.completedAtMs + ONE_YEAR_MS).toLocaleDateString();
+        els.chartIntakeStatus.textContent = `Completed ${completedDate} · Next annual review due ${nextDue}`;
+      } else {
+        els.chartIntakeStatus.textContent = "Annual intake not completed yet";
+      }
+
+      els.chartIntakeSummary.textContent = c?.summary || "No intake summary recorded yet.";
+
+      const conds = c?.medical_conditions || [];
+      els.chartMedicalList.innerHTML = conds.length
+        ? conds.map((m) => {
+            if (typeof m === "string") return `<li class="p-2 rounded-lg bg-paper border border-hairline">${escapeHtml(m)}</li>`;
+            const status = (m.control_status || "Unknown").toLowerCase();
+            const badgeCls = status.includes("uncontrolled")
+              ? "bg-terra-bg text-terra-ink border-terra-border"
+              : status.includes("partial")
+                ? "bg-amber-bg text-amber-ink border-amber-border"
+                : "bg-sage-light text-sage border-sage-border";
+            return `
+              <li class="p-2.5 rounded-lg bg-paper border border-hairline space-y-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-medium text-ink">${escapeHtml(m.condition)}</span>
+                  <span class="text-[10px] font-medium px-2 py-0.5 rounded-full border ${badgeCls}">${escapeHtml(m.control_status || "Unknown")}</span>
+                </div>
+                ${m.notes ? `<div class="text-[11px] text-muted">${escapeHtml(m.notes)}</div>` : ""}
+              </li>
+            `;
+          }).join("")
+        : `<li class="text-muted">None reported</li>`;
+
+      const psychAndAllergies = [
+        ...(c?.psychiatric_history || []),
+        ...(c?.allergies || []).map((a) => `Allergy: ${a}`)
+      ];
+      els.chartPsychList.innerHTML = psychAndAllergies.length
+        ? psychAndAllergies.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+        : `<li class="text-muted list-none -ml-4">None reported</li>`;
+
+      const labs = c?.recent_labs || [];
+      els.chartLabsList.innerHTML = labs.length
+        ? labs.map((l) => `
+            <div class="p-3 rounded-xl bg-paper border border-hairline text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-ink">${escapeHtml(l.panel_or_test || "Lab Result")}</span>
+                <span class="text-[11px] text-muted">${escapeHtml(l.date || "")}</span>
+              </div>
+              <p class="text-ink/85 mt-1">${escapeHtml(l.findings || "")}</p>
+            </div>
+          `).join("")
+        : `<p class="text-xs text-muted">No recent lab results recorded.</p>`;
+
+      const base = c?.physiological_baselines || {};
+      els.chartBaselines.innerHTML = `
+        <div class="p-2.5 rounded-xl bg-paper border border-hairline"><span class="text-[10px] uppercase tracking-wider text-muted block">Sleep</span><span class="text-ink">${escapeHtml(base.sleep || "Not recorded")}</span></div>
+        <div class="p-2.5 rounded-xl bg-paper border border-hairline"><span class="text-[10px] uppercase tracking-wider text-muted block">Caffeine / Substances</span><span class="text-ink">${escapeHtml(base.caffeine_substances || "Not recorded")}</span></div>
+        <div class="p-2.5 rounded-xl bg-paper border border-hairline"><span class="text-[10px] uppercase tracking-wider text-muted block">Lifestyle</span><span class="text-ink">${escapeHtml(base.lifestyle || "Not recorded")}</span></div>
+      `;
+
+      const meds = c?.medications || [];
+      els.chartMedicationsList.innerHTML = meds.length
+        ? meds.map((m, idx) => `
+            <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-paper border border-hairline">
+              <div class="text-xs">
+                <span class="font-medium text-ink">${escapeHtml(m.name)}</span>
+                <span class="text-muted"> · ${escapeHtml(m.dosage)} · ${escapeHtml(m.timing)}</span>
+                ${m.purpose ? `<div class="text-[11px] text-muted mt-0.5">${escapeHtml(m.purpose)}</div>` : ""}
+              </div>
+              <button data-remove-med="${idx}" class="remove-med-btn text-[11px] text-muted hover:text-terra-ink px-2 py-1 rounded-md">Remove</button>
+            </div>
+          `).join("")
+        : `<p class="text-xs text-muted">No medications listed.</p>`;
+
+      els.chartMedicationsList.querySelectorAll(".remove-med-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const i = Number(btn.dataset.removeMed);
+          if (!state.chart) return;
+          state.chart.medications.splice(i, 1);
+          await saveProfileDoc("chart", state.chart, "chart");
+          renderMyChart();
+          showToast("Medication removed.");
+        });
+      });
+
+      const diags = state.carePlan?.working_diagnoses || [];
+      els.chartDiagnosesList.innerHTML = diags.length
+        ? diags.map((d) => `
+            <div class="p-3 rounded-xl bg-paper border border-hairline text-xs">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-ink">${escapeHtml(d.label)}</span>
+                <span class="text-[10px] text-muted">${escapeHtml(d.confidence || "")}</span>
+              </div>
+              <p class="text-muted mt-1">${escapeHtml(d.rationale || "")}</p>
+            </div>
+          `).join("")
+        : `<p class="text-xs text-muted">No working hypotheses yet.</p>`;
+
+      els.chartFormulation.textContent = state.carePlan?.clinical_formulation || "No clinical formulation generated yet.";
+      const goals = state.carePlan?.treatment_goals || [];
+      els.chartGoalsList.innerHTML = goals.length
+        ? goals.map((g) => `<div class="text-xs p-2.5 rounded-lg bg-paper border border-hairline"><strong class="text-ink">${escapeHtml(g.goal)}</strong> <span class="text-muted">— ${escapeHtml(g.intervention || "")}</span></div>`).join("")
+        : "";
+
+      els.chartProgressNotes.innerHTML = state.sessionsHistory.length
+        ? state.sessionsHistory.slice(0, 8).map((s, idx) => `
+            <div class="p-3 rounded-xl bg-paper border border-hairline text-xs space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-ink">Session ${state.sessionsHistory.length - idx}</span>
+                <span class="text-[11px] text-muted">${escapeHtml(s.dateLabel || "")}</span>
+              </div>
+              <p class="text-ink/85">${escapeHtml(s.interpretation?.session_summary || "")}</p>
+            </div>
+          `).join("")
+        : `<p class="text-xs text-muted">No session progress notes yet.</p>`;
+
+      const triages = state.schedule.triageEvents || [];
+      els.chartTriageLog.innerHTML = triages.length
+        ? triages.slice(0, 8).map((t) => `
+            <div class="p-3 rounded-xl bg-paper border border-hairline text-xs space-y-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="font-medium text-ink">${escapeHtml(formatDateTime(t.timestampMs))}</span>
+                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full border ${t.grantedUrgent ? "bg-terra-bg text-terra-ink border-terra-border" : "bg-stone text-muted border-hairline"}">
+                  ${escapeHtml(t.decision.replace(/_/g, " "))} (${escapeHtml(t.severity || "moderate")})
+                </span>
+              </div>
+              <p class="text-muted">${escapeHtml(t.clinical_note || "")}</p>
+            </div>
+          `).join("")
+        : `<p class="text-xs text-muted">No urgent triage events recorded.</p>`;
+    }
+
+    function renderAccountCard() {
+      const name = state.userProfile.name || state.user?.displayName || "Mindful Patient";
+      const email = state.user?.email || "";
+      const gender = state.userProfile.gender || "";
+      const photo = state.userProfile.photoDataUrl || state.user?.photoURL || "";
+
+      els.accountName.textContent = name;
+      els.accountEmail.textContent = email;
+      if (gender) {
+        els.accountGenderBadge.textContent = gender;
+        els.accountGenderBadge.classList.remove("hidden");
+      } else {
+        els.accountGenderBadge.classList.add("hidden");
+      }
+
+      if (photo) {
+        els.accountAvatar.innerHTML = `<img src="${photo}" alt="Profile" class="w-full h-full object-cover" />`;
+      } else {
+        els.accountAvatar.textContent = (name[0] || "U").toUpperCase();
+      }
+
+      els.profileNameInput.value = name;
+      els.profileGenderInput.value = gender;
+    }
+
+    // =========================================================================
+    // 12. NAVIGATION & DIAGNOSTICS MODE
+    // =========================================================================
+    function applyDiagnosticsVisibility() {
+      const on = state.diagnosticsEnabled;
+      els.navTabEngines.classList.toggle("hidden", !on);
+      els.activeEngine1Label.classList.toggle("hidden", !on);
+      els.cpBriefDiagnostics.classList.toggle("hidden", !on);
+      els.diagnosticsToggleBtn.setAttribute("aria-checked", String(on));
+      els.diagnosticsToggleBtn.classList.toggle("bg-sage", on);
+      els.diagnosticsToggleBtn.classList.toggle("bg-hairline", !on);
+      els.diagnosticsToggleKnob.classList.toggle("translate-x-5", on);
+      els.diagnosticsToggleKnob.classList.toggle("translate-x-0", !on);
+
+      if (!on && !els.views.engines.classList.contains("hidden")) {
+        switchTab("settings");
+      }
+    }
+
+    function switchTab(tabName) {
+      if (tabName === "engines" && !state.diagnosticsEnabled) tabName = "session";
+      Object.entries(els.views).forEach(([key, section]) => {
+        section.classList.toggle("hidden", key !== tabName);
+      });
+      els.navTabs.forEach((btn) => {
+        const isTarget = btn.dataset.tab === tabName;
+        const isEnginesHidden = btn.id === "nav-tab-engines" && !state.diagnosticsEnabled;
+        btn.className = `${isEnginesHidden ? "hidden " : ""}nav-tab px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          isTarget ? "bg-stone text-ink" : "text-muted hover:text-ink hover:bg-stone/60"
+        }`;
+      });
+      if (tabName === "schedule") renderScheduleView();
+      if (tabName === "session") updateSessionGateUI();
+      if (tabName === "settings") renderMyChart();
+    }
+
+    els.navTabs.forEach((btn) => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+    els.settingsSubBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const sub = btn.dataset.settingsSub;
+        els.settingsSubMychart.classList.toggle("hidden", sub !== "mychart");
+        els.settingsSubAccount.classList.toggle("hidden", sub !== "account");
+        els.settingsSubBtns.forEach((b) => {
+          const active = b.dataset.settingsSub === sub;
+          b.className = `settings-sub-btn px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            active ? "bg-surface text-ink shadow-sm" : "text-muted hover:text-ink"
+          }`;
+        });
+      });
+    });
+
+    els.diagnosticsToggleBtn.addEventListener("click", () => {
+      state.diagnosticsEnabled = !state.diagnosticsEnabled;
+      localStorage.setItem("mindful_diagnostics", state.diagnosticsEnabled ? "1" : "0");
+      applyDiagnosticsVisibility();
+    });
+
+    // =========================================================================
+    // 13. LIVE SESSION MESSAGING & POST-SESSION SAVING WORKFLOW
+    // =========================================================================
+    async function sendChatMessage(textOverride = null) {
+      const text = (textOverride ?? els.chatInput.value).trim();
+      if (!text && !state.pendingImageDataUrl) return;
+      if (state.isSending) return;
+
+      checkCrisisGuardrail(text);
+
+      const userMsg = {
+        role: "user",
+        content: text || "(Attached image)",
+        imageDataUrl: state.pendingImageDataUrl || undefined,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      };
+      state.messages.push(userMsg);
+      saveLiveDraft();
+
+      els.chatInput.value = "";
+      autoResizeTextarea(els.chatInput);
+      clearPendingImage();
+      renderChatMessages();
+
+      state.isSending = true;
+      els.sendBtn.disabled = true;
+      els.endAnalyzeBtn.disabled = true;
+      els.typingIndicator.classList.remove("hidden");
+      els.chatScroll.scrollTop = els.chatScroll.scrollHeight;
+
+      try {
+        const apiMessages = [
+          { role: "system", content: buildTherapistSystemPrompt() },
+          ...state.messages.map((m) => {
+            if (m.role === "user" && m.imageDataUrl) {
+              return {
+                role: "user",
+                content: [
+                  { type: "text", text: m.content },
+                  { type: "image_url", image_url: { url: m.imageDataUrl } }
+                ]
+              };
+            }
+            return { role: m.role, content: m.content };
+          })
+        ];
+
+        const reply = await callOpenRouter({
+          engineKey: "conversation",
+          messages: apiMessages,
+          temperature: 0.65,
+          maxTokens: 900
+        });
+
+        state.messages.push({
+          role: "assistant",
+          content: reply,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        });
+        saveLiveDraft();
+        renderChatMessages();
+      } catch (err) {
+        showToast(err.message, 5000);
+        logTelemetry(`Engine 1 error: ${err.message}`, "error");
+      } finally {
+        state.isSending = false;
+        els.sendBtn.disabled = false;
+        els.typingIndicator.classList.add("hidden");
+        updateSessionHeader();
+      }
+    }
+
+    function clearPendingImage() {
+      state.pendingImageDataUrl = null;
+      state.pendingImageName = "";
+      els.imageFileInput.value = "";
+      els.attachmentBar.classList.add("hidden");
+    }
+
+    function setSaveProgress(pct, label, statusText = null) {
+      els.saveProgressBar.style.width = `${pct}%`;
+      els.saveProgressPct.textContent = `${pct}%`;
+      els.saveProgressLabel.textContent = label;
+      if (statusText) els.saveModalStatus.textContent = statusText;
+    }
+
+    async function runPostSessionSave() {
+      const confirmed = await showConfirm({
+        title: "End today's session?",
+        body: "Your therapist will finalize today's progress note, update your care plan, and close this appointment.",
+        okLabel: "End Session"
+      });
+      if (!confirmed) return;
+
+      els.saveModalTitle.textContent = "Saving Your Session";
+      els.saveModalError.classList.add("hidden");
+      els.saveModalActions.classList.add("hidden");
+      els.saveViewPlanBtn.classList.remove("hidden");
+      els.saveSessionModal.classList.remove("hidden");
+      setSaveProgress(18, "Reviewing today's session…", "Writing your clinical progress note…");
+
+      try {
+        const interpretation = await runSessionInterpreter();
+        setSaveProgress(52, "Updating your care plan…", "Integrating today's insights with your ongoing goals…");
+
+        const updatedPlan = await runCarePlanSynthesis(interpretation);
+        state.carePlan = updatedPlan;
+        await saveProfileDoc("care_plan", updatedPlan, "careplan");
+
+        const sessionRecord = {
+          timestampMs: Date.now(),
+          dateLabel: new Date().toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }),
+          transcript: state.messages.map((m) => ({ role: m.role, content: m.content, timestamp: m.timestamp })),
+          interpretation
+        };
+        await saveSessionRecord(sessionRecord);
+
+        const appt = getActiveAppointment();
+        if (appt) {
+          appt.status = "completed";
+          appt.endedAtMs = Date.now();
+          await saveProfileDoc("schedule", state.schedule, "schedule");
+        }
+        state.activeAppointmentId = null;
+        state.messages = [];
+        clearLiveDraft();
+
+        setSaveProgress(82, "Updating appointment schedule…", "Confirming your recommended session cadence…");
+        await runCadencePlanner(updatedPlan);
+
+        setSaveProgress(100, "Complete", "Your session notes and care plan have been saved to My Chart.");
+        els.saveModalTitle.textContent = "Session Saved";
+
+        renderChatMessages();
+        renderCarePlan();
+        renderHistory();
+        renderMyChart();
+        renderScheduleView();
+        updateSessionGateUI();
+
+        els.saveModalActions.classList.remove("hidden");
+      } catch (err) {
+        logTelemetry(`Post-session error: ${err.message}`, "error");
+        els.saveModalTitle.textContent = "Could Not Save Session";
+        els.saveModalError.textContent = err.message;
+        els.saveModalError.classList.remove("hidden");
+        els.saveViewPlanBtn.classList.add("hidden");
+        els.saveModalActions.classList.remove("hidden");
+      }
+    }
+
+    // =========================================================================
+    // 14. ANNUAL CLINICAL INTAKE INTERVIEW
+    // =========================================================================
+    function isIntakeDue() {
+      if (!state.chart || !state.chart.completedAtMs) return true;
+      return (Date.now() - state.chart.completedAtMs) > ONE_YEAR_MS;
+    }
+
+    function openIntakeInterview() {
+      els.authGate.classList.add("hidden");
+      els.appShell.classList.add("hidden");
+      els.intakeGate.classList.remove("hidden");
+      state.intakeMessages = [
+        {
+          role: "assistant",
+          content: `Hello${state.userProfile.name ? " " + state.userProfile.name.split(" ")[0] : ""}. Before we begin therapy sessions, I'd like to complete your annual pre-clinical medical intake so your care plan accounts for both physical and psychological health.\n\nTo start: **Do you have any current or past medical conditions** (such as thyroid issues, anemia, diabetes, chronic pain, migraines, or sleep disorders), and if so, **are they currently well-controlled or uncontrolled?**`
+        }
+      ];
+      els.completeIntakeBtn.disabled = true;
+      renderIntakeMessages();
+    }
+
+    function renderIntakeMessages() {
+      els.intakeMessages.innerHTML = state.intakeMessages.map((m) => {
+        if (m.role === "user") {
+          return `
+            <div class="flex flex-col items-end animate-fade-up">
+              <div class="max-w-[85%] rounded-2xl rounded-br-md bg-stone border border-hairline px-4 py-3 text-sm text-ink leading-relaxed">
+                ${m.attachment ? `<div class="mb-2 text-[11px] font-mono px-2.5 py-1 rounded-lg bg-surface border border-hairline text-sage">Attached: ${escapeHtml(m.attachment.name)}</div>` : ""}
+                <div class="whitespace-pre-wrap">${escapeHtml(m.content)}</div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="animate-fade-up max-w-[92%]">
+            <div class="text-[11px] font-medium uppercase tracking-wider text-muted mb-1.5">Intake Clinician</div>
+            <div class="clinical-prose text-sm text-ink leading-relaxed bg-surface border border-hairline rounded-2xl rounded-tl-md px-5 py-4 shadow-sm">
+              ${formatClinicalMarkdown(m.content)}
+            </div>
+          </div>
+        `;
+      }).join("");
+      els.intakeScroll.scrollTop = els.intakeScroll.scrollHeight;
+      const userTurns = state.intakeMessages.filter((m) => m.role === "user").length;
+      els.completeIntakeBtn.disabled = userTurns < 2 || state.isIntakeSending;
+    }
+
+    async function sendIntakeMessage() {
+      const text = els.intakeInput.value.trim();
+      if (!text && !state.pendingIntakeFile) return;
+      if (state.isIntakeSending) return;
+
+      const att = state.pendingIntakeFile;
+      state.intakeMessages.push({
+        role: "user",
+        content: text || (att ? `Uploaded file: ${att.name}` : ""),
+        attachment: att || undefined
+      });
+      els.intakeInput.value = "";
+      autoResizeTextarea(els.intakeInput);
+      clearPendingIntakeFile();
+      renderIntakeMessages();
+
+      state.isIntakeSending = true;
+      els.intakeSendBtn.disabled = true;
+      els.completeIntakeBtn.disabled = true;
+      els.intakeTypingIndicator.classList.remove("hidden");
+      els.intakeScroll.scrollTop = els.intakeScroll.scrollHeight;
+
+      const clinicianPrompt = `You are a thorough, empathetic medical-psychiatric Intake Clinician conducting a once-per-year pre-clinical interview for ${state.userProfile.name || "the patient"} (${state.userProfile.gender || "gender not specified"}).
+
+Your clinical checklist (ask 1–2 focused questions at a time, never overwhelm with a giant list):
+1. Past & active medical conditions—specifically probe whether each condition is **controlled, partially controlled, or uncontrolled**.
+2. Current medications & supplements—get **exact name, dosage, timing of day, adherence, and side effects**.
+3. Past psychiatric history, prior therapy, and allergies.
+4. Physiological baselines: **sleep quality/hours, caffeine/alcohol/substance use, and recent blood work** (e.g., TSH/thyroid, CBC, CMP, Vitamin D, B12, HbA1c). Invite the patient to upload photos/PDFs/text of recent labs if they have them.
+
+When you have covered all 4 areas thoroughly (typically 4–6 exchanges), summarize what you heard and let the patient know they can click "Complete & Save to My Chart".`;
+
+      try {
+        const apiMessages = [
+          { role: "system", content: clinicianPrompt },
+          ...state.intakeMessages.map((m) => {
+            if (m.role === "user" && m.attachment?.kind === "image" && m.attachment.dataUrl) {
+              return {
+                role: "user",
+                content: [
+                  { type: "text", text: m.content },
+                  { type: "image_url", image_url: { url: m.attachment.dataUrl } }
+                ]
+              };
+            }
+            if (m.role === "user" && m.attachment?.textContent) {
+              return {
+                role: "user",
+                content: `${m.content}\n\n[UPLOADED DOCUMENT: ${m.attachment.name}]\n${m.attachment.textContent.slice(0, 7000)}`
+              };
+            }
+            return { role: m.role, content: m.content };
+          })
+        ];
+
+        const reply = await callOpenRouter({
+          engineKey: "intake",
+          messages: apiMessages,
+          temperature: 0.45,
+          maxTokens: 900
+        });
+
+        state.intakeMessages.push({ role: "assistant", content: reply });
+        renderIntakeMessages();
+      } catch (err) {
+        showToast(err.message, 5000);
+        logTelemetry(`Intake clinician error: ${err.message}`, "error");
+      } finally {
+        state.isIntakeSending = false;
+        els.intakeSendBtn.disabled = false;
+        els.intakeTypingIndicator.classList.add("hidden");
+        renderIntakeMessages();
+      }
+    }
+
+    function clearPendingIntakeFile() {
+      state.pendingIntakeFile = null;
+      els.intakeFileInput.value = "";
+      els.intakeAttachmentBar.classList.add("hidden");
+      els.intakeAttachmentThumb.classList.add("hidden");
+      els.intakeAttachmentDocIcon.classList.add("hidden");
+    }
+
+    async function completeAndSaveIntake() {
+      els.completeIntakeBtn.disabled = true;
+      els.completeIntakeBtn.textContent = "Saving to My Chart…";
+
+      const transcript = state.intakeMessages
+        .map((m) => `${m.role === "user" ? "PATIENT" : "CLINICIAN"}: ${m.content}${m.attachment?.textContent ? "\n[FILE]: " + m.attachment.textContent.slice(0, 4000) : ""}`)
+        .join("\n\n");
+
+      const extractionPrompt = `Extract a structured clinical intake chart from this pre-clinical interview transcript.
+Return ONLY valid RFC 8259 JSON matching this exact schema:
+{
+  "summary": "2-3 sentence clinical overview of medical history, medications, and relevant physiological factors",
+  "medical_conditions": [
+    { "condition": "Name", "control_status": "Controlled | Partially Controlled | Uncontrolled | Historical", "notes": "Brief context" }
+  ],
+  "psychiatric_history": ["Past diagnoses, hospitalizations, or prior therapy"],
+  "allergies": ["Medication or relevant allergies"],
+  "medications": [
+    { "name": "Med name", "dosage": "e.g. 50mg", "timing": "e.g. Morning with food", "purpose": "Reason & adherence/side effects" }
+  ],
+  "recent_labs": [
+    { "panel_or_test": "e.g. TSH / CBC / Vitamin D", "date": "Approximate date", "findings": "Normal or specific values/notes" }
+  ],
+  "physiological_baselines": {
+    "sleep": "Hours and quality",
+    "caffeine_substances": "Caffeine, alcohol, nicotine, etc.",
+    "lifestyle": "Exercise, diet, stressors"
+  }
+}`;
+
+      try {
+        logTelemetry(`Extracting structured My Chart via ${state.engines.intake.slug}…`);
+        const parsed = await callOpenRouterJSON({
+          engineKey: "intake",
+          messages: [
+            { role: "system", content: extractionPrompt },
+            { role: "user", content: transcript }
+          ],
+          temperature: 0.15,
+          maxTokens: 2600
+        });
+
+        parsed.completedAtMs = Date.now();
+        state.chart = parsed;
+        await saveProfileDoc("chart", parsed, "chart");
+
+        els.intakeGate.classList.add("hidden");
+        els.appShell.classList.remove("hidden");
+        renderMyChart();
+        renderScheduleView();
+        updateSessionGateUI();
+        switchTab("schedule");
+        showToast("Annual intake saved to My Chart. Book your first appointment to begin.");
+      } catch (err) {
+        showToast(`Could not save intake: ${err.message}`, 6000);
+        logTelemetry(`Intake extraction error: ${err.message}`, "error");
+      } finally {
+        els.completeIntakeBtn.disabled = false;
+        els.completeIntakeBtn.textContent = "Complete & Save to My Chart";
+      }
+    }
+
+    // =========================================================================
+    // 15. URGENT CLINICAL TRIAGE (INTAKE CLINICIAN GATEKEEPER)
+    // =========================================================================
+    function openUrgentTriageModal() {
+      state.triageMessages = [
+        {
+          role: "assistant",
+          content: "I'm the Intake Clinician. Tell me briefly what is happening right now, how severe your distress feels (1–10), and whether you feel safe."
+        }
+      ];
+      els.triageDecisionBar.classList.add("hidden");
+      els.triageEnterUrgentBtn.classList.add("hidden");
+      els.triageForm.classList.remove("hidden");
+      els.triageModal.classList.remove("hidden");
+      renderTriageMessages();
+    }
+
+    function renderTriageMessages() {
+      els.triageMessages.innerHTML = state.triageMessages.map((m) => `
+        <div class="${m.role === "user" ? "flex justify-end" : ""}">
+          <div class="max-w-[88%] rounded-xl px-3.5 py-2.5 text-xs leading-relaxed ${
+            m.role === "user" ? "bg-stone text-ink border border-hairline" : "bg-surface text-ink border border-hairline"
+          }">
+            ${escapeHtml(m.content)}
+          </div>
+        </div>
+      `).join("");
+      els.triageScroll.scrollTop = els.triageScroll.scrollHeight;
+    }
+
+    async function sendTriageMessage() {
+      const text = els.triageInput.value.trim();
+      if (!text || state.isTriageSending) return;
+
+      checkCrisisGuardrail(text);
+      state.triageMessages.push({ role: "user", content: text });
+      els.triageInput.value = "";
+      renderTriageMessages();
+
+      state.isTriageSending = true;
+      els.triageSendBtn.disabled = true;
+      els.triageTyping.classList.remove("hidden");
+
+      const triageSystemPrompt = `You are the Urgent Clinical Triage Clinician for Mindful CBT.
+Your job is to maintain healthy session boundaries while genuinely helping patients experiencing acute clinical decline.
+Evaluate the patient's message and decide ONE of:
+- "NEED_MORE_INFO": Ask 1 short clarifying question if you don't yet have enough context.
+- "APPROVE_URGENT": Genuine acute distress, panic, major stressor, or clinical decline where an immediate 30-45 min structured CBT session is clinically warranted.
+- "DEFER_TO_SCHEDULED": Mild boredom, routine venting, or non-urgent curiosity—gently decline immediate unlock and offer 1 grounding/coping skill until their scheduled appointment.
+- "EMERGENCY_988": Active suicidal intent, imminent self-harm, or medical emergency—direct immediately to 988 / emergency services and do NOT unlock an appointment.
+
+Return ONLY valid RFC 8259 JSON:
+{
+  "decision": "NEED_MORE_INFO | APPROVE_URGENT | DEFER_TO_SCHEDULED | EMERGENCY_988",
+  "severity": "low | moderate | high | critical",
+  "reply_to_patient": "Calm, concise clinical response (2-3 sentences)",
+  "clinical_note": "1-sentence chart note summarizing the triage presentation for My Chart",
+  "urgent_duration_minutes": 35
+}`;
+
+      try {
+        const parsed = await callOpenRouterJSON({
+          engineKey: "intake",
+          messages: [
+            { role: "system", content: triageSystemPrompt },
+            ...state.triageMessages.map((m) => ({ role: m.role, content: m.content }))
+          ],
+          temperature: 0.25,
+          maxTokens: 1000
+        });
+
+        state.triageMessages.push({ role: "assistant", content: parsed.reply_to_patient || "Thank you for sharing." });
+        renderTriageMessages();
+
+        if (parsed.decision && parsed.decision !== "NEED_MORE_INFO") {
+          const granted = parsed.decision === "APPROVE_URGENT";
+          const eventRecord = {
+            timestampMs: Date.now(),
+            decision: parsed.decision,
+            severity: parsed.severity || "moderate",
+            clinical_note: parsed.clinical_note || "Urgent triage completed.",
+            grantedUrgent: granted
+          };
+          state.schedule.triageEvents.unshift(eventRecord);
+
+          let urgentAppt = null;
+          if (granted) {
+            urgentAppt = {
+              id: `urgent_${Date.now()}`,
+              scheduledStartMs: Date.now(),
+              durationMinutes: Math.min(45, Math.max(25, Number(parsed.urgent_duration_minutes) || 35)),
+              status: "scheduled",
+              isUrgent: true,
+              triageReason: parsed.clinical_note || ""
+            };
+            state.schedule.appointments.push(urgentAppt);
+          }
+
+          await saveProfileDoc("schedule", state.schedule, "schedule");
+          renderMyChart();
+          renderScheduleView();
+
+          els.triageForm.classList.add("hidden");
+          els.triageDecisionBar.classList.remove("hidden");
+          els.triageDecisionSummary.innerHTML = `<strong>Assessment Complete:</strong> ${escapeHtml(parsed.decision.replace(/_/g, " "))} — recorded in My Chart.`;
+
+          if (granted && urgentAppt) {
+            els.triageEnterUrgentBtn.classList.remove("hidden");
+            els.triageEnterUrgentBtn.onclick = () => {
+              els.triageModal.classList.add("hidden");
+              enterAppointmentSession(urgentAppt);
+              switchTab("session");
+            };
+          } else {
+            els.triageEnterUrgentBtn.classList.add("hidden");
+          }
+        }
+      } catch (err) {
+        showToast(`Could not complete triage: ${err.message}`, 5000);
+      } finally {
+        state.isTriageSending = false;
+        els.triageSendBtn.disabled = false;
+        els.triageTyping.classList.add("hidden");
+      }
+    }
+
+    // =========================================================================
+    // 16. BLACK-AND-WHITE MEDICAL RECORD PDF EXPORT (jsPDF)
+    // =========================================================================
+    function exportMedicalRecordPDF() {
+      if (!window.jspdf?.jsPDF) {
+        showToast("PDF export is still loading. Please try again in a moment.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: "pt", format: "letter" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 48;
+      const contentW = pageW - margin * 2;
+      let y = margin;
+
+      const ensureSpace = (needed = 40) => {
+        if (y + needed > pageH - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+      };
+
+      const addSectionHeader = (title) => {
+        ensureSpace(34);
+        y += 8;
+        pdf.setFillColor(235, 235, 235);
+        pdf.rect(margin, y, contentW, 18, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9.5);
+        pdf.setTextColor(25, 25, 25);
+        pdf.text(title.toUpperCase(), margin + 6, y + 12.5);
+        y += 28;
+      };
+
+      const addParagraph = (text, boldPrefix = "") => {
+        const full = boldPrefix ? `${boldPrefix}${text}` : String(text || "None recorded.");
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9.5);
+        pdf.setTextColor(20, 20, 20);
+        const lines = pdf.splitTextToSize(full, contentW);
+        ensureSpace(lines.length * 13 + 6);
+        pdf.text(lines, margin, y);
+        y += lines.length * 13 + 5;
+      };
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(15);
+      pdf.setTextColor(15, 15, 15);
+      pdf.text("MINDFUL CLINICAL RECORD & CBT SUMMARY", margin, y);
+      y += 16;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text(`Generated: ${new Date().toLocaleString()}   |   Personal CBT Self-Reflection Record (Not a Formal Medical Diagnosis)`, margin, y);
+      y += 12;
+      pdf.setDrawColor(180, 180, 180);
+      pdf.line(margin, y, pageW - margin, y);
+      y += 14;
+
+      addSectionHeader("1. Patient Demographics");
+      addParagraph(`Name: ${state.userProfile.name || "Not specified"}   |   Gender: ${state.userProfile.gender || "Not specified"}   |   Email: ${state.user?.email || "—"}`);
+
+      addSectionHeader("2. Past Medical & Psychiatric History");
+      const c = state.chart;
+      addParagraph(c?.summary || "Annual intake not yet completed.");
+      if (c?.medical_conditions?.length) {
+        c.medical_conditions.forEach((m) => {
+          const line = typeof m === "string" ? m : `${m.condition} [${m.control_status || "Unknown"}]${m.notes ? " — " + m.notes : ""}`;
+          addParagraph(`• ${line}`);
+        });
+      }
+      if (c?.psychiatric_history?.length) addParagraph(c.psychiatric_history.join("; "), "Psychiatric History: ");
+      if (c?.allergies?.length) addParagraph(c.allergies.join("; "), "Allergies: ");
+
+      addSectionHeader("3. Current Medications");
+      if (c?.medications?.length) {
+        c.medications.forEach((m) => {
+          addParagraph(`• ${m.name} — ${m.dosage} (${m.timing})${m.purpose ? " | " + m.purpose : ""}`);
+        });
+      } else {
+        addParagraph("No current medications reported.");
+      }
+
+      addSectionHeader("4. Recent Labs & Physiological Baselines");
+      if (c?.recent_labs?.length) {
+        c.recent_labs.forEach((l) => addParagraph(`• ${l.panel_or_test} (${l.date || "Date N/A"}): ${l.findings}`));
+      } else {
+        addParagraph("No recent lab work recorded.");
+      }
+      if (c?.physiological_baselines) {
+        const b = c.physiological_baselines;
+        addParagraph(`Sleep: ${b.sleep || "N/A"} | Caffeine/Substances: ${b.caffeine_substances || "N/A"} | Lifestyle: ${b.lifestyle || "N/A"}`);
+      }
+
+      addSectionHeader("5. Working Hypotheses & Treatment Plan");
+      const cp = state.carePlan;
+      if (cp) {
+        addParagraph(cp.clinical_formulation || "", "Formulation: ");
+        (cp.working_diagnoses || []).forEach((d) => {
+          addParagraph(`• ${d.label} (${d.confidence || "Working"}): ${d.rationale || ""}`);
+        });
+        (cp.treatment_goals || []).forEach((g) => {
+          addParagraph(`• Goal [${g.status || "Active"}]: ${g.goal} — Intervention: ${g.intervention || ""}`);
+        });
+        if (cp.homework?.title) {
+          addParagraph(`${cp.homework.title}: ${cp.homework.instructions || ""}`, "Active Homework: ");
+        }
+      } else {
+        addParagraph("No longitudinal care plan generated yet.");
+      }
+
+      if (state.schedule.triageEvents?.length) {
+        addSectionHeader("6. Urgent Triage & Clinical Decline Log");
+        state.schedule.triageEvents.forEach((t) => {
+          addParagraph(`• ${formatDateTime(t.timestampMs)} [${t.decision} / ${t.severity}]: ${t.clinical_note}`);
+        });
+      }
+
+      addSectionHeader("7. Session Progress Notes (SOAP Format)");
+      if (!state.sessionsHistory.length) {
+        addParagraph("No completed therapy sessions recorded.");
+      } else {
+        state.sessionsHistory.forEach((s, idx) => {
+          const interp = s.interpretation || {};
+          const soap = interp.soap_note || {};
+          ensureSpace(80);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(10);
+          pdf.setTextColor(15, 15, 15);
+          pdf.text(`Session ${state.sessionsHistory.length - idx} — ${s.dateLabel || ""} (Mood: ${interp.mood_score ?? "N/A"}/10)`, margin, y);
+          y += 14;
+          addParagraph(soap.subjective || interp.session_summary || "—", "S (Subjective): ");
+          addParagraph(soap.objective || (interp.cognitive_distortions || []).join(", ") || "—", "O (Objective): ");
+          addParagraph(soap.assessment || "—", "A (Assessment): ");
+          addParagraph(soap.plan || "—", "P (Plan): ");
+          y += 6;
+        });
+      }
+
+      const pageCount = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(`Page ${i} of ${pageCount}`, pageW - margin - 45, pageH - 24);
+      }
+
+      const safeName = (state.userProfile.name || "patient").replace(/[^a-z0-9]+/gi, "_").toLowerCase();
+      pdf.save(`mindful_medical_record_${safeName}.pdf`);
+      showToast("Medical record PDF downloaded.");
+    }
+
+    // =========================================================================
+    // 17. EVENT LISTENERS (AUTH, INTAKE, SESSION, SCHEDULE, SETTINGS, TRIAGE)
+    // =========================================================================
+    function showAuthError(msg) {
+      els.authErrorBox.textContent = msg;
+      els.authErrorBox.classList.remove("hidden");
+    }
+
+    els.toggleAuthModeBtn.addEventListener("click", () => {
+      state.authMode = state.authMode === "signin" ? "signup" : "signin";
+      const isSignup = state.authMode === "signup";
+      els.signupProfileFields.classList.toggle("hidden", !isSignup);
+      els.emailAuthSubmit.textContent = isSignup ? "Create Account" : "Sign In";
+      els.authModePrompt.textContent = isSignup ? "Already have an account?" : "New to Mindful?";
+      els.toggleAuthModeBtn.textContent = isSignup ? "Sign in" : "Create an account";
+      els.authErrorBox.classList.add("hidden");
+    });
+
+    els.signupPhotoBtn.addEventListener("click", () => els.signupPhotoInput.click());
+    els.signupPhotoInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const dataUrl = await compressImageToDataUrl(file, 240, 0.8);
+        state.pendingSignupPhotoDataUrl = dataUrl;
+        els.signupAvatarPreview.innerHTML = `<img src="${dataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    els.googleSigninBtn.addEventListener("click", async () => {
+      els.authErrorBox.classList.add("hidden");
+      try {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      } catch (err) {
+        showAuthError(err.message || "Google Sign-In failed. Ensure Google Sign-In is enabled in Firebase Auth.");
+      }
+    });
+
+    els.emailAuthForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      els.authErrorBox.classList.add("hidden");
+      const email = els.authEmail.value.trim();
+      const password = els.authPassword.value;
+      els.emailAuthSubmit.disabled = true;
+
+      try {
+        if (state.authMode === "signup") {
+          const fullName = els.authName.value.trim() || email.split("@")[0];
+          const gender = els.authGender.value;
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          await updateProfile(cred.user, { displayName: fullName }).catch(() => {});
+          state.userProfile = {
+            name: fullName,
+            gender,
+            photoDataUrl: state.pendingSignupPhotoDataUrl || ""
+          };
+          await setDoc(doc(db, "users", cred.user.uid, "profile", "account"), state.userProfile, { merge: true }).catch(() => {});
+          localStorage.setItem(`mindful_${cred.user.uid}_profile`, JSON.stringify(state.userProfile));
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        showAuthError(err.message || "Authentication failed.");
+      } finally {
+        els.emailAuthSubmit.disabled = false;
+      }
+    });
+
+    const handleSignOut = async () => {
+      clearLiveDraft();
+      state.activeAppointmentId = null;
+      state.messages = [];
+      await signOut(auth);
+    };
+    els.signoutBtn.addEventListener("click", handleSignOut);
+    els.intakeSignoutBtn.addEventListener("click", handleSignOut);
+
+    // Intake listeners
+    els.intakeInput.addEventListener("input", () => autoResizeTextarea(els.intakeInput));
+    els.intakeInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendIntakeMessage();
+      }
+    });
+    els.intakeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendIntakeMessage();
+    });
+    els.intakeAttachBtn.addEventListener("click", () => els.intakeFileInput.click());
+    els.removeIntakeAttachmentBtn.addEventListener("click", clearPendingIntakeFile);
+    els.intakeFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      els.intakeAttachmentName.textContent = file.name;
+      els.intakeAttachmentBar.classList.remove("hidden");
+
+      if (file.type.startsWith("image/")) {
+        const dataUrl = await compressImageToDataUrl(file, 1024, 0.82);
+        state.pendingIntakeFile = { name: file.name, kind: "image", dataUrl };
+        els.intakeAttachmentThumb.src = dataUrl;
+        els.intakeAttachmentThumb.classList.remove("hidden");
+        els.intakeAttachmentDocIcon.classList.add("hidden");
+      } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+        els.intakeAttachmentThumb.classList.add("hidden");
+        els.intakeAttachmentDocIcon.classList.remove("hidden");
+        const pdfText = await extractPdfText(file);
+        state.pendingIntakeFile = { name: file.name, kind: "doc", textContent: pdfText };
+      } else {
+        const textContent = await file.text().catch(() => `[Document attached: ${file.name}]`);
+        state.pendingIntakeFile = { name: file.name, kind: "doc", textContent };
+        els.intakeAttachmentThumb.classList.add("hidden");
+        els.intakeAttachmentDocIcon.classList.remove("hidden");
+      }
+    });
+    els.completeIntakeBtn.addEventListener("click", completeAndSaveIntake);
+
+    // Session chat listeners
+    els.chatInput.addEventListener("input", () => autoResizeTextarea(els.chatInput));
+    els.chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+    els.chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendChatMessage();
+    });
+    document.querySelectorAll(".starter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const promptText = btn.querySelector("div:nth-child(2)")?.textContent || "";
+        sendChatMessage(promptText);
+      });
+    });
+    els.attachImageBtn.addEventListener("click", () => els.imageFileInput.click());
+    els.removeAttachmentBtn.addEventListener("click", clearPendingImage);
+    els.imageFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const dataUrl = await compressImageToDataUrl(file, 1024, 0.82);
+        state.pendingImageDataUrl = dataUrl;
+        state.pendingImageName = file.name;
+        els.attachmentThumb.src = dataUrl;
+        els.attachmentName.textContent = file.name;
+        els.attachmentBar.classList.remove("hidden");
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+    els.endAnalyzeBtn.addEventListener("click", runPostSessionSave);
+    els.newSessionBtn.addEventListener("click", async () => {
+      const ok = await showConfirm({
+        title: "Reset current session?",
+        body: "This clears the messages in this session without saving them.",
+        okLabel: "Reset"
+      });
+      if (ok) {
+        state.messages = [];
+        clearLiveDraft();
+        renderChatMessages();
+      }
+    });
+
+    // Save modal buttons
+    els.saveCloseBtn.addEventListener("click", () => els.saveSessionModal.classList.add("hidden"));
+    els.saveViewPlanBtn.addEventListener("click", () => {
+      els.saveSessionModal.classList.add("hidden");
+      switchTab("careplan");
+    });
+
+    // Crisis banner dismiss
+    els.dismissCrisisBtn.addEventListener("click", () => els.crisisBanner.classList.add("hidden"));
+
+    // Schedule & Waiting Room listeners
+    els.lockedGotoScheduleBtn.addEventListener("click", () => switchTab("schedule"));
+    els.lockedJoinBtn.addEventListener("click", () => {
+      const info = getJoinableOrUpcomingAppointment();
+      if (info.appt) enterAppointmentSession(info.appt);
+    });
+    els.schedJoinBtn.addEventListener("click", () => {
+      const info = getJoinableOrUpcomingAppointment();
+      if (info.appt) {
+        enterAppointmentSession(info.appt);
+        switchTab("session");
+      }
+    });
+    els.schedCancelBtn.addEventListener("click", async () => {
+      const info = getJoinableOrUpcomingAppointment();
+      if (!info.appt) return;
+      info.appt.status = "cancelled";
+      await saveProfileDoc("schedule", state.schedule, "schedule");
+      renderScheduleView();
+      updateSessionGateUI();
+      showToast("Appointment cancelled. Pick a new day and time below.");
+    });
+
+    els.bookAppointmentForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      els.bookingErrorBox.classList.add("hidden");
+
+      const dateVal = els.apptDateInput.value;
+      const timeVal = els.apptTimeInput.value;
+      if (!dateVal || !timeVal) return;
+      const startMs = new Date(`${dateVal}T${timeVal}`).getTime();
+      if (isNaN(startMs)) return;
+
+      if (startMs < Date.now() - 10 * 60 * 1000) {
+        els.bookingErrorBox.textContent = "Please choose a current or future date and time.";
+        els.bookingErrorBox.classList.remove("hidden");
+        return;
+      }
+
+      const lastCompleted = state.schedule.appointments
+        .filter((a) => a.status === "completed" && !a.isUrgent)
+        .sort((a, b) => (b.endedAtMs || b.scheduledStartMs) - (a.endedAtMs || a.scheduledStartMs))[0];
+
+      if (lastCompleted) {
+        const minDays = state.schedule.cadence.minimum_days_between_sessions || 4;
+        const earliestMs = (lastCompleted.endedAtMs || lastCompleted.scheduledStartMs) + minDays * 24 * 60 * 60 * 1000;
+        if (startMs < earliestMs) {
+          els.bookingErrorBox.textContent = `Your care plan recommends at least ${minDays} days between sessions. Earliest next slot: ${formatDateTime(earliestMs)}.`;
+          els.bookingErrorBox.classList.remove("hidden");
+          return;
+        }
+      }
+
+      state.schedule.appointments.forEach((a) => {
+        if (a.status === "scheduled") a.status = "cancelled";
+      });
+
+      state.schedule.appointments.push({
+        id: `appt_${Date.now()}`,
+        scheduledStartMs: startMs,
+        durationMinutes: state.schedule.cadence.session_duration_minutes || 45,
+        status: "scheduled",
+        isUrgent: false
+      });
+      await saveProfileDoc("schedule", state.schedule, "schedule");
+      renderScheduleView();
+      updateSessionGateUI();
+      showToast(`Appointment confirmed for ${formatDateTime(startMs)}.`);
+    });
+
+    els.recalcCadenceBtn.addEventListener("click", async () => {
+      els.recalcCadenceBtn.disabled = true;
+      els.recalcCadenceBtn.textContent = "Updating…";
+      await runCadencePlanner(state.carePlan);
+      renderScheduleView();
+      showToast("Recommended cadence updated.");
+      els.recalcCadenceBtn.disabled = false;
+      els.recalcCadenceBtn.textContent = "Refresh Cadence";
+    });
+
+    // Urgent Triage listeners
+    els.openTriageBtn.addEventListener("click", openUrgentTriageModal);
+    els.scheduleUrgentBtn.addEventListener("click", openUrgentTriageModal);
+    els.closeTriageBtn.addEventListener("click", () => els.triageModal.classList.add("hidden"));
+    els.triageDismissBtn.addEventListener("click", () => els.triageModal.classList.add("hidden"));
+    els.triageForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendTriageMessage();
+    });
+
+    // Settings & My Chart listeners
+    els.redoIntakeBtn.addEventListener("click", openIntakeInterview);
+    els.copyChartBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(buildPatientChartContext());
+        showToast("Chart summary copied to clipboard.");
+      } catch (_) {
+        showToast("Could not access clipboard.");
+      }
+    });
+    els.exportPdfBtn.addEventListener("click", exportMedicalRecordPDF);
+
+    els.toggleAddMedBtn.addEventListener("click", () => els.addMedForm.classList.toggle("hidden"));
+    els.addMedForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!state.chart) state.chart = { medications: [], medical_conditions: [], psychiatric_history: [], allergies: [], recent_labs: [] };
+      if (!Array.isArray(state.chart.medications)) state.chart.medications = [];
+      state.chart.medications.push({
+        name: els.medNameInput.value.trim(),
+        dosage: els.medDosageInput.value.trim(),
+        timing: els.medTimingInput.value.trim(),
+        purpose: els.medPurposeInput.value.trim()
+      });
+      await saveProfileDoc("chart", state.chart, "chart");
+      els.addMedForm.reset();
+      els.addMedForm.classList.add("hidden");
+      renderMyChart();
+      showToast("Medication saved to My Chart.");
+    });
+
+    // Edit Profile listeners
+    els.toggleEditProfileBtn.addEventListener("click", () => els.editProfileForm.classList.toggle("hidden"));
+    els.profilePhotoBtn.addEventListener("click", () => els.profilePhotoInput.click());
+    els.profilePhotoInput.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        state.pendingEditPhotoDataUrl = await compressImageToDataUrl(file, 240, 0.8);
+        els.profilePhotoStatus.textContent = "New photo ready";
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+    els.editProfileForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      state.userProfile.name = els.profileNameInput.value.trim() || state.userProfile.name;
+      state.userProfile.gender = els.profileGenderInput.value;
+      if (state.pendingEditPhotoDataUrl) {
+        state.userProfile.photoDataUrl = state.pendingEditPhotoDataUrl;
+        state.pendingEditPhotoDataUrl = null;
+      }
+      await saveProfileDoc("account", state.userProfile, "profile");
+      renderAccountCard();
+      els.editProfileForm.classList.add("hidden");
+      els.profilePhotoStatus.textContent = "";
+      showToast("Profile updated.");
+    });
+
+    // Diagnostics / Engines tab listeners
+    els.reloadFirebaseBtn.addEventListener("click", loadEngineConfigsFromFirebase);
+    els.clearLogBtn.addEventListener("click", () => { els.telemetryLog.innerHTML = ""; });
+
+    // =========================================================================
+    // 18. AUTH STATE BOOTSTRAP
+    // =========================================================================
+    state.diagnosticsEnabled = localStorage.getItem("mindful_diagnostics") === "1";
+    applyDiagnosticsVisibility();
+
+    onAuthStateChanged(auth, async (user) => {
+      state.user = user;
+      if (!user) {
+        els.appShell.classList.add("hidden");
+        els.intakeGate.classList.add("hidden");
+        els.authGate.classList.remove("hidden");
+        return;
+      }
+
+      els.authGate.classList.add("hidden");
+      await Promise.all([loadEngineConfigsFromFirebase(), loadUserData()]);
+
+      renderAccountCard();
+      renderCarePlan();
+      renderHistory();
+      renderMyChart();
+      renderScheduleView();
+
+      if (isIntakeDue()) {
+        openIntakeInterview();
+      } else {
+        els.intakeGate.classList.add("hidden");
+        els.appShell.classList.remove("hidden");
+        updateSessionGateUI();
+        switchTab("session");
+      }
+    });
+  </script>
+</body>
+</html>
