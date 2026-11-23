@@ -864,7 +864,7 @@
               <div>
                 <div class="text-sm font-medium text-ink">Diagnostics Mode</div>
                 <p class="text-xs text-muted mt-1 leading-relaxed">
-                  Reveals the <strong class="text-ink font-medium">Engines</strong> tab, model identifiers, internal session handoff briefs, and live telemetry logs.
+                  Reveals the <strong class="text-ink font-medium">Engines</strong> tab, model identifiers, internal session handoff briefs, past-session <strong class="text-ink font-medium">Reanalyze</strong> controls in History, and live telemetry logs.
                 </p>
               </div>
               <button id="diagnostics-toggle-btn" type="button" role="switch" aria-checked="false" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-hairline transition-colors duration-200 focus:outline-none">
@@ -960,11 +960,11 @@
     </div>
   </div>
 
-  <!-- ==================== SAVING SESSION MODAL (CALM PROGRESS BAR) ==================== -->
+  <!-- ==================== SAVING / REANALYZING SESSION MODAL ==================== -->
   <div id="save-session-modal" class="hidden fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px] flex items-center justify-center p-4">
     <div class="w-full max-w-md rounded-2xl bg-surface border border-hairline shadow-xl p-6 space-y-5">
       <div>
-        <p class="text-xs font-medium uppercase tracking-widest text-sage">Closing Appointment</p>
+        <p id="save-modal-eyebrow" class="text-xs font-medium uppercase tracking-widest text-sage">Closing Appointment</p>
         <h2 id="save-modal-title" class="font-serif text-2xl text-ink mt-1">Saving Your Session</h2>
         <p id="save-modal-status" class="text-xs text-muted mt-1.5 leading-relaxed">
           Finalizing your progress note and updating your care plan…
@@ -1361,6 +1361,7 @@
       checkinSubmitBtn: document.getElementById("checkin-submit-btn"),
 
       saveSessionModal: document.getElementById("save-session-modal"),
+      saveModalEyebrow: document.getElementById("save-modal-eyebrow"),
       saveModalTitle: document.getElementById("save-modal-title"),
       saveModalStatus: document.getElementById("save-modal-status"),
       saveProgressBar: document.getElementById("save-progress-bar"),
@@ -1523,7 +1524,7 @@
     }
 
     // =========================================================================
-    // 6. CLINICAL MARKDOWN, PLAIN-TEXT PARSER & SAFETY GUARDRAIL
+    // 6. CLINICAL MARKDOWN, FLEXIBLE PLAIN-TEXT PARSER & SAFETY GUARDRAIL
     // =========================================================================
     function formatClinicalMarkdown(text) {
       const safe = escapeHtml(text || "");
@@ -1556,46 +1557,87 @@
         .trim();
     }
 
-    function parsePlainTextSections(rawText, sectionKeys) {
+    /**
+     * Flexible plain-text section parser supporting aliases, markdown headings (##),
+     * bold headers (**HEADER:** or **HEADER**), numbered headings (1. HEADER:),
+     * parentheticals like "O (Objective):", and optional colons.
+     */
+    function parsePlainTextSections(rawText, sectionSpecs) {
       const cleaned = stripReasoningTags(rawText);
       const result = { _raw: cleaned };
-      sectionKeys.forEach((k) => { result[k] = ""; });
+      const entries = sectionSpecs.map((spec) =>
+        typeof spec === "string"
+          ? { key: spec, aliases: [spec] }
+          : { key: spec.key, aliases: [spec.key, ...(spec.aliases || [])] }
+      );
+      entries.forEach((e) => { result[e.key] = ""; });
 
-      const keyPattern = sectionKeys
-        .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-        .join("|");
-      const headerRegex = new RegExp(`^(?:\\*{0,2}|#{1,4}\\s*)(${keyPattern})(?:\\*{0,2})\\s*:\\s*(.*)$`, "i");
+      const aliasPairs = [];
+      for (const e of entries) {
+        for (const a of e.aliases) {
+          const norm = a.toUpperCase().replace(/[^A-Z0-9]+/g, " ").trim();
+          if (norm) aliasPairs.push({ norm, key: e.key });
+        }
+      }
+      aliasPairs.sort((a, b) => b.norm.length - a.norm.length);
 
       let currentKey = null;
       const lines = cleaned.split(/\r?\n/);
 
-      for (const line of lines) {
-        const match = line.trim().match(headerRegex);
-        if (match) {
-          const matchedUpper = match[1].toUpperCase();
-          currentKey = sectionKeys.find((k) => k.toUpperCase() === matchedUpper) || null;
-          if (currentKey && match[2].trim()) {
-            result[currentKey] = match[2].trim();
+      for (const rawLine of lines) {
+        const trimmed = rawLine.trim();
+        let matchedKey = null;
+        let remainder = "";
+
+        const stripped = trimmed
+          .replace(/^#{1,6}\s*/, "")
+          .replace(/^(?:\d+[.)]\s+|[-*•]\s+)/, "")
+          .replace(/^[*_]+/, "");
+
+        for (const { norm, key } of aliasPairs) {
+          const escaped = norm
+            .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+            .replace(/\s+/g, "[\\s_\\-/]+");
+          const re = new RegExp(`^${escaped}(?:\\s*\\([^)]{1,45}\\))?[*_]*\\s*(?::[*_]*\\s*(.*)|$)`, "i");
+          const m = stripped.match(re);
+          if (m) {
+            matchedKey = key;
+            remainder = (m[1] || "").replace(/^[*_]+\s*/, "").trim();
+            break;
+          }
+        }
+
+        if (matchedKey) {
+          currentKey = matchedKey;
+          if (remainder) {
+            result[currentKey] = result[currentKey]
+              ? `${result[currentKey]}\n${remainder}`
+              : remainder;
           }
         } else if (currentKey) {
           result[currentKey] = result[currentKey]
-            ? `${result[currentKey]}\n${line}`
-            : line;
+            ? `${result[currentKey]}\n${rawLine}`
+            : rawLine;
         }
       }
 
-      sectionKeys.forEach((k) => {
-        result[k] = (result[k] || "").trim();
+      entries.forEach((e) => {
+        result[e.key] = (result[e.key] || "").trim();
       });
       return result;
     }
 
-    function splitPlainList(text) {
+    function splitPlainList(text, allowSemicolonSplit = true) {
       if (!text || /^none\b|^n\/a\b|^not reported/i.test(text.trim())) return [];
-      return text
-        .split(/\r?\n|;/)
-        .map((line) => line.replace(/^\s*[-*•\d.)]+\s*/, "").trim())
+      const rawLines = text
+        .split(/\r?\n/)
+        .map((line) => line.replace(/^\s*[-*•\d.)]+\s*/, "").replace(/^\*\*(.+?)\*\*/, "$1").trim())
         .filter((line) => line.length > 1 && !/^none\b|^n\/a\b/i.test(line));
+
+      if (allowSemicolonSplit && rawLines.length === 1 && rawLines[0].includes(";")) {
+        return rawLines[0].split(";").map((s) => s.trim()).filter((s) => s.length > 1);
+      }
+      return rawLines;
     }
 
     function extractNumberInRange(text, min, max, fallback) {
@@ -1743,10 +1785,37 @@
 
       if (!state.user) return;
       try {
-        await addDoc(collection(db, "users", state.user.uid, "sessions"), sessionRecord);
+        const ref = await addDoc(collection(db, "users", state.user.uid, "sessions"), sessionRecord);
+        sessionRecord.id = ref.id;
+        try {
+          localStorage.setItem(uidKey("sessions"), JSON.stringify(state.sessionsHistory));
+        } catch (_) {}
       } catch (err) {
         state.firestoreWritable = false;
         logTelemetry(`Firestore session save fallback: ${err.message}`, "error");
+      }
+    }
+
+    async function updateSessionRecord(sessionRecord) {
+      try {
+        localStorage.setItem(uidKey("sessions"), JSON.stringify(state.sessionsHistory));
+      } catch (_) {}
+
+      if (!state.user) return;
+      try {
+        if (sessionRecord.id) {
+          const { id, ...payload } = sessionRecord;
+          await setDoc(doc(db, "users", state.user.uid, "sessions", id), payload, { merge: true });
+        } else {
+          const ref = await addDoc(collection(db, "users", state.user.uid, "sessions"), sessionRecord);
+          sessionRecord.id = ref.id;
+          try {
+            localStorage.setItem(uidKey("sessions"), JSON.stringify(state.sessionsHistory));
+          } catch (_) {}
+        }
+      } catch (err) {
+        state.firestoreWritable = false;
+        logTelemetry(`Firestore session update fallback: ${err.message}`, "error");
       }
     }
 
@@ -2019,8 +2088,9 @@ THERAPEUTIC PRINCIPLES:
 - If the user shares an image (e.g., handwritten journal), read and integrate its content naturally into the session.`;
     }
 
-    async function runSessionInterpreter(checkin) {
-      const transcript = state.messages
+    async function runSessionInterpreter(checkin, transcriptMessages = null) {
+      const msgs = Array.isArray(transcriptMessages) ? transcriptMessages : state.messages;
+      const transcript = msgs
         .map((m) => `${m.role === "user" ? "PATIENT" : "THERAPIST"}: ${m.content}${m.imageDataUrl ? " [attached image]" : ""}`)
         .join("\n\n");
 
@@ -2028,8 +2098,8 @@ THERAPEUTIC PRINCIPLES:
         ? `POST-SESSION SELF-REPORT: PHQ-4 Total ${checkin.phq4_total}/12 (${getPhq4Band(checkin.phq4_total)}) | Anxiety ${checkin.anxiety_score}/6 | Depression ${checkin.depression_score}/6 | Daily Coping ${checkin.coping_score}/10`
         : "No self-report check-in submitted.";
 
-      const systemPrompt = `You are a clinical CBT scribe. Analyze the therapy transcript alongside the patient's medical chart and post-session PHQ-4/Coping check-in, and write a clear, structured plain-text clinical note.
-Do NOT output JSON or code blocks. Use these exact section headers in plain text:
+      const systemPrompt = `You are a clinical CBT scribe. Analyze the therapy transcript alongside the patient's medical chart and post-session PHQ-4/Coping check-in, and write a complete, concise plain-text SOAP clinical note.
+IMPORTANT: You MUST fill in EVERY section below (do not leave OBJECTIVE or PLAN blank). Do NOT output JSON or code blocks. Use these exact plain-text headers on their own lines:
 
 SUMMARY:
 (2-3 sentence summary of today's session)
@@ -2038,16 +2108,16 @@ MOOD:
 (Single number from 1 to 10)
 
 SUBJECTIVE:
-(Patient's reported feelings, symptoms, and key statements)
+(Patient's reported feelings, symptoms, stressors, and key quotes)
 
 OBJECTIVE:
-(Observable thought patterns, engagement, affect cues, PHQ-4 & coping scores, homework adherence)
+(Observable engagement, thought clarity, emotional tone in messages, PHQ-4 & daily coping scores, and homework follow-through)
 
 ASSESSMENT:
-(Clinical synthesis, cognitive distortions, medical/physiological factors)
+(Clinical synthesis, cognitive distortions observed, medical/physiological factors from chart)
 
 PLAN:
-(Next CBT targets, behavioral experiments, follow-up focus)
+(Concrete next-session CBT focus, between-session behavioral experiment/practice, and items to monitor)
 
 DISTORTIONS:
 (Short bullet list of cognitive distortions noticed, or None)
@@ -2056,7 +2126,7 @@ TRIGGERS:
 (Short bullet list of triggers or stressors, or None)
 
 HYPOTHESES:
-(Short bullet list of working diagnostic patterns with confidence and open questions)
+(Short bullet list of tentative working diagnostic impressions with confidence level and open questions to test next)
 
 RISK_FLAGS:
 (None, or brief note on clinical decline/distress)`;
@@ -2071,24 +2141,36 @@ RISK_FLAGS:
           { role: "user", content: userPrompt }
         ],
         temperature: 0.25,
-        maxTokens: 1800
+        maxTokens: 2000
       });
 
       const sec = parsePlainTextSections(raw, [
-        "SUMMARY", "MOOD", "SUBJECTIVE", "OBJECTIVE", "ASSESSMENT", "PLAN",
-        "DISTORTIONS", "TRIGGERS", "HYPOTHESES", "RISK_FLAGS"
+        { key: "SUMMARY", aliases: ["SESSION SUMMARY", "OVERVIEW"] },
+        { key: "MOOD", aliases: ["MOOD SCORE", "MOOD RATING"] },
+        { key: "SUBJECTIVE", aliases: ["S", "S SUBJECTIVE"] },
+        { key: "OBJECTIVE", aliases: ["O", "O OBJECTIVE", "OBJECTIVE OBSERVATIONS", "OBSERVATIONS"] },
+        { key: "ASSESSMENT", aliases: ["A", "A ASSESSMENT", "CLINICAL ASSESSMENT"] },
+        { key: "PLAN", aliases: ["P", "P PLAN", "TREATMENT PLAN", "ACTION PLAN", "NEXT STEPS"] },
+        { key: "DISTORTIONS", aliases: ["COGNITIVE DISTORTIONS"] },
+        { key: "TRIGGERS", aliases: ["TRIGGERS AND STRESSORS", "STRESSORS"] },
+        { key: "HYPOTHESES", aliases: ["WORKING HYPOTHESES", "DIAGNOSTIC HYPOTHESES", "WORKING DIAGNOSES", "DIAGNOSES"] },
+        { key: "RISK_FLAGS", aliases: ["RISK", "SAFETY", "SAFETY FLAGS"] }
       ]);
 
       const moodVal = extractNumberInRange(sec.MOOD, 1, 10, null);
+      const fallbackObjective = checkin
+        ? `Engaged in text CBT session (${msgs.length} exchanges). Closing check-in: PHQ-4 ${checkin.phq4_total}/12 (${getPhq4Band(checkin.phq4_total)}; Anxiety ${checkin.anxiety_score}/6, Depression ${checkin.depression_score}/6), Daily Coping ${checkin.coping_score}/10.`
+        : `Engaged in structured text CBT session (${msgs.length} exchanges).`;
+
       const parsed = {
         raw_text: sec._raw,
         session_summary: sec.SUMMARY || sec.ASSESSMENT || sec._raw.slice(0, 320),
         mood_score: moodVal,
         soap_note: {
-          subjective: sec.SUBJECTIVE || "",
-          objective: sec.OBJECTIVE || "",
+          subjective: sec.SUBJECTIVE || sec.SUMMARY || "",
+          objective: sec.OBJECTIVE || fallbackObjective,
           assessment: sec.ASSESSMENT || sec.SUMMARY || sec._raw,
-          plan: sec.PLAN || ""
+          plan: sec.PLAN || "Continue structured CBT exploration and review between-session practice at the next scheduled appointment."
         },
         cognitive_distortions: splitPlainList(sec.DISTORTIONS),
         triggers: splitPlainList(sec.TRIGGERS),
@@ -2100,7 +2182,7 @@ RISK_FLAGS:
       return parsed;
     }
 
-    async function runCarePlanSynthesis(latestInterpretation, checkin) {
+    async function runCarePlanSynthesis(latestInterpretation, checkin = null) {
       const pastSummaries = state.sessionsHistory.slice(0, 6).map((s, idx) => {
         const num = state.sessionsHistory.length - idx;
         return `Session ${num} (${s.dateLabel || ""}) [Mood ${s.interpretation?.mood_score ?? "N/A"}/10]: ${s.interpretation?.session_summary || ""}`;
@@ -2115,6 +2197,7 @@ RISK_FLAGS:
       const systemPrompt = `You are a longitudinal CBT clinical supervisor.
 Review the patient's medical chart, ALL-TIME symptom & coping trajectory (PHQ-4 + Daily Coping across every session), prior Care Plan, recent session summaries, and today's clinical note.
 Explicitly watch for long-term improvement, plateaus, or gradual relapse in the PHQ-4 and Coping trajectory.
+Even after Session 1, formulate 1–3 tentative **Working Diagnostic Hypotheses** (marked as Initial/Low or Moderate confidence, along with open questions or medical rule-outs to test in upcoming sessions) rather than leaving DIAGNOSES blank.
 Write an updated longitudinal Care Plan and a concise Next Session Brief for the therapist.
 Do NOT output JSON or code blocks. Use these exact plain-text headers:
 
@@ -2122,10 +2205,10 @@ FORMULATION:
 (3-5 sentence longitudinal CBT conceptualization integrating medical/biological factors, recurring patterns, and multi-session symptom trajectory)
 
 DIAGNOSES:
-(Bullet list of working diagnostic hypotheses — include confidence level and open questions/rule-outs for each)
+(Bullet list of 1-3 working diagnostic hypotheses formatted as: Pattern Name (Initial/Low/Moderate/High confidence) — brief evidence & open questions/rule-outs)
 
 GOALS:
-(Bullet list of measurable CBT goals and the specific CBT intervention for each)
+(Bullet list of measurable CBT goals formatted as: Goal — specific CBT intervention)
 
 HOMEWORK_TITLE:
 (Short 3-6 word title for between-session practice)
@@ -2149,26 +2232,46 @@ CADENCE_NOTE:
           { role: "user", content: userPrompt }
         ],
         temperature: 0.3,
-        maxTokens: 2000
+        maxTokens: 2200
       });
 
       const sec = parsePlainTextSections(raw, [
-        "FORMULATION", "DIAGNOSES", "GOALS",
-        "HOMEWORK_TITLE", "HOMEWORK_INSTRUCTIONS",
-        "NEXT_SESSION_BRIEF", "CADENCE_NOTE"
+        { key: "FORMULATION", aliases: ["CLINICAL FORMULATION", "CASE FORMULATION", "CONCEPTUALIZATION"] },
+        { key: "DIAGNOSES", aliases: ["WORKING DIAGNOSES", "WORKING DIAGNOSTIC HYPOTHESES", "DIAGNOSTIC HYPOTHESES", "DIAGNOSIS", "WORKING HYPOTHESES", "DIAGNOSTIC IMPRESSIONS"] },
+        { key: "GOALS", aliases: ["TREATMENT GOALS", "CBT GOALS", "GOALS AND INTERVENTIONS", "TREATMENT GOALS AND CBT INTERVENTIONS"] },
+        { key: "HOMEWORK_TITLE", aliases: ["HOMEWORK", "BETWEEN SESSION PRACTICE TITLE", "PRACTICE TITLE"] },
+        { key: "HOMEWORK_INSTRUCTIONS", aliases: ["BETWEEN SESSION PRACTICE", "HOMEWORK DETAILS", "PRACTICE INSTRUCTIONS"] },
+        { key: "NEXT_SESSION_BRIEF", aliases: ["SESSION BRIEF", "NEXT SESSION", "THERAPIST BRIEF"] },
+        { key: "CADENCE_NOTE", aliases: ["CADENCE", "SCHEDULING NOTE", "RECOMMENDED CADENCE"] }
       ]);
 
-      const diagnosesList = splitPlainList(sec.DIAGNOSES).map((line) => ({
-        label: line.split(/[:—-]/)[0].trim() || "Working Hypothesis",
-        confidence: /high/i.test(line) ? "High" : /low/i.test(line) ? "Low" : "Working",
-        rationale: line,
-        differentials_or_open_questions: ""
-      }));
-
-      const goalsList = splitPlainList(sec.GOALS).map((line) => {
-        const parts = line.split(/\s*[—–-]\s*/);
+      const diagSource = sec.DIAGNOSES || latestInterpretation.working_hypotheses_text || "";
+      const diagnosesList = splitPlainList(diagSource, false).map((line) => {
+        const cleanLine = line.replace(/\*\*/g, "").trim();
+        const splitMatch = cleanLine.match(/^([^:—–-]+?)(?:\s*\(([^)]+)\))?\s*[:—–-]\s*(.+)$/);
+        const label = splitMatch ? splitMatch[1].trim() : (cleanLine.split(/[:—–-]/)[0].trim() || "Working Hypothesis");
+        const confText = splitMatch?.[2] || cleanLine;
+        const confidence = /high/i.test(confText)
+          ? "High"
+          : /moderate|medium/i.test(confText)
+            ? "Moderate"
+            : /low|initial|tentative/i.test(confText)
+              ? "Initial / Low"
+              : "Working";
+        const rationale = splitMatch ? splitMatch[3].trim() : cleanLine;
         return {
-          goal: parts[0]?.trim() || line,
+          label,
+          confidence,
+          rationale,
+          differentials_or_open_questions: ""
+        };
+      });
+
+      const goalsList = splitPlainList(sec.GOALS, false).map((line) => {
+        const cleanLine = line.replace(/\*\*/g, "").trim();
+        const parts = cleanLine.split(/\s*[—–-]\s*|\s*:\s*/);
+        return {
+          goal: parts[0]?.trim() || cleanLine,
           intervention: parts.slice(1).join(" — ").trim(),
           status: "Active"
         };
@@ -2223,7 +2326,10 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
         });
 
         const sec = parsePlainTextSections(raw, [
-          "SESSIONS_PER_WEEK", "DURATION_MINUTES", "MIN_DAYS_BETWEEN", "RATIONALE"
+          { key: "SESSIONS_PER_WEEK", aliases: ["FREQUENCY", "SESSIONS PER WEEK"] },
+          { key: "DURATION_MINUTES", aliases: ["SESSION LENGTH", "TARGET LENGTH", "DURATION"] },
+          { key: "MIN_DAYS_BETWEEN", aliases: ["MIN SPACING", "MINIMUM DAYS BETWEEN", "SPACING"] },
+          { key: "RATIONALE", aliases: ["REASON", "CLINICAL RATIONALE"] }
         ]);
 
         const spw = extractNumberInRange(sec.SESSIONS_PER_WEEK, 0.5, 3, 1);
@@ -2278,7 +2384,6 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
         badgeText = `${badgeText} · ${trendStr}`;
       }
 
-      // SVG coordinate system
       const W = 560;
       const H = 176;
       const padL = 32;
@@ -2314,7 +2419,6 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
         </circle>
       `).join("");
 
-      // Show up to 6 evenly spaced X-axis labels
       const labelIndices = points.length <= 6
         ? points.map((_, i) => i)
         : [0, Math.round((points.length - 1) * 0.25), Math.round((points.length - 1) * 0.5), Math.round((points.length - 1) * 0.75), points.length - 1];
@@ -2781,6 +2885,14 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
               <span class="text-xs text-muted shrink-0 hidden group-open:inline">Close</span>
             </summary>
             <div class="px-5 pb-5 pt-3 border-t border-hairline bg-paper/40 space-y-4 text-xs">
+              <div class="diag-only-reanalyze ${state.diagnosticsEnabled ? "flex" : "hidden"} items-center justify-between gap-3 p-3 rounded-xl bg-surface border border-sage-border/80">
+                <div class="text-[11px] text-muted">
+                  <strong class="text-ink font-medium">Diagnostics:</strong> Re-run SOAP note &amp; Care Plan synthesis on this transcript and save updates.
+                </div>
+                <button type="button" data-reanalyze-idx="${idx}" class="reanalyze-session-btn shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg bg-sage text-white hover:bg-sage-hover transition-colors">
+                  Reanalyze
+                </button>
+              </div>
               ${distortions ? `<div class="flex flex-wrap gap-1.5">${distortions}</div>` : ""}
               ${soap ? `
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2800,6 +2912,13 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
           </details>
         `;
       }).join("");
+
+      els.historyList.querySelectorAll(".reanalyze-session-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.dataset.reanalyzeIdx);
+          reanalyzePastSession(idx);
+        });
+      });
     }
 
     function renderMyChart() {
@@ -2976,6 +3095,11 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
       els.diagnosticsToggleKnob.classList.toggle("translate-x-5", on);
       els.diagnosticsToggleKnob.classList.toggle("translate-x-0", !on);
 
+      document.querySelectorAll(".diag-only-reanalyze").forEach((bar) => {
+        bar.classList.toggle("hidden", !on);
+        bar.classList.toggle("flex", on);
+      });
+
       if (!on && !els.views.engines.classList.contains("hidden")) {
         switchTab("settings");
       }
@@ -2996,6 +3120,7 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
       if (tabName === "schedule") renderScheduleView();
       if (tabName === "session") updateSessionGateUI();
       if (tabName === "careplan") renderCarePlan();
+      if (tabName === "history") renderHistory();
       if (tabName === "settings") renderMyChart();
     }
 
@@ -3022,7 +3147,7 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
     });
 
     // =========================================================================
-    // 15. LIVE SESSION MESSAGING & POST-SESSION SAVING WORKFLOW
+    // 15. LIVE SESSION MESSAGING, SAVING & DIAGNOSTICS REANALYZE WORKFLOW
     // =========================================================================
     async function sendChatMessage(textOverride = null) {
       const text = (textOverride ?? els.chatInput.value).trim();
@@ -3108,6 +3233,7 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
     }
 
     async function runPostSessionSave(checkinPayload) {
+      els.saveModalEyebrow.textContent = "Closing Appointment";
       els.saveModalTitle.textContent = "Saving Your Session";
       els.saveModalError.classList.add("hidden");
       els.saveModalActions.classList.add("hidden");
@@ -3159,6 +3285,52 @@ RATIONALE: (1-2 calm sentences explaining the recommended schedule to the patien
       } catch (err) {
         logTelemetry(`Post-session error: ${err.message}`, "error");
         els.saveModalTitle.textContent = "Could Not Save Session";
+        els.saveModalError.textContent = err.message;
+        els.saveModalError.classList.remove("hidden");
+        els.saveViewPlanBtn.classList.add("hidden");
+        els.saveModalActions.classList.remove("hidden");
+      }
+    }
+
+    async function reanalyzePastSession(idx) {
+      const session = state.sessionsHistory[idx];
+      if (!session || !Array.isArray(session.transcript) || !session.transcript.length) {
+        showToast("No saved transcript found for this session.");
+        return;
+      }
+
+      const sessionNum = state.sessionsHistory.length - idx;
+      els.saveModalEyebrow.textContent = "Diagnostics · Reanalysis";
+      els.saveModalTitle.textContent = `Reanalyzing Session ${sessionNum}`;
+      els.saveModalError.classList.add("hidden");
+      els.saveModalActions.classList.add("hidden");
+      els.saveViewPlanBtn.classList.remove("hidden");
+      els.saveSessionModal.classList.remove("hidden");
+      setSaveProgress(22, "Re-running SOAP clinical note…", `Analyzing saved transcript from Session ${sessionNum}…`);
+
+      try {
+        logTelemetry(`Diagnostics: Reanalyzing Session ${sessionNum} (${session.dateLabel || ""})…`);
+        const newInterpretation = await runSessionInterpreter(session.checkin || null, session.transcript);
+        session.interpretation = newInterpretation;
+        await updateSessionRecord(session);
+
+        setSaveProgress(64, "Updating longitudinal Care Plan…", "Refreshing working hypotheses, goals, and next-session brief…");
+        const updatedPlan = await runCarePlanSynthesis(newInterpretation, null);
+        state.carePlan = updatedPlan;
+        await saveProfileDoc("care_plan", updatedPlan, "careplan");
+
+        setSaveProgress(100, "Saved", `Session ${sessionNum} SOAP note and Care Plan have been updated and saved.`);
+        els.saveModalTitle.textContent = `Session ${sessionNum} Updated`;
+
+        renderHistory();
+        renderCarePlan();
+        renderMyChart();
+        updateSessionHeader();
+        els.saveModalActions.classList.remove("hidden");
+        logTelemetry(`Diagnostics: Session ${sessionNum} reanalyzed and saved.`, "success");
+      } catch (err) {
+        logTelemetry(`Reanalysis error (Session ${sessionNum}): ${err.message}`, "error");
+        els.saveModalTitle.textContent = "Reanalysis Failed";
         els.saveModalError.textContent = err.message;
         els.saveModalError.classList.remove("hidden");
         els.saveViewPlanBtn.classList.add("hidden");
@@ -3354,8 +3526,15 @@ LIFESTYLE:
         });
 
         const sec = parsePlainTextSections(raw, [
-          "SUMMARY", "MEDICAL_CONDITIONS", "PSYCHIATRIC_HISTORY", "ALLERGIES",
-          "MEDICATIONS", "RECENT_LABS", "SLEEP", "CAFFEINE_SUBSTANCES", "LIFESTYLE"
+          { key: "SUMMARY", aliases: ["INTAKE SUMMARY", "OVERVIEW"] },
+          { key: "MEDICAL_CONDITIONS", aliases: ["MEDICAL HISTORY", "PAST MEDICAL HISTORY", "CONDITIONS"] },
+          { key: "PSYCHIATRIC_HISTORY", aliases: ["PSYCHIATRIC", "MENTAL HEALTH HISTORY"] },
+          { key: "ALLERGIES", aliases: ["DRUG ALLERGIES"] },
+          { key: "MEDICATIONS", aliases: ["CURRENT MEDICATIONS", "MEDS"] },
+          { key: "RECENT_LABS", aliases: ["LABS", "LAB WORK", "BLOOD WORK"] },
+          { key: "SLEEP", aliases: ["SLEEP BASELINE"] },
+          { key: "CAFFEINE_SUBSTANCES", aliases: ["CAFFEINE", "SUBSTANCES", "CAFFEINE AND SUBSTANCES"] },
+          { key: "LIFESTYLE", aliases: ["LIFESTYLE BASELINE"] }
         ]);
 
         const medicalConditions = splitPlainList(sec.MEDICAL_CONDITIONS).map((line) => {
