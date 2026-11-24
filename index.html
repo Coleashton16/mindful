@@ -1,1 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#FAF9F6" />
+  <meta name="description" content="Mindful — Free, structured Cognitive Behavioral Therapy (CBT) with scheduled 45-minute sessions, personalized care plans, and easy-to-follow progress tracking." />
+  <title>Mindful — Structured CBT</title>
 
+  <!-- Typography: Inter + Newsreader (Matches Mindful App Identity) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'serif']
+          },
+          colors: {
+            paper: '#FAF9F6',
+            surface: '#FFFFFF',
+            stone: '#F2F0EB',
+            ink: '#1F2421',
+            muted: '#636B66',
+            hairline: '#E6E3DC',
+            sage: '#3D6652',
+            'sage-hover': '#2F5141',
+            'sage-light': '#EEF4F0',
+            'sage-border': '#CFE0D5',
+            'amber-bg': '#FDF6E9',
+            'amber-ink': '#8A5A12',
+            'amber-border': '#F0D9B1'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-paper text-ink font-sans antialiased selection:bg-sage-light selection:text-sage min-h-screen flex flex-col">
+
+  <!-- ======================================================================= -->
+  <!-- NAVIGATION HEADER                                                       -->
+  <!-- Update the "app.html" hrefs below to match your hosted app filename     -->
+  <!-- ======================================================================= -->
+  <header class="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b border-hairline">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="#home" data-nav="home" class="flex items-center gap-2.5 group">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-sage-light text-sage border border-sage-border group-hover:bg-sage group-hover:text-white transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+          </svg>
+        </span>
+        <span class="font-serif text-xl tracking-tight text-ink">Mindful</span>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#home" data-nav="home" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors">Overview</a>
+        <a href="#how-it-works" data-scroll="section-how-it-works" class="scroll-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">How It Works</a>
+        <a href="#architecture" data-scroll="section-architecture" class="scroll-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">What's Inside</a>
+        <a href="#founder" data-nav="founder" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">About the Founder</a>
+      </nav>
+
+      <!-- Action Buttons + Mobile Menu Trigger -->
+      <div class="flex items-center gap-2">
+        <a href="/mindful/beta.html" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-xs font-medium text-ink transition-colors">
+          Sign In
+        </a>
+        <a href="/mindful/beta.html" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
+          Get Started
+        </a>
+        <button id="mobile-menu-btn" type="button" aria-label="Toggle navigation menu" class="md:hidden p-2 rounded-xl border border-hairline bg-surface text-muted hover:text-ink transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-hairline bg-surface px-4 py-3 space-y-1">
+      <a href="#home" data-nav="home" class="block px-3 py-2 rounded-xl text-xs font-medium text-ink hover:bg-stone/60">Overview</a>
+      <a href="#how-it-works" data-scroll="section-how-it-works" class="scroll-link block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">How It Works</a>
+      <a href="#architecture" data-scroll="section-architecture" class="scroll-link block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">What's Inside</a>
+      <a href="#founder" data-nav="founder" class="block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">About the Founder</a>
+      <div class="pt-2 mt-2 border-t border-hairline flex items-center gap-2">
+        <a href="app.html" class="flex-1 text-center px-3 py-2 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink">Sign In</a>
+        <a href="app.html" class="flex-1 text-center px-3 py-2 rounded-xl bg-sage text-white text-xs font-medium">Create Account</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================================= -->
+  <!-- VIEW 1: HOMEPAGE                                                        -->
+  <!-- ======================================================================= -->
+  <main id="view-home" class="flex-1">
+    <!-- Hero Section -->
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-14 pb-16 sm:pt-20 sm:pb-24">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-sage"></span>
+            Free, Structured Therapy Support
+          </div>
+          <h1 class="font-serif text-4xl sm:text-5xl text-ink tracking-tight leading-[1.12]">
+            Thoughtful therapy with real structure, not endless chat.
+          </h1>
+          <p class="text-base text-muted leading-relaxed max-w-xl">
+            Mindful brings the proven structure of Cognitive Behavioral Therapy (CBT) into a calm, private space—at zero cost. Enjoy scheduled 45-minute sessions, personalized goals, simple mood check-ins, and clear summaries you can keep.
+          </p>
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <a href="app.html" class="px-6 py-3 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors shadow-sm">
+              Create Free Account
+            </a>
+            <a href="app.html" class="px-5 py-3 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-sm font-medium text-ink transition-colors">
+              Sign In
+            </a>
+          </div>
+          <div class="pt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              Scheduled 45-minute sessions
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              Considers your whole health picture
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              100% free &amp; printable summaries
+            </span>
+          </div>
+        </div>
+
+        <!-- Static Session Preview Card -->
+        <div class="lg:col-span-5">
+          <div class="rounded-2xl bg-surface border border-hairline shadow-sm overflow-hidden">
+            <div class="px-4 py-3 border-b border-hairline bg-paper/70 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-sage"></span>
+                <span class="text-xs font-medium text-ink">Weekly Session · 18 / 45 min</span>
+              </div>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">In Session</span>
+            </div>
+            <div class="p-4 space-y-3 text-xs leading-relaxed">
+              <div class="flex justify-start">
+                <div class="max-w-[88%] rounded-2xl rounded-bl-sm bg-paper border border-hairline px-3.5 py-2.5 text-ink">
+                  You mentioned last week that Sunday evenings tend to trigger racing thoughts about the week ahead. How did that feel this past Sunday?
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <div class="max-w-[88%] rounded-2xl rounded-br-sm bg-sage text-white px-3.5 py-2.5">
+                  Better than before. I caught myself spiraling about Monday's meeting and tried the 3-minute breathing reset we planned.
+                </div>
+              </div>
+              <div class="pt-2 border-t border-hairline grid grid-cols-2 gap-2">
+                <div class="rounded-xl bg-paper border border-hairline p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-muted">Weekly Stress</div>
+                  <div class="text-sm font-semibold text-ink mt-0.5">Lower <span class="text-[11px] font-normal text-sage">↓ Improving</span></div>
+                </div>
+                <div class="rounded-xl bg-paper border border-hairline p-2.5">
+                  <div class="text-[10px] uppercase tracking-wider text-muted">Daily Coping</div>
+                  <div class="text-sm font-semibold text-sage mt-0.5">8 / 10</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Pillars -->
+    <section class="border-y border-hairline bg-surface">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+        <div class="max-w-2xl mb-10">
+          <h2 class="font-serif text-2xl sm:text-3xl text-ink">Why structured sessions work better than 24/7 AI chat</h2>
+          <p class="text-sm text-muted mt-2 leading-relaxed">
+            Open-ended chatbots can feel repetitive and lose track of your story. Mindful is designed around healthy boundaries and steady, real-world progress.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-6 rounded-2xl bg-paper border border-hairline space-y-2.5">
+            <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3 class="font-serif text-lg text-ink">A Healthy Rhythm</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Sessions happen during scheduled appointment times so you have space in daily life to practice what you've learned—with an urgent check-in option if a tough moment hits unexpectedly.
+            </p>
+          </div>
+          <div class="p-6 rounded-2xl bg-paper border border-hairline space-y-2.5">
+            <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <h3 class="font-serif text-lg text-ink">Sees the Whole You</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Your physical health affects how you feel. A quick yearly check-in lets you note sleep habits, medications, and optional health records so your sessions stay grounded in your real life.
+            </p>
+          </div>
+          <div class="p-6 rounded-2xl bg-paper border border-hairline space-y-2.5">
+            <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            </div>
+            <h3 class="font-serif text-lg text-ink">Clear Progress Over Time</h3>
+            <p class="text-xs text-muted leading-relaxed">
+              Every session wraps up with an easy-to-read summary, a practical weekly exercise, and a clean printable PDF you can keep for yourself or share with your doctor anytime.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="section-how-it-works" class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 scroll-mt-16">
+      <div class="max-w-2xl mb-10">
+        <div class="text-xs font-semibold uppercase tracking-wider text-sage mb-2">How It Works</div>
+        <h2 class="font-serif text-2xl sm:text-3xl text-ink">Simple, supportive steps from day one</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
+          <div class="text-xs font-mono text-sage font-semibold">01</div>
+          <h3 class="text-sm font-semibold text-ink">Quick Health Profile</h3>
+          <p class="text-xs text-muted leading-relaxed">Start with a friendly conversation about your sleep, everyday habits, medications, or optional health records so Mindful knows your full story.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
+          <div class="text-xs font-mono text-sage font-semibold">02</div>
+          <h3 class="text-sm font-semibold text-ink">Book Your Sessions</h3>
+          <p class="text-xs text-muted leading-relaxed">Pick a 45-minute appointment time that fits your week. Your private session room opens 10 minutes before you begin.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
+          <div class="text-xs font-mono text-sage font-semibold">03</div>
+          <h3 class="text-sm font-semibold text-ink">Check-In &amp; Recap</h3>
+          <p class="text-xs text-muted leading-relaxed">Finish each session with a 30-second mood check-in while Mindful saves a clear, easy-to-read summary of what you covered.</p>
+        </div>
+        <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
+          <div class="text-xs font-mono text-sage font-semibold">04</div>
+          <h3 class="text-sm font-semibold text-ink">Personal Care Plan</h3>
+          <p class="text-xs text-muted leading-relaxed">Watch your progress over time, review your personal goals, and try one small, realistic practice between appointments.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multi-Engine Overview (Plain Language) -->
+    <section id="section-architecture" class="border-t border-hairline bg-surface scroll-mt-16">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div class="max-w-2xl mb-10">
+          <div class="text-xs font-semibold uppercase tracking-wider text-sage mb-2">What's Inside</div>
+          <h2 class="font-serif text-2xl sm:text-3xl text-ink">Six specialized AI systems working together for you</h2>
+          <p class="text-sm text-muted mt-2 leading-relaxed">
+            Instead of relying on one generic chatbot, Mindful uses six focused systems behind the scenes to keep your support thoughtful, consistent, and organized.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">01 · CONVERSATION</div>
+            <h3 class="text-sm font-semibold text-ink">Your Guided Therapist</h3>
+            <p class="text-xs text-muted leading-relaxed">Leads calm, paced 45-minute sessions tailored to your personal goals, story, and current week.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">02 · RECAP</div>
+            <h3 class="text-sm font-semibold text-ink">Session Summaries</h3>
+            <p class="text-xs text-muted leading-relaxed">Turns every session into a clear, organized note so you never have to start from scratch next time.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">03 · PROGRESS</div>
+            <h3 class="text-sm font-semibold text-ink">Care Plan &amp; Goals</h3>
+            <p class="text-xs text-muted leading-relaxed">Tracks how you're feeling over time, updates your goals, and suggests one simple exercise for the week ahead.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">04 · SUPPORT</div>
+            <h3 class="text-sm font-semibold text-ink">Health Profile &amp; Urgent Help</h3>
+            <p class="text-xs text-muted leading-relaxed">Walks you through your yearly health check-in and helps unlock an urgent session if you're having an especially hard day.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">05 · SCHEDULING</div>
+            <h3 class="text-sm font-semibold text-ink">Smart Pacing</h3>
+            <p class="text-xs text-muted leading-relaxed">Recommends a healthy session rhythm—offering extra support when things feel heavy and spacing out visits as you feel stronger.</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
+            <div class="text-[11px] font-mono text-sage">06 · QUALITY</div>
+            <h3 class="text-sm font-semibold text-ink">Ongoing Care Review</h3>
+            <p class="text-xs text-muted leading-relaxed">Reviews completed sessions behind the scenes to keep conversations natural, respectful, and consistently helpful.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Founder Spotlight + Safety Notice -->
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 py-16 space-y-8">
+      <div class="rounded-2xl bg-surface border border-hairline p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-sage-light border border-sage-border overflow-hidden shrink-0 flex items-center justify-center font-serif text-xl text-sage">
+            <img src="profile.jpg" alt="Cole Ashton" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" />
+            <span class="hidden">CA</span>
+          </div>
+          <div>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-sage">Built by Cole Ashton, RN</div>
+            <h3 class="font-serif text-xl text-ink mt-0.5">Closing the mental health accessibility gap</h3>
+            <p class="text-xs text-muted mt-1 max-w-lg leading-relaxed">
+              Registered Nurse and founder of Allied Tech Services &amp; AlliedRNPrep—building structured, zero-cost AI therapeutic support at the intersection of healthcare and software.
+            </p>
+          </div>
+        </div>
+        <a href="#founder" data-nav="founder" class="shrink-0 px-4 py-2.5 rounded-xl border border-hairline bg-paper hover:bg-stone text-xs font-medium text-ink transition-colors">
+          About the Founder →
+        </a>
+      </div>
+
+      <div class="rounded-2xl bg-amber-bg/70 border border-amber-border p-5 text-xs text-amber-ink leading-relaxed">
+        <strong>Important Safety Note:</strong> Mindful is an AI-powered support tool built to help with reflection, everyday coping skills, and personal wellness tracking. It is not a replacement for a licensed doctor, therapist, or emergency care. If you are experiencing a crisis, please call or text <strong>988</strong> (US/Canada) or contact your local emergency services immediately.
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- VIEW 2: ABOUT THE FOUNDER (COLE ASHTON)                                 -->
+  <!-- ======================================================================= -->
+  <main id="view-founder" class="hidden flex-1">
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-12">
+      <a href="#home" data-nav="home" class="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink transition-colors">
+        ← Back to Overview
+      </a>
+
+      <!-- Founder Hero Card -->
+      <div class="rounded-2xl bg-surface border border-hairline p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div class="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl bg-sage-light border border-sage-border overflow-hidden shrink-0 flex items-center justify-center font-serif text-4xl text-sage shadow-sm">
+          <img src="profile.jpg" alt="Cole Ashton — Founder of Mindful" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" />
+          <span class="hidden">CA</span>
+        </div>
+        <div class="space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium">
+            Registered Nurse · Founder &amp; Architect
+          </div>
+          <h1 class="font-serif text-3xl sm:text-4xl text-ink tracking-tight">Cole Ashton</h1>
+          <p class="text-sm text-muted leading-relaxed">
+            Registered Nurse and founder of <strong class="text-ink font-medium">Allied Tech Services</strong> and <strong class="text-ink font-medium">AlliedRNPrep</strong>. Building practical, clinically grounded software at the intersection of healthcare and modern AI.
+          </p>
+        </div>
+      </div>
+
+      <!-- Story & Technical History -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+        <div class="md:col-span-7 space-y-6">
+          <div class="space-y-3">
+            <h2 class="font-serif text-2xl text-ink">About the Creator</h2>
+            <p class="text-sm text-ink/85 leading-relaxed">
+              I'm Cole Ashton, a Registered Nurse and founder of Allied Tech Services and AlliedRNPrep. I originally created Allied Technologies during my nursing school college career, and it has since flourished into a suite of multiple platforms built at the intersection of healthcare and software.
+            </p>
+            <p class="text-sm text-ink/85 leading-relaxed">
+              Over the years, I've designed and launched a portfolio of practical applications built for the people who keep healthcare moving—including a comprehensive nursing study platform powered by a progressive CAT NCLEX engine, a bedside nurse aid for managing shift workflows, and a schedule-matching app built to keep busy friends connected.
+            </p>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <h2 class="font-serif text-2xl text-ink">Why I Built Mindful</h2>
+            <p class="text-sm text-ink/85 leading-relaxed">
+              Mindful is my most ambitious project yet. Powered by a custom multi-engine AI system, Mindful was built from the ground up to deliver responsive, structured therapeutic support at zero cost.
+            </p>
+            <p class="text-sm text-ink/85 leading-relaxed">
+              Mental health care shouldn't be a luxury reserved for those who can afford out-of-pocket sessions. My goal with Mindful is simple: harness modern AI to close the accessibility gap and put meaningful, clinically structured support within everyone's reach.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Column: Portfolio & CTA -->
+        <div class="md:col-span-5 space-y-4">
+          <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3.5">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">Allied Technologies Portfolio</h3>
+            <ul class="space-y-3 text-xs text-ink/85 leading-relaxed">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
+                <span><strong class="text-ink">Mindful:</strong> Custom multi-engine AI platform delivering structured therapy sessions, clear progress tracking, and personalized care plans at zero cost.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
+                <span><strong class="text-ink">AlliedRNPrep:</strong> Comprehensive nursing study platform powered by a progressive CAT NCLEX engine.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
+                <span><strong class="text-ink">Bedside Nurse Aid:</strong> Practical shift-workflow tool designed for nurses on the floor.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
+                <span><strong class="text-ink">Schedule-Matching App:</strong> Built to keep busy friends and shift workers connected across demanding schedules.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-sage-light/60 border border-sage-border space-y-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-sage">Zero-Cost Structured Care</h3>
+            <p class="text-xs text-ink/85 leading-relaxed">
+              Start with a quick getting-to-know-you check-in and book your first structured 45-minute session—completely free.
+            </p>
+            <div class="flex flex-col gap-2 pt-1">
+              <a href="app.html" class="w-full text-center py-2.5 px-4 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
+                Create Free Account
+              </a>
+              <a href="app.html" class="w-full text-center py-2.5 px-4 rounded-xl bg-surface border border-sage-border hover:bg-paper text-ink text-xs font-medium transition-colors">
+                Sign In
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- FOOTER                                                                  -->
+  <!-- ======================================================================= -->
+  <footer class="border-t border-hairline bg-surface/60 mt-auto">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-sage"></span>
+        <span class="font-serif text-sm text-ink">Mindful</span>
+        <span>· Structured CBT by Cole Ashton</span>
+      </div>
+      <div class="flex items-center gap-5">
+        <a href="#home" data-nav="home" class="hover:text-ink transition-colors">Overview</a>
+        <a href="#founder" data-nav="founder" class="hover:text-ink transition-colors">About the Founder</a>
+        <a href="app.html" class="hover:text-ink transition-colors">Sign In</a>
+        <a href="app.html" class="hover:text-ink transition-colors">Get Started</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================================================================= -->
+  <!-- LIGHTWEIGHT VIEW ROUTER (HOME <-> ABOUT THE FOUNDER)                    -->
+  <!-- ======================================================================= -->
+  <script>
+    (function () {
+      const viewHome = document.getElementById("view-home");
+      const viewFounder = document.getElementById("view-founder");
+      const navLinks = document.querySelectorAll(".nav-link");
+      const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      function showView(viewName, scrollTargetId = null) {
+        const isFounder = viewName === "founder";
+        viewHome.classList.toggle("hidden", isFounder);
+        viewFounder.classList.toggle("hidden", !isFounder);
+        mobileMenu.classList.add("hidden");
+
+        navLinks.forEach((link) => {
+          const active = link.dataset.nav === (isFounder ? "founder" : "home");
+          link.className = active
+            ? "nav-link px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors"
+            : "nav-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors";
+        });
+
+        if (!isFounder && scrollTargetId) {
+          const target = document.getElementById(scrollTargetId);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+          }
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // View switcher links
+      document.querySelectorAll("[data-nav]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const targetView = el.dataset.nav;
+          history.replaceState(null, "", targetView === "founder" ? "#founder" : "#home");
+          showView(targetView);
+        });
+      });
+
+      // Smooth-scroll section links on the homepage
+      document.querySelectorAll("[data-scroll]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const sectionId = el.dataset.scroll;
+          history.replaceState(null, "", "#home");
+          showView("home", sectionId);
+        });
+      });
+
+      // Mobile menu toggle
+      mobileMenuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
+      // Support direct links like homepage.html#founder
+      if (window.location.hash === "#founder") {
+        showView("founder");
+      }
+    })();
+  </script>
+</body>
+</html>
