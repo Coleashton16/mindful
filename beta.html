@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#FAF9F6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -57,7 +57,7 @@
 <body class="bg-paper text-ink font-sans antialiased selection:bg-sage-light selection:text-sage min-h-screen flex flex-col">
 
   <!-- ======================================================================= -->
-  <!-- AUTH GATE (MANDATORY LOGIN: GOOGLE + EMAIL/PASSWORD + SIGN-UP PROFILE)  -->
+  <!-- AUTH GATE (GOOGLE + EMAIL/PASSWORD + SIGN-UP PROFILE)                   -->
   <!-- ======================================================================= -->
   <div id="auth-gate" class="fixed inset-0 z-50 bg-paper flex items-center justify-center p-4 overflow-y-auto">
     <div class="w-full max-w-md bg-surface border border-hairline rounded-2xl p-6 sm:p-8 shadow-sm my-auto">
@@ -158,6 +158,9 @@
         <p class="text-xs text-muted">Medical history, medications, baselines &amp; recent labs</p>
       </div>
       <div class="flex items-center gap-2">
+        <button id="intake-cancel-btn" type="button" class="hidden px-3 py-2 rounded-xl border border-hairline text-xs text-muted hover:text-ink transition-colors">
+          Back to Chart
+        </button>
         <button id="intake-complete-btn" type="button" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
           Complete &amp; Save to My Chart
         </button>
@@ -186,7 +189,7 @@
             </svg>
             <input id="intake-file-input" type="file" accept="image/*,.pdf,.txt,.csv" class="hidden" />
           </label>
-          <textarea id="intake-input" rows="1" placeholder="Share your medical history, medications, or upload recent labs…" class="flex-1 resize-none px-4 py-2.5 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-36"></textarea>
+          <textarea id="intake-input" rows="1" placeholder="Share your medical history, medications, or upload recent labs…" class="flex-1 resize-none px-4 py-2.5 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-36 overflow-y-auto"></textarea>
           <button id="intake-send-btn" type="submit" class="shrink-0 px-4 py-2.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors">
             Send
           </button>
@@ -212,7 +215,6 @@
           <button data-tab="careplan" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Care Plan</button>
           <button data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">History</button>
           <button data-tab="settings" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Settings</button>
-          <!-- Strictly hidden unless Diagnostics Mode is ON -->
           <button id="nav-tab-engines" data-tab="engines" class="nav-tab hidden px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Engines</button>
         </nav>
       </div>
@@ -302,7 +304,7 @@
                   </svg>
                   <input id="chat-image-input" type="file" accept="image/*" class="hidden" />
                 </label>
-                <textarea id="chat-input" rows="1" placeholder="Share what's on your mind…" class="flex-1 resize-none px-4 py-2.5 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-36"></textarea>
+                <textarea id="chat-input" rows="1" placeholder="Share what's on your mind…" class="flex-1 resize-none px-4 py-2.5 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-36 overflow-y-auto"></textarea>
                 <button id="chat-send-btn" type="submit" class="shrink-0 px-4 py-2.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors">
                   Send
                 </button>
@@ -491,7 +493,7 @@
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
               </svg>
-              Export
+              Export PDF
             </button>
           </div>
         </div>
@@ -669,7 +671,7 @@
         <button id="triage-unlock-btn" type="button" class="hidden px-4 py-1.5 rounded-xl bg-sage text-white text-xs font-medium">Enter Urgent Session</button>
       </div>
       <form id="triage-form" class="p-3.5 border-t border-hairline bg-surface flex items-end gap-2">
-        <textarea id="triage-input" rows="1" placeholder="Describe what is happening right now…" class="flex-1 resize-none px-3.5 py-2 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-28"></textarea>
+        <textarea id="triage-input" rows="1" placeholder="Describe what is happening right now…" class="flex-1 resize-none px-3.5 py-2 rounded-xl bg-paper border border-hairline text-sm focus:outline-none focus:border-sage/60 max-h-28 overflow-y-auto"></textarea>
         <button id="triage-send-btn" type="submit" class="px-4 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium">Send</button>
       </form>
     </div>
@@ -930,12 +932,12 @@ UPDATED_PROMPT:
       activeTab: "session",
       lastSaveSucceeded: true,
       engines: {
-        conversation: { docId: "conversationengine",      label: "Engine 1 · Conversation",      role: "Real-time structured CBT therapist",                   api: "", slug: "", loaded: false, error: null },
-        interpreter:  { docId: "interpreterengine",       label: "Engine 2 · Interpreter",       role: "Post-session clinical SOAP scribe",                    api: "", slug: "", loaded: false, error: null },
-        careplan:     { docId: "diagnosiscareplanengine", label: "Engine 3 · Care Plan",         role: "Longitudinal diagnosis & care plan supervisor",        api: "", slug: "", loaded: false, error: null },
-        intake:       { docId: "intakeinterview",         label: "Engine 4 · Intake & Triage",   role: "Annual medical intake & urgent triage gatekeeper",     api: "", slug: "", loaded: false, error: null },
-        planning:     { docId: "planningengine",          label: "Engine 5 · Cadence Planner",   role: "Determines session frequency & duration boundaries",   api: "", slug: "", loaded: false, error: null },
-        qa:           { docId: "Qualityassurance",        label: "Engine 6 · Quality Assurance", role: "Auto-audits completed sessions & refines prompts",     api: "", slug: "", loaded: false, error: null }
+        conversation: { docId: "conversationengine",      label: "Engine 1 · Conversation",      role: "Real-time structured CBT therapist",                 api: "", slug: "", loaded: false, error: null },
+        interpreter:  { docId: "interpreterengine",       label: "Engine 2 · Interpreter",       role: "Post-session clinical SOAP scribe",                  api: "", slug: "", loaded: false, error: null },
+        careplan:     { docId: "diagnosiscareplanengine", label: "Engine 3 · Care Plan",         role: "Longitudinal diagnosis & care plan supervisor",      api: "", slug: "", loaded: false, error: null },
+        intake:       { docId: "intakeinterview",         label: "Engine 4 · Intake & Triage",   role: "Annual medical intake & urgent triage gatekeeper",   api: "", slug: "", loaded: false, error: null },
+        planning:     { docId: "planningengine",          label: "Engine 5 · Cadence Planner",   role: "Determines session frequency & duration boundaries", api: "", slug: "", loaded: false, error: null },
+        qa:           { docId: "Qualityassurance",        label: "Engine 6 · Quality Assurance", role: "Auto-audits completed sessions & refines prompts",   api: "", slug: "", loaded: false, error: null }
       },
       promptLibrary: { ...DEFAULT_PROMPTS },
       promptLibrarySource: "defaults",
@@ -954,7 +956,12 @@ UPDATED_PROMPT:
       intakeMessages: [],
       pendingIntakeFile: null,
       triageMessages: [],
-      isBusy: false,
+      busy: {
+        chat: false,
+        intake: false,
+        triage: false,
+        saving: false
+      },
       timerInterval: null,
       waitingRoomInterval: null
     };
@@ -981,179 +988,182 @@ UPDATED_PROMPT:
       state.intakeMessages = [];
       state.pendingIntakeFile = null;
       state.triageMessages = [];
-      state.isBusy = false;
+      state.busy = { chat: false, intake: false, triage: false, saving: false };
     }
 
     // =========================================================================
     // 4. DOM REFERENCES
     // =========================================================================
+    const $ = (id) => document.getElementById(id);
+
     const els = {
-      authGate: document.getElementById("auth-gate"),
-      authTabSignin: document.getElementById("auth-tab-signin"),
-      authTabSignup: document.getElementById("auth-tab-signup"),
-      googleSigninBtn: document.getElementById("google-signin-btn"),
-      authForm: document.getElementById("auth-form"),
-      signupExtraFields: document.getElementById("signup-extra-fields"),
-      signupPhotoInput: document.getElementById("signup-photo-input"),
-      signupPhotoPreview: document.getElementById("signup-photo-preview"),
-      signupName: document.getElementById("signup-name"),
-      signupGender: document.getElementById("signup-gender"),
-      authEmail: document.getElementById("auth-email"),
-      authPassword: document.getElementById("auth-password"),
-      authError: document.getElementById("auth-error"),
-      authSubmitBtn: document.getElementById("auth-submit-btn"),
+      authGate: $("auth-gate"),
+      authTabSignin: $("auth-tab-signin"),
+      authTabSignup: $("auth-tab-signup"),
+      googleSigninBtn: $("google-signin-btn"),
+      authForm: $("auth-form"),
+      signupExtraFields: $("signup-extra-fields"),
+      signupPhotoInput: $("signup-photo-input"),
+      signupPhotoPreview: $("signup-photo-preview"),
+      signupName: $("signup-name"),
+      signupGender: $("signup-gender"),
+      authEmail: $("auth-email"),
+      authPassword: $("auth-password"),
+      authError: $("auth-error"),
+      authSubmitBtn: $("auth-submit-btn"),
 
-      intakeGate: document.getElementById("intake-gate"),
-      intakeMessages: document.getElementById("intake-messages"),
-      intakeForm: document.getElementById("intake-form"),
-      intakeInput: document.getElementById("intake-input"),
-      intakeSendBtn: document.getElementById("intake-send-btn"),
-      intakeFileInput: document.getElementById("intake-file-input"),
-      intakeFilePreview: document.getElementById("intake-file-preview"),
-      intakeFileName: document.getElementById("intake-file-name"),
-      intakeFileClear: document.getElementById("intake-file-clear"),
-      intakeCompleteBtn: document.getElementById("intake-complete-btn"),
-      intakeSignoutBtn: document.getElementById("intake-signout-btn"),
+      intakeGate: $("intake-gate"),
+      intakeMessages: $("intake-messages"),
+      intakeForm: $("intake-form"),
+      intakeInput: $("intake-input"),
+      intakeSendBtn: $("intake-send-btn"),
+      intakeFileInput: $("intake-file-input"),
+      intakeFilePreview: $("intake-file-preview"),
+      intakeFileName: $("intake-file-name"),
+      intakeFileClear: $("intake-file-clear"),
+      intakeCancelBtn: $("intake-cancel-btn"),
+      intakeCompleteBtn: $("intake-complete-btn"),
+      intakeSignoutBtn: $("intake-signout-btn"),
 
-      appShell: document.getElementById("app-shell"),
+      appShell: $("app-shell"),
       navTabs: document.querySelectorAll(".nav-tab"),
-      navTabEngines: document.getElementById("nav-tab-engines"),
-      crisisBanner: document.getElementById("crisis-banner"),
-      dismissCrisisBtn: document.getElementById("dismiss-crisis-btn"),
+      navTabEngines: $("nav-tab-engines"),
+      crisisBanner: $("crisis-banner"),
+      dismissCrisisBtn: $("dismiss-crisis-btn"),
 
       views: {
-        session: document.getElementById("view-session"),
-        schedule: document.getElementById("view-schedule"),
-        careplan: document.getElementById("view-careplan"),
-        history: document.getElementById("view-history"),
-        settings: document.getElementById("view-settings"),
-        engines: document.getElementById("view-engines")
+        session: $("view-session"),
+        schedule: $("view-schedule"),
+        careplan: $("view-careplan"),
+        history: $("view-history"),
+        settings: $("view-settings"),
+        engines: $("view-engines")
       },
 
-      waitingRoom: document.getElementById("session-waiting-room"),
-      waitingStatus: document.getElementById("waiting-room-status"),
-      waitingNextSlotCard: document.getElementById("waiting-next-slot-card"),
-      waitingNextSlotTime: document.getElementById("waiting-next-slot-time"),
-      waitingNextSlotSub: document.getElementById("waiting-next-slot-sub"),
-      waitingJoinBtn: document.getElementById("waiting-join-btn"),
-      waitingScheduleBtn: document.getElementById("waiting-schedule-btn"),
-      waitingUrgentBtn: document.getElementById("waiting-urgent-btn"),
+      waitingRoom: $("session-waiting-room"),
+      waitingStatus: $("waiting-room-status"),
+      waitingNextSlotCard: $("waiting-next-slot-card"),
+      waitingNextSlotTime: $("waiting-next-slot-time"),
+      waitingNextSlotSub: $("waiting-next-slot-sub"),
+      waitingJoinBtn: $("waiting-join-btn"),
+      waitingScheduleBtn: $("waiting-schedule-btn"),
+      waitingUrgentBtn: $("waiting-urgent-btn"),
 
-      activeRoom: document.getElementById("session-active-room"),
-      sessionTimerLabel: document.getElementById("session-timer-label"),
-      sessionPhaseBadge: document.getElementById("session-phase-badge"),
-      activeEngine1Label: document.getElementById("active-engine1-label"),
-      endSessionBtn: document.getElementById("end-session-btn"),
-      chatMessages: document.getElementById("chat-messages"),
-      chatForm: document.getElementById("chat-form"),
-      chatInput: document.getElementById("chat-input"),
-      chatSendBtn: document.getElementById("chat-send-btn"),
-      chatImageInput: document.getElementById("chat-image-input"),
-      chatImagePreview: document.getElementById("chat-image-preview"),
-      chatImageThumb: document.getElementById("chat-image-thumb"),
-      chatImageClear: document.getElementById("chat-image-clear"),
+      activeRoom: $("session-active-room"),
+      sessionTimerLabel: $("session-timer-label"),
+      sessionPhaseBadge: $("session-phase-badge"),
+      activeEngine1Label: $("active-engine1-label"),
+      endSessionBtn: $("end-session-btn"),
+      chatMessages: $("chat-messages"),
+      chatForm: $("chat-form"),
+      chatInput: $("chat-input"),
+      chatSendBtn: $("chat-send-btn"),
+      chatImageInput: $("chat-image-input"),
+      chatImagePreview: $("chat-image-preview"),
+      chatImageThumb: $("chat-image-thumb"),
+      chatImageClear: $("chat-image-clear"),
 
-      scheduleUrgentBtn: document.getElementById("schedule-urgent-btn"),
-      cadenceFreqPill: document.getElementById("cadence-freq-pill"),
-      cadenceDurPill: document.getElementById("cadence-dur-pill"),
-      cadenceRationale: document.getElementById("cadence-rationale"),
-      bookSlotForm: document.getElementById("book-slot-form"),
-      bookDate: document.getElementById("book-date"),
-      bookTime: document.getElementById("book-time"),
-      appointmentsList: document.getElementById("appointments-list"),
+      scheduleUrgentBtn: $("schedule-urgent-btn"),
+      cadenceFreqPill: $("cadence-freq-pill"),
+      cadenceDurPill: $("cadence-dur-pill"),
+      cadenceRationale: $("cadence-rationale"),
+      bookSlotForm: $("book-slot-form"),
+      bookDate: $("book-date"),
+      bookTime: $("book-time"),
+      appointmentsList: $("appointments-list"),
 
-      careplanTrendDelta: document.getElementById("careplan-trend-delta"),
-      careplanProgressChart: document.getElementById("careplan-progress-chart"),
-      careplanFormulation: document.getElementById("careplan-formulation"),
-      careplanDiagnoses: document.getElementById("careplan-diagnoses"),
-      careplanGoals: document.getElementById("careplan-goals"),
-      careplanHwTitle: document.getElementById("careplan-hw-title"),
-      careplanHwInstructions: document.getElementById("careplan-hw-instructions"),
+      careplanTrendDelta: $("careplan-trend-delta"),
+      careplanProgressChart: $("careplan-progress-chart"),
+      careplanFormulation: $("careplan-formulation"),
+      careplanDiagnoses: $("careplan-diagnoses"),
+      careplanGoals: $("careplan-goals"),
+      careplanHwTitle: $("careplan-hw-title"),
+      careplanHwInstructions: $("careplan-hw-instructions"),
 
-      historyList: document.getElementById("history-list"),
+      historyList: $("history-list"),
 
-      settingsSubtabChart: document.getElementById("settings-subtab-chart"),
-      settingsSubtabAccount: document.getElementById("settings-subtab-account"),
-      settingsPanelChart: document.getElementById("settings-panel-chart"),
-      settingsPanelAccount: document.getElementById("settings-panel-account"),
-      chartIntakeStatus: document.getElementById("chart-intake-status"),
-      copyChartBtn: document.getElementById("copy-chart-btn"),
-      redoIntakeBtn: document.getElementById("redo-intake-btn"),
-      chartProgressChart: document.getElementById("chart-progress-chart"),
-      chartMedicalHistory: document.getElementById("chart-medical-history"),
-      chartMedicationsList: document.getElementById("chart-medications-list"),
-      addMedForm: document.getElementById("add-med-form"),
-      medName: document.getElementById("med-name"),
-      medDosage: document.getElementById("med-dosage"),
-      medTiming: document.getElementById("med-timing"),
-      chartLabsBaselines: document.getElementById("chart-labs-baselines"),
-      chartDiagnosesGoals: document.getElementById("chart-diagnoses-goals"),
-      chartTriageLog: document.getElementById("chart-triage-log"),
-      exportPdfBtn: document.getElementById("export-pdf-btn"),
+      settingsSubtabChart: $("settings-subtab-chart"),
+      settingsSubtabAccount: $("settings-subtab-account"),
+      settingsPanelChart: $("settings-panel-chart"),
+      settingsPanelAccount: $("settings-panel-account"),
+      chartIntakeStatus: $("chart-intake-status"),
+      copyChartBtn: $("copy-chart-btn"),
+      redoIntakeBtn: $("redo-intake-btn"),
+      chartProgressChart: $("chart-progress-chart"),
+      chartMedicalHistory: $("chart-medical-history"),
+      chartMedicationsList: $("chart-medications-list"),
+      addMedForm: $("add-med-form"),
+      medName: $("med-name"),
+      medDosage: $("med-dosage"),
+      medTiming: $("med-timing"),
+      chartLabsBaselines: $("chart-labs-baselines"),
+      chartDiagnosesGoals: $("chart-diagnoses-goals"),
+      chartTriageLog: $("chart-triage-log"),
+      exportPdfBtn: $("export-pdf-btn"),
 
-      accountAvatar: document.getElementById("account-avatar"),
-      accountName: document.getElementById("account-name"),
-      accountMeta: document.getElementById("account-meta"),
-      editProfileBtn: document.getElementById("edit-profile-btn"),
-      signoutBtn: document.getElementById("signout-btn"),
-      diagnosticsToggle: document.getElementById("diagnostics-toggle"),
+      accountAvatar: $("account-avatar"),
+      accountName: $("account-name"),
+      accountMeta: $("account-meta"),
+      editProfileBtn: $("edit-profile-btn"),
+      signoutBtn: $("signout-btn"),
+      diagnosticsToggle: $("diagnostics-toggle"),
 
-      storageModeNote: document.getElementById("storage-mode-note"),
-      enginesReadyBadge: document.getElementById("engines-ready-badge"),
-      reloadFirebaseBtn: document.getElementById("reload-firebase-btn"),
-      engineCardsGrid: document.getElementById("engine-cards-grid"),
-      promptLibraryStatus: document.getElementById("prompt-library-status"),
-      promptLibraryEditor: document.getElementById("prompt-library-editor"),
-      seedPromptsBtn: document.getElementById("seed-prompts-btn"),
-      savePromptsBtn: document.getElementById("save-prompts-btn"),
-      qaAuditLog: document.getElementById("qa-audit-log"),
-      runManualQaBtn: document.getElementById("run-manual-qa-btn"),
-      telemetryLog: document.getElementById("telemetry-log"),
-      clearLogBtn: document.getElementById("clear-log-btn"),
+      storageModeNote: $("storage-mode-note"),
+      enginesReadyBadge: $("engines-ready-badge"),
+      reloadFirebaseBtn: $("reload-firebase-btn"),
+      engineCardsGrid: $("engine-cards-grid"),
+      promptLibraryStatus: $("prompt-library-status"),
+      promptLibraryEditor: $("prompt-library-editor"),
+      seedPromptsBtn: $("seed-prompts-btn"),
+      savePromptsBtn: $("save-prompts-btn"),
+      qaAuditLog: $("qa-audit-log"),
+      runManualQaBtn: $("run-manual-qa-btn"),
+      telemetryLog: $("telemetry-log"),
+      clearLogBtn: $("clear-log-btn"),
 
-      checkinModal: document.getElementById("checkin-modal"),
-      phq4Questions: document.getElementById("phq4-questions"),
-      copingSlider: document.getElementById("coping-slider"),
-      copingSliderVal: document.getElementById("coping-slider-val"),
-      checkinCancelBtn: document.getElementById("checkin-cancel-btn"),
-      checkinSubmitBtn: document.getElementById("checkin-submit-btn"),
+      checkinModal: $("checkin-modal"),
+      phq4Questions: $("phq4-questions"),
+      copingSlider: $("coping-slider"),
+      copingSliderVal: $("coping-slider-val"),
+      checkinCancelBtn: $("checkin-cancel-btn"),
+      checkinSubmitBtn: $("checkin-submit-btn"),
 
-      savingModal: document.getElementById("saving-modal"),
-      savingPct: document.getElementById("saving-pct"),
-      savingBar: document.getElementById("saving-bar"),
-      savingStepTitle: document.getElementById("saving-step-title"),
-      savingStepSub: document.getElementById("saving-step-sub"),
-      savingDoneActions: document.getElementById("saving-done-actions"),
-      savingCloseBtn: document.getElementById("saving-close-btn"),
+      savingModal: $("saving-modal"),
+      savingPct: $("saving-pct"),
+      savingBar: $("saving-bar"),
+      savingStepTitle: $("saving-step-title"),
+      savingStepSub: $("saving-step-sub"),
+      savingDoneActions: $("saving-done-actions"),
+      savingCloseBtn: $("saving-close-btn"),
 
-      triageModal: document.getElementById("triage-modal"),
-      triageCloseBtn: document.getElementById("triage-close-btn"),
-      triageMessages: document.getElementById("triage-messages"),
-      triageOutcomeBar: document.getElementById("triage-outcome-bar"),
-      triageOutcomeText: document.getElementById("triage-outcome-text"),
-      triageUnlockBtn: document.getElementById("triage-unlock-btn"),
-      triageForm: document.getElementById("triage-form"),
-      triageInput: document.getElementById("triage-input"),
-      triageSendBtn: document.getElementById("triage-send-btn"),
+      triageModal: $("triage-modal"),
+      triageCloseBtn: $("triage-close-btn"),
+      triageMessages: $("triage-messages"),
+      triageOutcomeBar: $("triage-outcome-bar"),
+      triageOutcomeText: $("triage-outcome-text"),
+      triageUnlockBtn: $("triage-unlock-btn"),
+      triageForm: $("triage-form"),
+      triageInput: $("triage-input"),
+      triageSendBtn: $("triage-send-btn"),
 
-      editProfileModal: document.getElementById("edit-profile-modal"),
-      editProfileForm: document.getElementById("edit-profile-form"),
-      editPhotoInput: document.getElementById("edit-photo-input"),
-      editPhotoPreview: document.getElementById("edit-photo-preview"),
-      editName: document.getElementById("edit-name"),
-      editGender: document.getElementById("edit-gender"),
-      editProfileCancel: document.getElementById("edit-profile-cancel"),
+      editProfileModal: $("edit-profile-modal"),
+      editProfileForm: $("edit-profile-form"),
+      editPhotoInput: $("edit-photo-input"),
+      editPhotoPreview: $("edit-photo-preview"),
+      editName: $("edit-name"),
+      editGender: $("edit-gender"),
+      editProfileCancel: $("edit-profile-cancel"),
 
-      confirmModal: document.getElementById("confirm-modal"),
-      confirmTitle: document.getElementById("confirm-title"),
-      confirmBody: document.getElementById("confirm-body"),
-      confirmCancelBtn: document.getElementById("confirm-cancel-btn"),
-      confirmOkBtn: document.getElementById("confirm-ok-btn"),
-      toastBox: document.getElementById("toast-box")
+      confirmModal: $("confirm-modal"),
+      confirmTitle: $("confirm-title"),
+      confirmBody: $("confirm-body"),
+      confirmCancelBtn: $("confirm-cancel-btn"),
+      confirmOkBtn: $("confirm-ok-btn"),
+      toastBox: $("toast-box")
     };
 
     // =========================================================================
-    // 5. UTILITY HELPERS & BACKWARD-COMPATIBLE FIRESTORE NORMALIZERS
+    // 5. UTILITY HELPERS & FIRESTORE DATA NORMALIZERS
     // =========================================================================
     function escapeHtml(str) {
       return String(str ?? "")
@@ -1165,10 +1175,9 @@ UPDATED_PROMPT:
     }
 
     function formatClinicalMarkdown(text) {
-      const safe = escapeHtml(text || "");
-      return safe
+      return escapeHtml(text || "")
         .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-        .replace(/\*(.+?)\*/g, "<em>$1</em>")
+        .replace(/(^|[\s(])\*([^*\n]+?)\*(?=[\s.,!?;:)]|$)/g, "$1<em>$2</em>")
         .replace(/\n/g, "<br>");
     }
 
@@ -1212,8 +1221,11 @@ UPDATED_PROMPT:
           els.confirmModal.classList.add("hidden");
           els.confirmOkBtn.onclick = null;
           els.confirmCancelBtn.onclick = null;
+          document.removeEventListener("keydown", onKey);
           resolve(result);
         };
+        const onKey = (e) => { if (e.key === "Escape") cleanup(false); };
+        document.addEventListener("keydown", onKey);
         els.confirmOkBtn.onclick = () => cleanup(true);
         els.confirmCancelBtn.onclick = () => cleanup(false);
       });
@@ -1238,13 +1250,28 @@ UPDATED_PROMPT:
       return false;
     }
 
-    function compressImageFile(file, maxDim = 640, quality = 0.78) {
+    function autoResizeTextarea(el) {
+      el.style.height = "auto";
+      el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
+    }
+
+    function bindChatTextarea(textarea, form) {
+      textarea.addEventListener("input", () => autoResizeTextarea(textarea));
+      textarea.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          form.requestSubmit();
+        }
+      });
+    }
+
+    function compressImageFile(file, maxDim = 1024, quality = 0.82) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error("Could not read image file."));
         reader.onload = () => {
           const img = new Image();
-          img.onerror = reject;
+          img.onerror = () => reject(new Error("Invalid image format."));
           img.onload = () => {
             let { width, height } = img;
             if (width > maxDim || height > maxDim) {
@@ -1264,29 +1291,39 @@ UPDATED_PROMPT:
       });
     }
 
+    // Extracts full text from every page of an uploaded PDF (no artificial page/char cap)
     async function extractPdfText(file) {
       if (!window.pdfjsLib) return "[PDF uploaded — text extractor unavailable]";
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let text = "";
-      const maxPages = Math.min(pdf.numPages, 8);
-      for (let i = 1; i <= maxPages; i++) {
+      for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
         text += `\n--- Page ${i} ---\n` + content.items.map((it) => it.str).join(" ");
       }
-      return text.trim().slice(0, 12000);
+      return text.trim();
     }
 
+    /**
+     * Parses plain-text section headers into a keyed dictionary.
+     * Supports `terminal: true` on a spec so that free-form sections containing
+     * nested headers (e.g. Engine 6's UPDATED_PROMPT) are never prematurely split.
+     */
     function parsePlainTextSections(rawText, sectionSpecs) {
       const cleaned = String(rawText || "")
         .replace(/<think>[\s\S]*?<\/think>/gi, "")
+        .replace(/<thinking>[\s\S]*?<\/thinking>/gi, "")
         .replace(/```[a-z]*\n?/gi, "")
         .replace(/```/g, "")
         .trim();
 
       const result = { _raw: cleaned };
-      sectionSpecs.forEach((s) => { result[s.key] = ""; });
+      const terminalKeys = new Set();
+      sectionSpecs.forEach((s) => {
+        result[s.key] = "";
+        if (s.terminal) terminalKeys.add(s.key);
+      });
 
       const lookup = [];
       for (const spec of sectionSpecs) {
@@ -1301,6 +1338,12 @@ UPDATED_PROMPT:
       let currentKey = null;
 
       for (const line of lines) {
+        // Once inside a terminal section (like UPDATED_PROMPT), consume all remaining lines verbatim
+        if (currentKey && terminalKeys.has(currentKey)) {
+          result[currentKey] = (result[currentKey] ? result[currentKey] + "\n" : "") + line;
+          continue;
+        }
+
         const stripped = line
           .trim()
           .replace(/^#+\s*/, "")
@@ -1319,7 +1362,9 @@ UPDATED_PROMPT:
           .toLowerCase()
           .replace(/[^a-z0-9]/g, "");
 
-        const matched = lookup.find((entry) => entry.norm === normCandidate && normCandidate.length >= 2);
+        const isValidLength = normCandidate.length >= 2 || (colonIdx !== -1 && normCandidate.length === 1);
+        const matched = isValidLength ? lookup.find((entry) => entry.norm === normCandidate) : null;
+
         if (matched && (colonIdx !== -1 || stripped.length <= 48)) {
           currentKey = matched.key;
           if (remainder) {
@@ -1354,7 +1399,13 @@ UPDATED_PROMPT:
       return "Severe";
     }
 
-    function copyTextToClipboard(text) {
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          return;
+        } catch (_) {}
+      }
       const ta = document.createElement("textarea");
       ta.value = text;
       ta.style.position = "fixed";
@@ -1365,7 +1416,7 @@ UPDATED_PROMPT:
       document.body.removeChild(ta);
     }
 
-    // ---- Backward-Compatible Normalizers (preserves all older Firestore data) ----
+    // ---- Backward-Compatible Firestore Normalizers ----
     function formatObjectToLine(item) {
       if (!item) return "";
       if (typeof item === "string") return item.trim();
@@ -1425,15 +1476,9 @@ UPDATED_PROMPT:
       };
 
       const historySources = [
-        raw.medical_history,
-        raw.past_medical_history,
-        raw.medicalHistory,
-        raw.pastMedicalHistory,
-        raw.conditions,
-        raw.active_conditions,
-        raw.psychiatric_history,
-        raw.past_psychiatric_history,
-        raw.psychiatricHistory
+        raw.medical_history, raw.past_medical_history, raw.medicalHistory,
+        raw.pastMedicalHistory, raw.conditions, raw.active_conditions,
+        raw.psychiatric_history, raw.past_psychiatric_history, raw.psychiatricHistory
       ];
       for (const src of historySources) {
         if (Array.isArray(src)) src.forEach((x) => pushCondition(x));
@@ -1451,8 +1496,7 @@ UPDATED_PROMPT:
         meds.push({ name: cleanName, dosage: (dosage || "").trim(), timing: (timing || "").trim() });
       };
 
-      const medSources = [raw.medications, raw.current_medications, raw.meds];
-      for (const src of medSources) {
+      for (const src of [raw.medications, raw.current_medications, raw.meds]) {
         if (Array.isArray(src)) {
           src.forEach((m) => {
             if (!m) return;
@@ -1516,37 +1560,20 @@ UPDATED_PROMPT:
       if (!raw || typeof raw !== "object") return null;
 
       const formulation =
-        raw.clinical_formulation ||
-        raw.formulation ||
-        raw.case_formulation ||
-        raw.longitudinal_formulation ||
-        raw.summary ||
-        "";
+        raw.clinical_formulation || raw.formulation || raw.case_formulation ||
+        raw.longitudinal_formulation || raw.summary || "";
 
       const diagRaw =
-        raw.diagnoses ||
-        raw.working_diagnoses ||
-        raw.working_hypotheses ||
-        raw.diagnostic_hypotheses ||
-        raw.mental_health_diagnoses ||
-        [];
+        raw.diagnoses || raw.working_diagnoses || raw.working_hypotheses ||
+        raw.diagnostic_hypotheses || raw.mental_health_diagnoses || [];
       const diagnoses = Array.isArray(diagRaw)
         ? diagRaw.map(formatObjectToLine).filter(Boolean)
-        : typeof diagRaw === "string"
-          ? parseBulletList(diagRaw)
-          : [];
+        : typeof diagRaw === "string" ? parseBulletList(diagRaw) : [];
 
-      const goalsRaw =
-        raw.goals ||
-        raw.treatment_goals ||
-        raw.active_goals ||
-        raw.cbt_goals ||
-        [];
+      const goalsRaw = raw.goals || raw.treatment_goals || raw.active_goals || raw.cbt_goals || [];
       const goals = Array.isArray(goalsRaw)
         ? goalsRaw.map(formatObjectToLine).filter(Boolean)
-        : typeof goalsRaw === "string"
-          ? parseBulletList(goalsRaw)
-          : [];
+        : typeof goalsRaw === "string" ? parseBulletList(goalsRaw) : [];
 
       const hwRaw = raw.homework || raw.between_session_practice || raw.between_session_homework || null;
       let homework = { title: "", instructions: "" };
@@ -1778,7 +1805,7 @@ UPDATED_PROMPT:
       logTelemetry("Syncing 6 engine configurations from Firestore (backend/*)…");
       let loadedCount = 0;
 
-      for (const key of Object.keys(state.engines)) {
+      await Promise.all(Object.keys(state.engines).map(async (key) => {
         const eng = state.engines[key];
         try {
           const snap = await getDoc(doc(db, "backend", eng.docId));
@@ -1804,7 +1831,7 @@ UPDATED_PROMPT:
           eng.error = err.message || "Permission or network error";
           logTelemetry(`Error reading backend/${eng.docId}: ${eng.error}`, "error");
         }
-      }
+      }));
 
       await loadPromptLibraryFromFirebase();
 
@@ -1879,19 +1906,19 @@ UPDATED_PROMPT:
     }
 
     // =========================================================================
-    // 7. OPENROUTER API CLIENT (FAULT-TOLERANT WITH 1-TIME RETRY)
+    // 7. OPENROUTER API CLIENT (UNRESTRICTED TOKENS + 1-TIME RETRY)
     // =========================================================================
-    async function callOpenRouter({ engineKey, messages, temperature = 0.5, maxTokens = 1400 }) {
+    async function callOpenRouter({ engineKey, messages, temperature = 0.5 }) {
       const eng = state.engines[engineKey];
       if (!eng || !eng.loaded) {
         throw new Error(`${eng?.label || engineKey} is not configured in Firebase.`);
       }
 
+      // No max_tokens cap — allow models to generate complete, untruncated responses
       const payload = {
         model: eng.slug,
         messages,
-        temperature,
-        max_tokens: maxTokens
+        temperature
       };
 
       let lastErr = null;
@@ -1910,14 +1937,24 @@ UPDATED_PROMPT:
 
           if (!res.ok) {
             const errText = await res.text().catch(() => "");
+            let parsedMsg = errText;
+            try {
+              const errJson = JSON.parse(errText);
+              parsedMsg = errJson?.error?.message || errText;
+            } catch (_) {}
+
             if ((res.status === 429 || res.status >= 500) && attempt === 0) {
               await new Promise((r) => setTimeout(r, 1200));
               continue;
             }
-            throw new Error(`HTTP ${res.status}: ${errText.slice(0, 160)}`);
+            throw new Error(`HTTP ${res.status}: ${parsedMsg}`);
           }
 
           const data = await res.json();
+          if (data?.error) {
+            throw new Error(data.error.message || JSON.stringify(data.error));
+          }
+
           const choice = data?.choices?.[0]?.message;
           let text = "";
           if (typeof choice?.content === "string") {
@@ -1926,13 +1963,13 @@ UPDATED_PROMPT:
             text = choice.content.map((p) => p?.text || "").join("\n");
           }
 
-          text = text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+          text = text
+            .replace(/<think>[\s\S]*?<\/think>/gi, "")
+            .replace(/<thinking>[\s\S]*?<\/thinking>/gi, "")
+            .trim();
+
           if (!text) {
-            throw new Error(
-              typeof choice?.reasoning === "string" && choice.reasoning.trim()
-                ? "Model exhausted token budget during reasoning before producing a final response."
-                : "Empty response returned by model."
-            );
+            throw new Error("Empty response returned by model.");
           }
           return text;
         } catch (err) {
@@ -1963,9 +2000,9 @@ UPDATED_PROMPT:
           parts.push("Intake Summary:\n" + state.chart.summary);
         }
       }
-      const recentTriages = (state.schedule.triageEvents || []).slice(0, 3);
-      if (recentTriages.length) {
-        parts.push("Recent Urgent Triage Events:\n" + recentTriages.map((t) => `- ${formatDateTime(t.timestampMs)}: ${t.decision} (${t.summary})`).join("\n"));
+      const triages = state.schedule.triageEvents || [];
+      if (triages.length) {
+        parts.push("Urgent Triage Events:\n" + triages.map((t) => `- ${formatDateTime(t.timestampMs)}: ${t.decision} (${t.summary})`).join("\n"));
       }
       return parts.join("\n\n");
     }
@@ -2041,8 +2078,7 @@ ${pacingDirective}`;
           { role: "system", content: getEnginePrompt("Engine 2") },
           { role: "user", content: `PATIENT CHART:\n${buildPatientChartContext()}\n\n${checkinText}\n\nTRANSCRIPT:\n${transcript}` }
         ],
-        temperature: 0.25,
-        maxTokens: 2000
+        temperature: 0.25
       });
 
       const sec = parsePlainTextSections(raw, [
@@ -2062,7 +2098,7 @@ ${pacingDirective}`;
       const moodScore = Number.isFinite(moodNum) ? Math.min(10, Math.max(1, moodNum)) : (checkin?.coping_score || 5);
 
       return {
-        session_summary: sec.SUMMARY || sec._raw.slice(0, 320),
+        session_summary: sec.SUMMARY || sec._raw,
         mood_score: moodScore,
         soap: {
           subjective: sec.SUBJECTIVE || sec.SUMMARY || "Patient discussed current emotional stressors and day-to-day functioning.",
@@ -2079,13 +2115,13 @@ ${pacingDirective}`;
     }
 
     // Engine 3: Longitudinal Diagnosis & Care Plan Supervisor
-    async function runCarePlanSupervisor(latestInterpretation, checkin = null) {
+    async function runCarePlanSupervisor(latestInterpretation, checkin = null, excludeSessionId = null) {
       const priorPlanText = state.carePlan
         ? `Formulation: ${state.carePlan.clinical_formulation}\nDiagnoses: ${(state.carePlan.diagnoses || []).join("; ")}\nGoals: ${(state.carePlan.goals || []).join("; ")}`
         : "None (initial Care Plan).";
 
       const pastSummaries = state.sessionsHistory
-        .slice(0, 6)
+        .filter((s) => !excludeSessionId || s.id !== excludeSessionId)
         .map((s) => `[${s.dateLabel}] ${s.interpretation?.session_summary || ""}`)
         .join("\n");
 
@@ -2096,10 +2132,9 @@ ${pacingDirective}`;
         engineKey: "careplan",
         messages: [
           { role: "system", content: getEnginePrompt("Engine 3") },
-          { role: "user", content: `PATIENT CHART:\n${buildPatientChartContext()}\n\nALL-TIME SYMPTOM & COPING TRAJECTORY:\n${allTimeTrajectory}\n\nPRIOR CARE PLAN:\n${priorPlanText}\n\nRECENT SESSIONS:\n${pastSummaries || "None"}\n\nTODAY'S CLINICAL NOTE:\n${latestInterpretation.raw_text || latestInterpretation.session_summary}` }
+          { role: "user", content: `PATIENT CHART:\n${buildPatientChartContext()}\n\nALL-TIME SYMPTOM & COPING TRAJECTORY:\n${allTimeTrajectory}\n\nPRIOR CARE PLAN:\n${priorPlanText}\n\nPAST SESSIONS:\n${pastSummaries || "None"}\n\nTODAY'S CLINICAL NOTE:\n${latestInterpretation.raw_text || latestInterpretation.session_summary}` }
         ],
-        temperature: 0.3,
-        maxTokens: 2200
+        temperature: 0.3
       });
 
       const sec = parsePlainTextSections(raw, [
@@ -2149,8 +2184,7 @@ ${pacingDirective}`;
             { role: "system", content: getEnginePrompt("Engine 5") },
             { role: "user", content: `CARE PLAN FORMULATION:\n${carePlan?.clinical_formulation || "Initial stage"}\n\nSUPERVISOR CADENCE NOTE:\n${carePlan?.cadence_note || "Default 1/week, 45 min"}\n\nALL-TIME TRAJECTORY:\n${allTimeTrajectory}\n\nMISSED APPOINTMENTS: ${missedCount}\nURGENT TRIAGE OVERRIDES: ${urgentCount}` }
           ],
-          temperature: 0.2,
-          maxTokens: 2000
+          temperature: 0.2
         });
 
         const sec = parsePlainTextSections(raw, [
@@ -2189,8 +2223,7 @@ ${pacingDirective}`;
 
       const transcript = transcriptMessages
         .map((m) => `${m.role === "user" ? "PATIENT" : "THERAPIST"}: ${m.content}`)
-        .join("\n\n")
-        .slice(0, 18000);
+        .join("\n\n");
 
       const currentPromptsBlock = ["Engine 1", "Engine 2", "Engine 3", "Engine 5"]
         .map((slot) => `=== ${slot} CURRENT PROMPT ===\n${getEnginePrompt(slot)}`)
@@ -2204,15 +2237,15 @@ ${pacingDirective}`;
             { role: "system", content: getEnginePrompt("Engine 6") },
             { role: "user", content: `${currentPromptsBlock}\n\n=== COMPLETED SESSION TRANSCRIPT ===\n${transcript}\n\n=== GENERATED SOAP NOTE ===\n${interpretation?.raw_text || interpretation?.session_summary || "N/A"}\n\n=== GENERATED CARE PLAN ===\n${carePlan?.clinical_formulation || "N/A"}` }
           ],
-          temperature: 0.25,
-          maxTokens: 4500
+          temperature: 0.25
         });
 
+        // UPDATED_PROMPT is marked terminal so nested headers inside the revised prompt aren't misparsed
         const sec = parsePlainTextSections(raw, [
           { key: "AUDIT_SUMMARY", aliases: ["SUMMARY", "AUDIT", "FINDINGS"] },
           { key: "TARGET_ENGINE", aliases: ["TARGET", "ENGINE"] },
           { key: "CHANGE_RATIONALE", aliases: ["RATIONALE", "REASON", "TWEAK"] },
-          { key: "UPDATED_PROMPT", aliases: ["NEW PROMPT", "REVISED PROMPT", "PROMPT"] }
+          { key: "UPDATED_PROMPT", aliases: ["NEW PROMPT", "REVISED PROMPT", "PROMPT"], terminal: true }
         ]);
 
         const targetMatch = (sec.TARGET_ENGINE || "").match(/Engine\s*[1235]|NONE/i);
@@ -2230,7 +2263,7 @@ ${pacingDirective}`;
         const headersIntact = requiredHeaders.every((h) => updatedPrompt.toUpperCase().includes(h));
 
         let applied = false;
-        if (targetEngine !== "NONE" && updatedPrompt.length >= 250 && headersIntact && !/^NONE$/i.test(updatedPrompt)) {
+        if (targetEngine !== "NONE" && updatedPrompt.length > 0 && headersIntact && !/^NONE$/i.test(updatedPrompt)) {
           await savePromptLibraryToFirebase({ [targetEngine]: updatedPrompt });
           applied = true;
           logTelemetry(`Engine 6 self-improved ${targetEngine} prompt (${updatedPrompt.length} chars) in Firebase.`, "success");
@@ -2241,11 +2274,10 @@ ${pacingDirective}`;
         const entry = {
           timestampMs: Date.now(),
           targetEngine: applied ? targetEngine : "NONE",
-          auditSummary: sec.AUDIT_SUMMARY || sec._raw.slice(0, 320),
+          auditSummary: sec.AUDIT_SUMMARY || sec._raw,
           changeRationale: sec.CHANGE_RATIONALE || ""
         };
         state.qaLogs.unshift(entry);
-        state.qaLogs = state.qaLogs.slice(0, 20);
         await saveProfileDoc("qa_logs", { entries: state.qaLogs }, "qa_logs");
         renderQaAuditLog();
         return entry;
@@ -2290,6 +2322,7 @@ ${pacingDirective}`;
     }
 
     function enterSessionRoom(appt) {
+      const switchingAppointment = state.activeAppointmentId !== appt.id;
       if (!appt.startedAtMs) {
         appt.startedAtMs = Date.now();
         appt.status = "in_progress";
@@ -2300,7 +2333,7 @@ ${pacingDirective}`;
       const draft = loadLiveDraft(appt.id);
       if (draft && draft.length) {
         state.messages = draft;
-      } else if (!state.messages.length) {
+      } else if (switchingAppointment || !state.messages.length) {
         const firstName = (state.userProfile.name || "").split(" ")[0];
         state.messages = [{
           role: "assistant",
@@ -2489,8 +2522,8 @@ ${pacingDirective}`;
               <div class="text-xs text-muted mt-0.5">${a.durationMinutes || 45} min structured CBT session</div>
             </div>
             <div class="flex items-center gap-2">
-              ${joinable ? `<button data-join-appt="${a.id}" class="join-appt-btn px-3.5 py-1.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium">Enter Session</button>` : ""}
-              ${a.status === "scheduled" ? `<button data-cancel-appt="${a.id}" class="cancel-appt-btn px-3 py-1.5 rounded-xl border border-hairline text-xs text-muted hover:text-rose-ink">Cancel</button>` : ""}
+              ${joinable ? `<button data-join-appt="${escapeHtml(a.id)}" class="join-appt-btn px-3.5 py-1.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium">Enter Session</button>` : ""}
+              ${a.status === "scheduled" ? `<button data-cancel-appt="${escapeHtml(a.id)}" class="cancel-appt-btn px-3 py-1.5 rounded-xl border border-hairline text-xs text-muted hover:text-rose-ink">Cancel</button>` : ""}
             </div>
           </div>
         `;
@@ -2527,13 +2560,15 @@ ${pacingDirective}`;
         return;
       }
 
+      const clamp = (val, min, max) => Math.min(max, Math.max(min, Number(val) || min));
       const latest = scored[scored.length - 1].checkin;
       const first = scored[0].checkin;
+
       if (deltaEl && scored.length > 1) {
-        const diff = latest.phq4_total - first.phq4_total;
-        deltaEl.textContent = diff <= 0
-          ? `PHQ-4 improved by ${Math.abs(diff)} pts since Session 1`
-          : `PHQ-4 up ${diff} pts since Session 1`;
+        const diff = (Number(latest.phq4_total) || 0) - (Number(first.phq4_total) || 0);
+        if (diff === 0) deltaEl.textContent = "PHQ-4 unchanged since Session 1";
+        else if (diff < 0) deltaEl.textContent = `PHQ-4 improved by ${Math.abs(diff)} pts since Session 1`;
+        else deltaEl.textContent = `PHQ-4 up ${diff} pts since Session 1`;
       } else if (deltaEl) {
         deltaEl.textContent = `Baseline PHQ-4: ${latest.phq4_total}/12 (${getPhq4Band(latest.phq4_total)})`;
       }
@@ -2542,8 +2577,8 @@ ${pacingDirective}`;
       const innerW = W - padL - padR;
       const innerH = H - padT - padB;
       const xAt = (i) => scored.length === 1 ? padL + innerW / 2 : padL + (i / (scored.length - 1)) * innerW;
-      const yPhq = (v) => padT + innerH - (v / 12) * innerH;
-      const yCop = (v) => padT + innerH - ((v - 1) / 9) * innerH;
+      const yPhq = (v) => padT + innerH - (clamp(v, 0, 12) / 12) * innerH;
+      const yCop = (v) => padT + innerH - ((clamp(v, 1, 10) - 1) / 9) * innerH;
 
       const phqPts = scored.map((s, i) => `${xAt(i)},${yPhq(s.checkin.phq4_total)}`).join(" ");
       const copPts = scored.map((s, i) => `${xAt(i)},${yCop(s.checkin.coping_score)}`).join(" ");
@@ -2622,6 +2657,7 @@ ${pacingDirective}`;
         const reanalyzeLabel = isLatest
           ? "Reanalyze Session (SOAP + Care Plan + QA)"
           : "Reanalyze SOAP Note";
+
         return `
           <details class="rounded-2xl bg-surface border border-hairline overflow-hidden group">
             <summary class="px-5 py-4 cursor-pointer flex flex-wrap items-center justify-between gap-2 hover:bg-stone/40 select-none">
@@ -2729,9 +2765,9 @@ ${pacingDirective}`;
 
       els.chartMedicationsList.querySelectorAll(".remove-med-btn").forEach((btn) => {
         btn.onclick = async () => {
+          if (!state.chart?.medications) return;
           const i = parseInt(btn.dataset.removeMed, 10);
           state.chart.medications.splice(i, 1);
-          // Overwrite chart document cleanly (merge=false) so legacy medication keys cannot resurrect deleted meds
           await saveProfileDoc("chart", state.chart, "chart", false);
           renderMyChart();
           showToast("Medication removed from My Chart.");
@@ -2817,7 +2853,7 @@ ${pacingDirective}`;
         els.qaAuditLog.innerHTML = `<div>No QA audits recorded yet. Engine 6 automatically reviews transcripts after each completed session.</div>`;
         return;
       }
-      els.qaAuditLog.innerHTML = state.qaLogs.slice(0, 10).map((entry) => `
+      els.qaAuditLog.innerHTML = state.qaLogs.map((entry) => `
         <div class="p-3 rounded-xl bg-surface border border-hairline space-y-1">
           <div class="flex items-center justify-between gap-2">
             <span class="font-medium text-ink">${escapeHtml(entry.targetEngine === "NONE" ? "No Prompt Change Needed" : `Updated ${entry.targetEngine}`)}</span>
@@ -2834,7 +2870,7 @@ ${pacingDirective}`;
     // =========================================================================
     async function handleSendChat(e) {
       e.preventDefault();
-      if (state.isBusy) return;
+      if (state.busy.chat) return;
       const text = els.chatInput.value.trim();
       const imageDataUrl = state.pendingChatImageDataUrl;
       if (!text && !imageDataUrl) return;
@@ -2842,19 +2878,21 @@ ${pacingDirective}`;
       checkCrisisGuardrail(text);
       state.messages.push({ role: "user", content: text || "[Attached image]", imageDataUrl, timestamp: Date.now() });
       els.chatInput.value = "";
+      autoResizeTextarea(els.chatInput);
       state.pendingChatImageDataUrl = null;
       els.chatImagePreview.classList.add("hidden");
       saveLiveDraft();
       renderChatMessages();
 
-      state.isBusy = true;
+      state.busy.chat = true;
       els.chatSendBtn.disabled = true;
       els.chatSendBtn.textContent = "…";
 
       try {
+        // Send complete session history (no artificial message slice)
         const apiMessages = [
           { role: "system", content: buildTherapistSystemPrompt() },
-          ...state.messages.slice(-24).map((m) => {
+          ...state.messages.map((m) => {
             if (m.imageDataUrl) {
               return {
                 role: m.role,
@@ -2871,8 +2909,7 @@ ${pacingDirective}`;
         const reply = await callOpenRouter({
           engineKey: "conversation",
           messages: apiMessages,
-          temperature: 0.65,
-          maxTokens: 1400
+          temperature: 0.65
         });
 
         state.messages.push({ role: "assistant", content: reply, timestamp: Date.now() });
@@ -2882,7 +2919,7 @@ ${pacingDirective}`;
         logTelemetry(`Session chat error: ${err.message}`, "error");
         showToast("Could not send message. Please try again.");
       } finally {
-        state.isBusy = false;
+        state.busy.chat = false;
         els.chatSendBtn.disabled = false;
         els.chatSendBtn.textContent = "Send";
       }
@@ -2947,6 +2984,10 @@ ${pacingDirective}`;
     }
 
     async function completeSessionWithCheckin() {
+      if (state.busy.saving) return;
+      state.busy.saving = true;
+      els.checkinSubmitBtn.disabled = true;
+
       const getVal = (id) => parseInt(document.querySelector(`input[name="phq_${id}"]:checked`)?.value || "0", 10);
       const anx = getVal("anx1") + getVal("anx2");
       const dep = getVal("dep1") + getVal("dep2");
@@ -2968,7 +3009,11 @@ ${pacingDirective}`;
         setSaveProgress(48, "Updating your care plan…", "Integrating today's session with your long-term progress…");
         const updatedPlan = await runCarePlanSupervisor(interpretation, checkinPayload);
 
-        const savedTranscript = state.messages.map((m) => ({ role: m.role, content: m.content, timestamp: m.timestamp }));
+        const savedTranscript = state.messages.map((m) => ({
+          role: m.role,
+          content: m.content || (m.imageDataUrl ? "[Attached image]" : ""),
+          timestamp: m.timestamp
+        }));
         const sessionRecord = {
           timestampMs: Date.now(),
           dateLabel: new Date().toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }),
@@ -3014,6 +3059,9 @@ ${pacingDirective}`;
         els.savingCloseBtn.textContent = "Return to Session";
         setSaveProgress(100, "Could Not Finish Saving", `Your conversation is still safe—please return to the session and try again (${err.message}).`);
         els.savingDoneActions.classList.remove("hidden");
+      } finally {
+        state.busy.saving = false;
+        els.checkinSubmitBtn.disabled = false;
       }
     }
 
@@ -3031,7 +3079,7 @@ ${pacingDirective}`;
         await saveSessionRecord(target);
 
         if (isLatest) {
-          const updatedPlan = await runCarePlanSupervisor(interpretation, null);
+          const updatedPlan = await runCarePlanSupervisor(interpretation, null, target.id);
           await runQualityAssuranceAudit({
             transcriptMessages: target.transcript,
             interpretation,
@@ -3063,9 +3111,11 @@ ${pacingDirective}`;
       return ageDays >= 365;
     }
 
-    function openIntakeGate() {
+    function openIntakeGate(allowCancel = false) {
       els.appShell.classList.add("hidden");
       els.intakeGate.classList.remove("hidden");
+      els.intakeCancelBtn.classList.toggle("hidden", !allowCancel);
+
       if (!state.intakeMessages.length) {
         const first = (state.userProfile.name || "").split(" ")[0];
         state.intakeMessages = [{
@@ -3096,7 +3146,7 @@ ${pacingDirective}`;
 
     async function sendIntakeMessage(e) {
       e.preventDefault();
-      if (state.isBusy) return;
+      if (state.busy.intake) return;
       const text = els.intakeInput.value.trim();
       const fileObj = state.pendingIntakeFile;
       if (!text && !fileObj) return;
@@ -3111,11 +3161,12 @@ ${pacingDirective}`;
         timestamp: Date.now()
       });
       els.intakeInput.value = "";
+      autoResizeTextarea(els.intakeInput);
       state.pendingIntakeFile = null;
       els.intakeFilePreview.classList.add("hidden");
       renderIntakeMessages();
 
-      state.isBusy = true;
+      state.busy.intake = true;
       els.intakeSendBtn.disabled = true;
 
       try {
@@ -3140,8 +3191,7 @@ ${pacingDirective}`;
         const reply = await callOpenRouter({
           engineKey: "intake",
           messages: apiMessages,
-          temperature: 0.45,
-          maxTokens: 1100
+          temperature: 0.45
         });
         state.intakeMessages.push({ role: "assistant", content: reply, timestamp: Date.now() });
         renderIntakeMessages();
@@ -3149,12 +3199,14 @@ ${pacingDirective}`;
         logTelemetry(`Intake message error: ${err.message}`, "error");
         showToast("Could not reach intake clinician. Please try again.");
       } finally {
-        state.isBusy = false;
+        state.busy.intake = false;
         els.intakeSendBtn.disabled = false;
       }
     }
 
     async function completeAndSaveIntake() {
+      if (state.busy.intake) return;
+      state.busy.intake = true;
       els.intakeCompleteBtn.disabled = true;
       els.intakeCompleteBtn.textContent = "Saving to Chart…";
 
@@ -3184,8 +3236,7 @@ SUMMARY:
             },
             { role: "user", content: transcript }
           ],
-          temperature: 0.2,
-          maxTokens: 1500
+          temperature: 0.2
         });
 
         const sec = parsePlainTextSections(raw, [
@@ -3205,7 +3256,7 @@ SUMMARY:
           return { name: name || line, dosage: dosage || "", timing: timing || "" };
         });
 
-        // Preserve any previously listed/manually added medications that weren't re-mentioned
+        // Preserve any previously listed medications that weren't re-mentioned
         const mergedMeds = [...extractedMeds];
         const seenMedNames = new Set(mergedMeds.map((m) => m.name.toLowerCase().trim()));
         for (const oldMed of (state.chart?.medications || [])) {
@@ -3223,7 +3274,6 @@ SUMMARY:
           labs_and_baselines: sec.LABS_AND_BASELINES || "None reported.",
           summary: sec.SUMMARY || "Annual intake completed."
         };
-        // Overwrite chart document cleanly (merge=false) to clear any legacy duplicate keys
         await saveProfileDoc("chart", state.chart, "chart", false);
 
         els.intakeGate.classList.add("hidden");
@@ -3235,6 +3285,7 @@ SUMMARY:
         logTelemetry(`Intake save error: ${err.message}`, "error");
         showToast("Could not save intake summary. Please try again.");
       } finally {
+        state.busy.intake = false;
         els.intakeCompleteBtn.disabled = false;
         els.intakeCompleteBtn.textContent = "Complete & Save to My Chart";
       }
@@ -3269,13 +3320,14 @@ SUMMARY:
     async function handleTriageSubmit(e) {
       e.preventDefault();
       const text = els.triageInput.value.trim();
-      if (!text || state.isBusy) return;
+      if (!text || state.busy.triage) return;
       checkCrisisGuardrail(text);
       state.triageMessages.push({ role: "user", content: text, timestamp: Date.now() });
       els.triageInput.value = "";
+      autoResizeTextarea(els.triageInput);
       renderTriageMessages();
 
-      state.isBusy = true;
+      state.busy.triage = true;
       els.triageSendBtn.disabled = true;
 
       try {
@@ -3298,8 +3350,7 @@ RESPONSE:
             },
             ...state.triageMessages.map((m) => ({ role: m.role, content: m.content }))
           ],
-          temperature: 0.3,
-          maxTokens: 500
+          temperature: 0.3
         });
 
         const sec = parsePlainTextSections(raw, [
@@ -3318,7 +3369,7 @@ RESPONSE:
             timestampMs: Date.now(),
             decision: granted ? "Urgent Session Approved" : decision.includes("EMERGENCY") ? "Emergency 988 Advised" : "Deferred to Scheduled Slot",
             grantedUrgent: granted,
-            summary: sec.CLINICAL_NOTE || text.slice(0, 140)
+            summary: sec.CLINICAL_NOTE || text
           });
 
           if (granted) {
@@ -3353,7 +3404,7 @@ RESPONSE:
         logTelemetry(`Triage error: ${err.message}`, "error");
         showToast("Could not complete triage right now.");
       } finally {
-        state.isBusy = false;
+        state.busy.triage = false;
         els.triageSendBtn.disabled = false;
       }
     }
@@ -3532,8 +3583,13 @@ RESPONSE:
     els.signupPhotoInput.addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      state.pendingSignupPhotoDataUrl = await compressImageFile(file, 240, 0.78);
-      els.signupPhotoPreview.innerHTML = `<img src="${state.pendingSignupPhotoDataUrl}" class="w-full h-full object-cover" />`;
+      try {
+        state.pendingSignupPhotoDataUrl = await compressImageFile(file, 240, 0.78);
+        els.signupPhotoPreview.innerHTML = `<img src="${state.pendingSignupPhotoDataUrl}" class="w-full h-full object-cover" />`;
+      } catch (err) {
+        showToast("Could not load selected photo.");
+      }
+      e.target.value = "";
     });
 
     els.googleSigninBtn.addEventListener("click", async () => {
@@ -3579,6 +3635,8 @@ RESPONSE:
     const handleSignOut = async () => {
       clearLiveDraft();
       resetInMemoryUserState();
+      els.authForm.reset();
+      els.authError.classList.add("hidden");
       await signOut(auth);
     };
     els.signoutBtn.addEventListener("click", handleSignOut);
@@ -3597,19 +3655,20 @@ RESPONSE:
     els.waitingUrgentBtn.addEventListener("click", openTriageModal);
     els.scheduleUrgentBtn.addEventListener("click", openTriageModal);
 
+    // Chat & attachments
     els.chatForm.addEventListener("submit", handleSendChat);
-    els.chatInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        els.chatForm.requestSubmit();
-      }
-    });
+    bindChatTextarea(els.chatInput, els.chatForm);
+
     els.chatImageInput.addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      state.pendingChatImageDataUrl = await compressImageFile(file, 960, 0.8);
-      els.chatImageThumb.src = state.pendingChatImageDataUrl;
-      els.chatImagePreview.classList.remove("hidden");
+      try {
+        state.pendingChatImageDataUrl = await compressImageFile(file, 1024, 0.82);
+        els.chatImageThumb.src = state.pendingChatImageDataUrl;
+        els.chatImagePreview.classList.remove("hidden");
+      } catch (err) {
+        showToast("Could not load selected image.");
+      }
       e.target.value = "";
     });
     els.chatImageClear.addEventListener("click", () => {
@@ -3617,6 +3676,7 @@ RESPONSE:
       els.chatImagePreview.classList.add("hidden");
     });
 
+    // End session & PHQ-4 modal
     els.endSessionBtn.addEventListener("click", handleEndSessionClick);
     els.copingSlider.addEventListener("input", () => {
       els.copingSliderVal.textContent = `${els.copingSlider.value} / 10`;
@@ -3628,6 +3688,7 @@ RESPONSE:
       if (state.lastSaveSucceeded) switchTab("careplan");
     });
 
+    // Scheduling
     els.bookSlotForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const dateVal = els.bookDate.value;
@@ -3643,7 +3704,7 @@ RESPONSE:
 
       const minGapMs = (state.schedule.cadence.minimum_days_between_sessions || 4) * 24 * 60 * 60 * 1000;
       const tooClose = state.schedule.appointments.some((a) =>
-        (a.status === "scheduled" || a.status === "completed") &&
+        (a.status === "scheduled" || a.status === "in_progress" || a.status === "completed") &&
         !a.isUrgent &&
         Math.abs(a.scheduledStartMs - startMs) < minGapMs
       );
@@ -3666,26 +3727,23 @@ RESPONSE:
       showToast("Appointment scheduled.");
     });
 
+    // Annual intake
     els.intakeForm.addEventListener("submit", sendIntakeMessage);
-    els.intakeInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        els.intakeForm.requestSubmit();
-      }
-    });
+    bindChatTextarea(els.intakeInput, els.intakeForm);
+
     els.intakeFileInput.addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       try {
         if (file.type.startsWith("image/")) {
-          const dataUrl = await compressImageFile(file, 1024, 0.82);
+          const dataUrl = await compressImageFile(file, 1280, 0.85);
           state.pendingIntakeFile = { name: file.name, imageDataUrl: dataUrl };
         } else if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
           showToast("Reading PDF lab report…");
           const extractedText = await extractPdfText(file);
           state.pendingIntakeFile = { name: file.name, extractedText };
         } else {
-          const extractedText = (await file.text()).slice(0, 12000);
+          const extractedText = await file.text();
           state.pendingIntakeFile = { name: file.name, extractedText };
         }
         els.intakeFileName.textContent = file.name;
@@ -3699,17 +3757,18 @@ RESPONSE:
       state.pendingIntakeFile = null;
       els.intakeFilePreview.classList.add("hidden");
     });
+    els.intakeCancelBtn.addEventListener("click", () => {
+      els.intakeGate.classList.add("hidden");
+      els.appShell.classList.remove("hidden");
+    });
     els.intakeCompleteBtn.addEventListener("click", completeAndSaveIntake);
 
+    // Triage modal
     els.triageCloseBtn.addEventListener("click", () => els.triageModal.classList.add("hidden"));
     els.triageForm.addEventListener("submit", handleTriageSubmit);
-    els.triageInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        els.triageForm.requestSubmit();
-      }
-    });
+    bindChatTextarea(els.triageInput, els.triageForm);
 
+    // Settings subtabs & My Chart
     els.settingsSubtabChart.addEventListener("click", () => {
       els.settingsPanelChart.classList.remove("hidden");
       els.settingsPanelAccount.classList.add("hidden");
@@ -3725,9 +3784,11 @@ RESPONSE:
 
     els.addMedForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const name = els.medName.value.trim();
+      if (!name) return;
       if (!state.chart) state.chart = { completedAtMs: Date.now(), medical_history: [], medications: [], labs_and_baselines: "", summary: "" };
       state.chart.medications.push({
-        name: els.medName.value.trim(),
+        name,
         dosage: els.medDosage.value.trim(),
         timing: els.medTiming.value.trim()
       });
@@ -3739,17 +3800,18 @@ RESPONSE:
       showToast("Medication added to My Chart.");
     });
 
-    els.copyChartBtn.addEventListener("click", () => {
+    els.copyChartBtn.addEventListener("click", async () => {
       const summary = `${buildPatientChartContext()}\n\nTRAJECTORY:\n${buildLongTermTrajectoryContext()}\n\nCARE PLAN:\n${state.carePlan?.clinical_formulation || "None"}`;
-      copyTextToClipboard(summary);
+      await copyTextToClipboard(summary);
       showToast("Chart summary copied to clipboard.");
     });
     els.redoIntakeBtn.addEventListener("click", () => {
       state.intakeMessages = [];
-      openIntakeGate();
+      openIntakeGate(!needsAnnualIntake());
     });
     els.exportPdfBtn.addEventListener("click", exportMedicalRecordPdf);
 
+    // Edit profile modal
     els.editProfileBtn.addEventListener("click", () => {
       els.editName.value = state.userProfile.name || "";
       els.editGender.value = state.userProfile.gender || "";
@@ -3762,14 +3824,21 @@ RESPONSE:
     els.editPhotoInput.addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      state.pendingEditPhotoDataUrl = await compressImageFile(file, 240, 0.78);
-      els.editPhotoPreview.innerHTML = `<img src="${state.pendingEditPhotoDataUrl}" class="w-full h-full object-cover" />`;
+      try {
+        state.pendingEditPhotoDataUrl = await compressImageFile(file, 240, 0.78);
+        els.editPhotoPreview.innerHTML = `<img src="${state.pendingEditPhotoDataUrl}" class="w-full h-full object-cover" />`;
+      } catch (err) {
+        showToast("Could not load selected photo.");
+      }
+      e.target.value = "";
     });
     els.editProfileCancel.addEventListener("click", () => els.editProfileModal.classList.add("hidden"));
     els.editProfileForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const name = els.editName.value.trim();
+      if (!name) return;
       state.userProfile = {
-        name: els.editName.value.trim(),
+        name,
         gender: els.editGender.value,
         photoDataUrl: state.pendingEditPhotoDataUrl || ""
       };
@@ -3779,6 +3848,15 @@ RESPONSE:
       showToast("Profile updated.");
     });
 
+    // Global Escape key to dismiss non-blocking modals
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!els.triageModal.classList.contains("hidden")) els.triageModal.classList.add("hidden");
+      if (!els.editProfileModal.classList.contains("hidden")) els.editProfileModal.classList.add("hidden");
+      if (!els.checkinModal.classList.contains("hidden")) els.checkinModal.classList.add("hidden");
+    });
+
+    // Diagnostics & Prompt Library
     els.diagnosticsToggle.addEventListener("change", () => {
       state.diagnosticsEnabled = els.diagnosticsToggle.checked;
       localStorage.setItem("mindful_diagnostics", state.diagnosticsEnabled ? "1" : "0");
@@ -3861,7 +3939,7 @@ RESPONSE:
       startWaitingRoomWatcher();
 
       if (needsAnnualIntake()) {
-        openIntakeGate();
+        openIntakeGate(false);
       } else {
         els.intakeGate.classList.add("hidden");
         els.appShell.classList.remove("hidden");
