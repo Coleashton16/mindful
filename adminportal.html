@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1F2421" />
+  <title>Mindful HQ — Clinical Trial Review Portal</title>
+
+  <!-- Typography: Inter + Newsreader -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'serif']
+          },
+          colors: {
+            paper: '#FAF9F6',
+            surface: '#FFFFFF',
+            stone: '#F2F0EB',
+            ink: '#1F2421',
+            muted: '#636B66',
+            hairline: '#E6E3DC',
+            sage: '#3D6652',
+            'sage-hover': '#2F5141',
+            'sage-light': '#EEF4F0',
+            'sage-border': '#CFE0D5',
+            'amber-bg': '#FDF6E9',
+            'amber-ink': '#8A5A12',
+            'amber-border': '#F0D9B1',
+            'rose-bg': '#FDF2F2',
+            'rose-ink': '#9B2C2C',
+            'rose-border': '#F5C6C6'
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-paper text-ink font-sans antialiased selection:bg-sage-light selection:text-sage min-h-screen flex flex-col">
+
+  <!-- ======================================================================= -->
+  <!-- ADMIN LOGIN GATE (EMAIL/PASSWORD + MANDATORY 6-DIGIT MINDFUL MFA)       -->
+  <!-- ======================================================================= -->
+  <div id="hq-auth-gate" class="fixed inset-0 z-50 bg-paper flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-surface border border-hairline rounded-2xl p-6 sm:p-8 shadow-sm my-auto space-y-6">
+      <div class="text-center space-y-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-ink text-white mx-auto shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone text-muted text-[10px] font-semibold uppercase tracking-widest mb-1.5">
+            Internal Portal
+          </div>
+          <h1 class="font-serif text-3xl text-ink tracking-tight">Mindful HQ</h1>
+          <p id="hq-auth-subtitle" class="text-xs text-muted mt-1">Log in with your email and password</p>
+        </div>
+      </div>
+
+      <!-- Step 1: Email / Password Login Form (No Sign-Up Option) -->
+      <form id="hq-signin-form" novalidate class="space-y-3.5">
+        <div>
+          <label for="hq-email" class="block text-xs font-medium text-muted mb-1">Admin Email</label>
+          <input id="hq-email" type="email" autocomplete="email" placeholder="admin@mindful.app" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+        </div>
+
+        <div>
+          <label for="hq-password" class="block text-xs font-medium text-muted mb-1">Password</label>
+          <input id="hq-password" type="password" autocomplete="current-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+        </div>
+
+        <p id="hq-auth-error" class="hidden text-xs text-rose-ink bg-rose-bg border border-rose-border rounded-xl px-3.5 py-2.5"></p>
+
+        <button id="hq-signin-btn" type="submit" class="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-ink/90 text-white text-sm font-medium transition-colors disabled:opacity-60">
+          Log In
+        </button>
+      </form>
+
+      <!-- Step 2: Mandatory 6-Digit Mindful MFA Verification -->
+      <form id="hq-mfa-form" novalidate class="hidden space-y-4">
+        <div class="rounded-xl bg-sage-light/70 border border-sage-border px-3.5 py-2.5 text-xs text-ink flex items-center justify-between gap-2">
+          <span class="text-muted">Account:</span>
+          <span id="hq-mfa-account" class="font-medium text-sage truncate"></span>
+        </div>
+
+        <div>
+          <label for="hq-mfa-code" class="block text-xs font-medium text-muted mb-1.5 text-center">
+            Enter 6-Digit Code from Mindful MFA
+          </label>
+          <input
+            id="hq-mfa-code"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            placeholder="000000"
+            class="w-full px-4 py-3.5 rounded-xl bg-paper border border-hairline font-serif text-3xl text-center tracking-[0.28em] text-ink focus:outline-none focus:border-sage/60"
+          />
+          <p class="text-[11px] text-muted text-center mt-1.5">
+            Open your Mindful MFA app and enter the active 15-second code.
+          </p>
+        </div>
+
+        <p id="hq-mfa-error" class="hidden text-xs text-rose-ink bg-rose-bg border border-rose-border rounded-xl px-3.5 py-2.5 text-center"></p>
+
+        <div class="space-y-2">
+          <button id="hq-mfa-verify-btn" type="submit" class="w-full py-2.5 px-4 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors disabled:opacity-60">
+            Verify &amp; Log In
+          </button>
+          <button id="hq-mfa-cancel-btn" type="button" class="w-full py-2 px-4 rounded-xl border border-hairline bg-paper hover:bg-stone/60 text-xs font-medium text-muted hover:text-ink transition-colors">
+            Cancel &amp; Sign Out
+          </button>
+        </div>
+      </form>
+
+      <p class="text-[11px] text-center text-muted leading-relaxed pt-1 border-t border-hairline">
+        Account registration is disabled on Mindful HQ. If you are looking to apply for the clinical trial, please visit the public Mindful homepage.
+      </p>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MAIN HQ SHELL                                                           -->
+  <!-- ======================================================================= -->
+  <div id="hq-shell" class="hidden flex-1 flex flex-col min-h-screen">
+    <!-- Top Header -->
+    <header class="sticky top-0 z-30 bg-ink text-white border-b border-white/10">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-8 h-8 rounded-xl bg-sage text-white flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="font-serif text-xl tracking-tight">Mindful HQ</span>
+              <span class="hidden sm:inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-white/80">Admin</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span id="hq-admin-email" class="hidden md:inline-block text-xs text-white/70 truncate max-w-[200px]"></span>
+          <button id="hq-rules-btn" type="button" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-medium text-white/90 transition-colors">
+            Firestore Rules
+          </button>
+          <button id="hq-refresh-btn" type="button" class="px-3 py-1.5 rounded-xl bg-sage hover:bg-sage-hover text-xs font-medium text-white transition-colors">
+            Refresh
+          </button>
+          <button id="hq-signout-btn" type="button" class="px-3 py-1.5 rounded-xl border border-white/20 hover:bg-white/10 text-xs font-medium text-white/90 transition-colors">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+
+      <!-- Page Heading -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div>
+          <h1 class="font-serif text-2xl sm:text-3xl text-ink tracking-tight">Clinical Trial Applications</h1>
+          <p class="text-sm text-muted mt-1">Review applicant questionnaires, verify signed legal waivers, and manage trial approval status.</p>
+        </div>
+        <button id="hq-lookup-btn" type="button" class="self-start sm:self-auto px-3.5 py-2 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-xs font-medium text-ink transition-colors">
+          Lookup Applicant by UID
+        </button>
+      </div>
+
+      <!-- Permission / Sync Alert Banner -->
+      <div id="hq-alert-banner" class="hidden rounded-2xl bg-amber-bg border border-amber-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-ink">
+        <div id="hq-alert-text" class="leading-relaxed"></div>
+        <button id="hq-alert-rules-btn" type="button" class="shrink-0 px-3 py-1.5 rounded-xl bg-surface border border-amber-border text-amber-ink font-medium hover:bg-paper transition-colors">
+          View Required Rules
+        </button>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="rounded-2xl bg-surface border border-hairline p-4 sm:p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-muted">Total Applications</div>
+          <div id="stat-total" class="font-serif text-3xl text-ink mt-1.5">0</div>
+        </div>
+        <div class="rounded-2xl bg-amber-bg/50 border border-amber-border p-4 sm:p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-amber-ink">Pending Review</div>
+          <div id="stat-pending" class="font-serif text-3xl text-amber-ink mt-1.5">0</div>
+        </div>
+        <div class="rounded-2xl bg-sage-light/70 border border-sage-border p-4 sm:p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-sage">Approved</div>
+          <div id="stat-approved" class="font-serif text-3xl text-sage mt-1.5">0</div>
+        </div>
+        <div class="rounded-2xl bg-surface border border-hairline p-4 sm:p-5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-muted">Declined</div>
+          <div id="stat-declined" class="font-serif text-3xl text-muted mt-1.5">0</div>
+        </div>
+      </section>
+
+      <!-- Filter & Search Bar -->
+      <section class="rounded-2xl bg-surface border border-hairline p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <!-- Status Filter Tabs -->
+        <div class="inline-flex flex-wrap p-1 rounded-xl bg-stone gap-1 self-start">
+          <button type="button" data-filter="all" class="filter-tab px-3 py-1.5 rounded-lg text-xs font-medium bg-surface text-ink shadow-sm transition-all">All</button>
+          <button type="button" data-filter="pending" class="filter-tab px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink transition-all">Pending</button>
+          <button type="button" data-filter="approved" class="filter-tab px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink transition-all">Approved</button>
+          <button type="button" data-filter="declined" class="filter-tab px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink transition-all">Declined</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative flex-1 md:max-w-xs">
+          <svg class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input id="hq-search-input" type="search" placeholder="Search name, email, focus, UID…" class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-paper border border-hairline text-xs text-ink focus:outline-none focus:border-sage/60" />
+        </div>
+      </section>
+
+      <!-- Applications List -->
+      <section class="rounded-2xl bg-surface border border-hairline overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-hairline flex items-center justify-between gap-2 bg-paper/50">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Applicant Queue</h2>
+          <span id="hq-result-count" class="text-xs text-muted">Loading…</span>
+        </div>
+
+        <div id="hq-applications-list" class="divide-y divide-hairline">
+          <div class="p-10 text-center text-sm text-muted">Loading applications from Firebase…</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 1: APPLICATION REVIEW & APPROVAL WORKSPACE                        -->
+  <!-- ======================================================================= -->
+  <div id="review-modal" class="hidden fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div class="w-full max-w-2xl bg-surface border border-hairline rounded-2xl shadow-xl overflow-hidden my-auto max-h-[92vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="px-5 sm:px-6 py-4 border-b border-hairline flex items-start justify-between gap-4 bg-paper/60">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 id="rev-name" class="font-serif text-2xl text-ink truncate">Applicant Name</h2>
+            <span id="rev-status-badge" class="text-[11px] px-2.5 py-0.5 rounded-full border font-medium capitalize">Pending</span>
+          </div>
+          <div id="rev-email-uid" class="text-xs text-muted mt-1 break-all"></div>
+        </div>
+        <button id="review-close-btn" type="button" class="p-1.5 rounded-lg text-muted hover:text-ink hover:bg-stone transition-colors text-sm shrink-0">✕</button>
+      </div>
+
+      <!-- Scrollable Details Body -->
+      <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-sm">
+        <!-- Quick Metadata Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+            <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Age Range</div>
+            <div id="rev-age" class="text-xs font-semibold text-ink mt-1">—</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+            <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Primary Focus</div>
+            <div id="rev-focus" class="text-xs font-semibold text-ink mt-1">—</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-paper border border-hairline">
+            <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Submitted</div>
+            <div id="rev-submitted" class="text-xs font-semibold text-ink mt-1">—</div>
+          </div>
+        </div>
+
+        <!-- Prior Experience -->
+        <div class="p-4 rounded-xl bg-paper border border-hairline space-y-1">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Prior Therapy / App Experience</div>
+          <div id="rev-experience" class="text-xs text-ink font-medium">—</div>
+        </div>
+
+        <!-- Applicant Statement -->
+        <div class="p-4 rounded-xl bg-paper border border-hairline space-y-1.5">
+          <div class="text-[10px] font-semibold uppercase tracking-wider text-muted">Goals &amp; Reason for Applying</div>
+          <p id="rev-reason" class="text-xs sm:text-sm text-ink/90 leading-relaxed whitespace-pre-line">—</p>
+        </div>
+
+        <!-- Legal Waiver & Consent Verification -->
+        <div class="p-4 rounded-xl bg-stone/50 border border-hairline space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-muted">Legal Waiver &amp; Electronic Signature</span>
+            <span id="rev-legal-pill" class="text-[10px] px-2 py-0.5 rounded-full font-semibold"></span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-ink/85">
+            <div><span class="text-muted">Signed Name:</span> <strong id="rev-signature" class="text-ink">—</strong></div>
+            <div><span class="text-muted">Waiver Version:</span> <span id="rev-waiver-version" class="font-mono">—</span></div>
+            <div><span class="text-muted">Weekly Commitment (18+):</span> <span id="rev-commit">—</span></div>
+            <div><span class="text-muted">Signed At:</span> <span id="rev-signed-at">—</span></div>
+          </div>
+        </div>
+
+        <!-- Internal Reviewer Notes -->
+        <div class="space-y-1.5">
+          <label for="rev-notes" class="block text-xs font-semibold uppercase tracking-wider text-muted">Internal Reviewer Notes</label>
+          <textarea id="rev-notes" rows="3" placeholder="Add private notes for the Mindful HQ team (reason for approval/decline, cohort number, etc.)…" class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline text-xs sm:text-sm text-ink focus:outline-none focus:border-sage/60 resize-y"></textarea>
+          <div id="rev-last-reviewed" class="text-[11px] text-muted"></div>
+        </div>
+      </div>
+
+      <!-- Sticky Decision Action Footer -->
+      <div class="px-5 sm:px-6 py-4 border-t border-hairline bg-paper/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <button id="rev-pending-btn" type="button" class="px-3.5 py-2 rounded-xl border border-hairline bg-surface hover:bg-stone text-xs font-medium text-muted hover:text-ink transition-colors disabled:opacity-50">
+          Set Pending
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="rev-decline-btn" type="button" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border border-rose-border bg-rose-bg hover:opacity-90 text-rose-ink text-xs font-semibold transition-opacity disabled:opacity-50">
+            Decline
+          </button>
+          <button id="rev-approve-btn" type="button" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-semibold transition-colors disabled:opacity-50">
+            Approve for Trial
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 2: LOOKUP APPLICANT BY UID                                        -->
+  <!-- ======================================================================= -->
+  <div id="lookup-modal" class="hidden fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-surface border border-hairline rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-serif text-xl text-ink">Lookup Applicant by UID</h3>
+        <button id="lookup-close-btn" type="button" class="text-muted hover:text-ink text-sm px-1">✕</button>
+      </div>
+      <p class="text-xs text-muted leading-relaxed">
+        Paste a Firebase User UID to fetch their application directly from <span class="font-mono">clinical_trial_applicants/{uid}</span> or <span class="font-mono">users/{uid}/profile/clinical_trial_application</span>.
+      </p>
+      <form id="lookup-form" class="space-y-3">
+        <input id="lookup-uid-input" type="text" required placeholder="e.g. 9xK2pL..." class="w-full px-3.5 py-2.5 rounded-xl bg-paper border border-hairline font-mono text-xs text-ink focus:outline-none focus:border-sage/60" />
+        <p id="lookup-error" class="hidden text-xs text-rose-ink bg-rose-bg border border-rose-border rounded-xl px-3 py-2"></p>
+        <div class="flex justify-end gap-2 pt-1">
+          <button id="lookup-cancel-btn" type="button" class="px-3.5 py-2 rounded-xl border border-hairline text-xs text-muted hover:text-ink">Cancel</button>
+          <button id="lookup-submit-btn" type="submit" class="px-4 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium">Find Application</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- MODAL 3: FIRESTORE ADMIN RULES HELPER                                   -->
+  <!-- ======================================================================= -->
+  <div id="rules-modal" class="hidden fixed inset-0 z-50 bg-ink/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="w-full max-w-xl bg-surface border border-hairline rounded-2xl p-6 shadow-xl space-y-4 my-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="font-serif text-xl text-ink">Firestore Security Rules for Mindful HQ</h3>
+        <button id="rules-close-btn" type="button" class="text-muted hover:text-ink text-sm px-1">✕</button>
+      </div>
+      <p class="text-xs text-muted leading-relaxed">
+        If Firebase returns a permission error, paste these rules into
+        <a href="https://console.firebase.google.com/project/mindful-cabbd/firestore/rules" target="_blank" rel="noopener noreferrer" class="text-sage underline font-medium">Firebase Console → Firestore Rules</a>
+        and click <strong>Publish</strong>.
+      </p>
+      <pre id="rules-code-block" class="p-4 rounded-xl bg-ink text-stone text-[11px] font-mono overflow-x-auto leading-relaxed"></pre>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <a href="https://console.firebase.google.com/project/mindful-cabbd/firestore/rules" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl border border-hairline bg-paper hover:bg-stone text-xs font-medium text-ink transition-colors">
+          Open Firebase Console ↗
+        </a>
+        <div class="flex items-center gap-2">
+          <button id="rules-copy-btn" type="button" class="px-4 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium">Copy Rules</button>
+          <button id="rules-retry-btn" type="button" class="px-4 py-2 rounded-xl bg-ink hover:bg-ink/90 text-white text-xs font-medium">Test &amp; Reload</button>
+          <button id="rules-done-btn" type="button" class="px-4 py-2 rounded-xl border border-hairline text-xs text-ink hover:bg-stone">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="hq-toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-ink text-white text-xs font-medium shadow-lg max-w-md text-center"></div>
+
+  <!-- ======================================================================= -->
+  <!-- MINDFUL HQ APPLICATION LOGIC                                            -->
+  <!-- ======================================================================= -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      collectionGroup,
+      doc,
+      getDoc,
+      getDocs,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // =========================================================================
+    // 1. FIREBASE CONFIGURATION (MINDFUL PROJECT)
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtSUbIzU45-bf2gS2lbH5iJMeq2c6piLc",
+      authDomain: "mindful-cabbd.firebaseapp.com",
+      projectId: "mindful-cabbd",
+      storageBucket: "mindful-cabbd.firebasestorage.app",
+      messagingSenderId: "663102632335",
+      appId: "1:663102632335:web:a643dc1001616692c5dbfa",
+      measurementId: "G-LVH8053YLS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // =========================================================================
+    // 2. STATE & DOM REFERENCES
+    // =========================================================================
+    const state = {
+      adminUser: null,
+      mfaVerified: false,
+      verifyingMfa: false,
+      applications: [],
+      activeFilter: "all",
+      searchQuery: "",
+      selectedUid: null,
+      savingDecision: false
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const els = {
+      authGate: $("hq-auth-gate"),
+      authSubtitle: $("hq-auth-subtitle"),
+      signinForm: $("hq-signin-form"),
+      emailInput: $("hq-email"),
+      passwordInput: $("hq-password"),
+      authError: $("hq-auth-error"),
+      signinBtn: $("hq-signin-btn"),
+
+      mfaForm: $("hq-mfa-form"),
+      mfaAccount: $("hq-mfa-account"),
+      mfaCodeInput: $("hq-mfa-code"),
+      mfaError: $("hq-mfa-error"),
+      mfaVerifyBtn: $("hq-mfa-verify-btn"),
+      mfaCancelBtn: $("hq-mfa-cancel-btn"),
+
+      shell: $("hq-shell"),
+      adminEmail: $("hq-admin-email"),
+      rulesBtn: $("hq-rules-btn"),
+      refreshBtn: $("hq-refresh-btn"),
+      signoutBtn: $("hq-signout-btn"),
+      lookupBtn: $("hq-lookup-btn"),
+
+      alertBanner: $("hq-alert-banner"),
+      alertText: $("hq-alert-text"),
+      alertRulesBtn: $("hq-alert-rules-btn"),
+
+      statTotal: $("stat-total"),
+      statPending: $("stat-pending"),
+      statApproved: $("stat-approved"),
+      statDeclined: $("stat-declined"),
+
+      filterTabs: document.querySelectorAll(".filter-tab"),
+      searchInput: $("hq-search-input"),
+      resultCount: $("hq-result-count"),
+      applicationsList: $("hq-applications-list"),
+
+      reviewModal: $("review-modal"),
+      reviewCloseBtn: $("review-close-btn"),
+      revName: $("rev-name"),
+      revStatusBadge: $("rev-status-badge"),
+      revEmailUid: $("rev-email-uid"),
+      revAge: $("rev-age"),
+      revFocus: $("rev-focus"),
+      revSubmitted: $("rev-submitted"),
+      revExperience: $("rev-experience"),
+      revReason: $("rev-reason"),
+      revLegalPill: $("rev-legal-pill"),
+      revSignature: $("rev-signature"),
+      revWaiverVersion: $("rev-waiver-version"),
+      revCommit: $("rev-commit"),
+      revSignedAt: $("rev-signed-at"),
+      revNotes: $("rev-notes"),
+      revLastReviewed: $("rev-last-reviewed"),
+      revPendingBtn: $("rev-pending-btn"),
+      revDeclineBtn: $("rev-decline-btn"),
+      revApproveBtn: $("rev-approve-btn"),
+
+      lookupModal: $("lookup-modal"),
+      lookupCloseBtn: $("lookup-close-btn"),
+      lookupForm: $("lookup-form"),
+      lookupUidInput: $("lookup-uid-input"),
+      lookupError: $("lookup-error"),
+      lookupCancelBtn: $("lookup-cancel-btn"),
+      lookupSubmitBtn: $("lookup-submit-btn"),
+
+      rulesModal: $("rules-modal"),
+      rulesCloseBtn: $("rules-close-btn"),
+      rulesCodeBlock: $("rules-code-block"),
+      rulesCopyBtn: $("rules-copy-btn"),
+      rulesRetryBtn: $("rules-retry-btn"),
+      rulesDoneBtn: $("rules-done-btn"),
+
+      toast: $("hq-toast")
+    };
+
+    // =========================================================================
+    // 3. HELPERS
+    // =========================================================================
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function parseTimestampMs(val) {
+      if (!val) return 0;
+      if (typeof val === "number") return val;
+      if (typeof val === "object" && typeof val.toMillis === "function") return val.toMillis();
+      if (typeof val === "object" && typeof val.seconds === "number") return val.seconds * 1000;
+      const parsed = Date.parse(String(val));
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    function formatDateTime(ms) {
+      const t = parseTimestampMs(ms);
+      if (!t) return "—";
+      return new Date(t).toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function showToast(msg, duration = 3000) {
+      els.toast.textContent = msg;
+      els.toast.classList.remove("hidden");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => els.toast.classList.add("hidden"), duration);
+    }
+
+    function copyTextFallback(text) {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {});
+        return;
+      }
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+
+    function statusBadgeClass(status) {
+      const s = String(status || "pending").toLowerCase();
+      if (s === "approved") return "bg-sage-light text-sage border-sage-border";
+      if (s === "declined" || s === "rejected") return "bg-rose-bg text-rose-ink border-rose-border";
+      return "bg-amber-bg text-amber-ink border-amber-border";
+    }
+
+    function normalizeApplication(raw, fallbackUid, source = "") {
+      if (!raw || typeof raw !== "object") return null;
+      const uid = String(raw.uid || fallbackUid || "").trim();
+      if (!uid) return null;
+      const rawStatus = String(raw.status || "pending").toLowerCase();
+      const status = rawStatus === "rejected" ? "declined" : rawStatus;
+
+      return {
+        ...raw,
+        uid,
+        source,
+        status,
+        fullName: raw.fullName || raw.name || "Unnamed Applicant",
+        email: raw.email || raw.emailLower || "—",
+        ageRange: raw.ageRange || "—",
+        primaryFocus: raw.primaryFocus || "—",
+        priorTherapyExperience: raw.priorTherapyExperience || "—",
+        reasonForJoining: raw.reasonForJoining || "—",
+        confirmedWeeklyCommitment: Boolean(raw.confirmedWeeklyCommitment),
+        legalDisclaimerAccepted: Boolean(raw.legalDisclaimerAccepted),
+        legalDisclaimerVersion: raw.legalDisclaimerVersion || "—",
+        legalSignatureName: raw.legalSignatureName || "—",
+        legalAcceptedAtMs: parseTimestampMs(raw.legalAcceptedAtMs),
+        submittedAtMs: parseTimestampMs(raw.submittedAtMs || raw.submittedAt),
+        reviewerNotes: raw.reviewerNotes || "",
+        reviewedBy: raw.reviewedBy || "",
+        reviewedAtMs: parseTimestampMs(raw.reviewedAtMs || raw.reviewedAt)
+      };
+    }
+
+    function buildAdminRulesSnippet() {
+      return `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}`;
+    }
+
+    // =========================================================================
+    // 4. DATA LOADING & APPROVAL SYNC
+    // =========================================================================
+    async function loadApplications() {
+      els.alertBanner.classList.add("hidden");
+      els.applicationsList.innerHTML = `<div class="p-10 text-center text-sm text-muted">Loading applications from Firebase…</div>`;
+
+      const byUid = new Map();
+      const errors = [];
+
+      // 1. Primary top-level collection: clinical_trial_applicants
+      try {
+        const snap = await getDocs(collection(db, "clinical_trial_applicants"));
+        snap.forEach((docSnap) => {
+          const item = normalizeApplication(docSnap.data(), docSnap.id, "clinical_trial_applicants");
+          if (item) byUid.set(item.uid, item);
+        });
+      } catch (err) {
+        errors.push(`clinical_trial_applicants (${err?.code || err?.message})`);
+      }
+
+      // 2. Fallback scan: users/*/profile/clinical_trial_application
+      try {
+        const groupSnap = await getDocs(collectionGroup(db, "profile"));
+        groupSnap.forEach((docSnap) => {
+          if (docSnap.id !== "clinical_trial_application") return;
+          const parentUid = docSnap.ref.parent?.parent?.id || "";
+          const item = normalizeApplication(docSnap.data(), parentUid, "users_profile");
+          if (item && !byUid.has(item.uid)) {
+            byUid.set(item.uid, item);
+          }
+        });
+      } catch (err) {
+        errors.push(`users/*/profile (${err?.code || err?.message})`);
+      }
+
+      state.applications = Array.from(byUid.values()).sort(
+        (a, b) => (b.submittedAtMs || 0) - (a.submittedAtMs || 0)
+      );
+
+      if (errors.length && state.applications.length === 0) {
+        els.alertText.innerHTML = `<strong>Firestore read blocked:</strong> ${escapeHtml(errors.join(" · "))}. Click <strong>View Required Rules</strong> to update your Firebase Console rules.`;
+        els.alertBanner.classList.remove("hidden");
+      }
+
+      renderDashboard();
+    }
+
+    async function updateApplicationDecision(item, newStatus, notes) {
+      if (state.savingDecision || !item) return;
+      state.savingDecision = true;
+
+      els.revApproveBtn.disabled = true;
+      els.revDeclineBtn.disabled = true;
+      els.revPendingBtn.disabled = true;
+
+      const cleanNotes = String(notes || "").trim();
+      const nowMs = Date.now();
+      const reviewer = state.adminUser?.email || state.adminUser?.uid || "Mindful HQ";
+
+      const updatePatch = {
+        ...item,
+        status: newStatus,
+        reviewerNotes: cleanNotes,
+        reviewedBy: reviewer,
+        reviewedAt: serverTimestamp(),
+        reviewedAtMs: nowMs
+      };
+      delete updatePatch.source;
+
+      try {
+        let savedAnywhere = false;
+        let lastErr = null;
+
+        // Write to top-level clinical_trial_applicants/{uid}
+        try {
+          await setDoc(doc(db, "clinical_trial_applicants", item.uid), updatePatch, { merge: true });
+          savedAnywhere = true;
+        } catch (err) {
+          lastErr = err;
+        }
+
+        // Mirror to users/{uid}/profile/clinical_trial_application so main app unlocks immediately
+        try {
+          await setDoc(doc(db, "users", item.uid, "profile", "clinical_trial_application"), updatePatch, { merge: true });
+          savedAnywhere = true;
+        } catch (err) {
+          if (!savedAnywhere) lastErr = err;
+        }
+
+        if (!savedAnywhere) {
+          throw lastErr || new Error("Permission denied when saving decision.");
+        }
+
+        const updatedItem = normalizeApplication(updatePatch, item.uid, item.source);
+        const idx = state.applications.findIndex((x) => x.uid === item.uid);
+        if (idx >= 0) state.applications[idx] = updatedItem;
+
+        renderDashboard();
+        openReviewModal(item.uid);
+        showToast(`Application marked as ${newStatus}.`);
+      } catch (err) {
+        showToast(`Could not update status (${err?.code || err?.message}).`);
+      } finally {
+        state.savingDecision = false;
+        els.revApproveBtn.disabled = false;
+        els.revDeclineBtn.disabled = false;
+        els.revPendingBtn.disabled = false;
+      }
+    }
+
+    // =========================================================================
+    // 5. DASHBOARD & MODAL RENDERING
+    // =========================================================================
+    function renderDashboard() {
+      const total = state.applications.length;
+      const pending = state.applications.filter((a) => a.status === "pending").length;
+      const approved = state.applications.filter((a) => a.status === "approved").length;
+      const declined = state.applications.filter((a) => a.status === "declined").length;
+
+      els.statTotal.textContent = String(total);
+      els.statPending.textContent = String(pending);
+      els.statApproved.textContent = String(approved);
+      els.statDeclined.textContent = String(declined);
+
+      const q = state.searchQuery.trim().toLowerCase();
+      const filtered = state.applications.filter((a) => {
+        if (state.activeFilter !== "all" && a.status !== state.activeFilter) return false;
+        if (!q) return true;
+        return [a.fullName, a.email, a.primaryFocus, a.uid, a.reasonForJoining]
+          .some((val) => String(val || "").toLowerCase().includes(q));
+      });
+
+      els.resultCount.textContent = `${filtered.length} of ${total} shown`;
+
+      if (!filtered.length) {
+        els.applicationsList.innerHTML = `<div class="p-10 text-center text-sm text-muted">No clinical trial applications match this filter.</div>`;
+        return;
+      }
+
+      els.applicationsList.innerHTML = filtered.map((a) => `
+        <div class="p-4 sm:px-5 sm:py-4 hover:bg-paper/70 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0 space-y-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-sm font-semibold text-ink">${escapeHtml(a.fullName)}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full border capitalize font-medium ${statusBadgeClass(a.status)}">${escapeHtml(a.status)}</span>
+              ${a.legalDisclaimerAccepted
+                ? `<span class="text-[10px] px-2 py-0.5 rounded-full bg-stone text-muted">Waiver Signed</span>`
+                : `<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-bg text-rose-ink border border-rose-border">No Waiver</span>`
+              }
+            </div>
+            <div class="text-xs text-muted truncate">
+              ${escapeHtml(a.email)} · ${escapeHtml(a.primaryFocus)} · Submitted ${escapeHtml(formatDateTime(a.submittedAtMs))}
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button data-review-uid="${escapeHtml(a.uid)}" type="button" class="review-open-btn px-3.5 py-2 rounded-xl bg-ink hover:bg-ink/90 text-white text-xs font-medium transition-colors">
+              Review Application
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      els.applicationsList.querySelectorAll(".review-open-btn").forEach((btn) => {
+        btn.addEventListener("click", () => openReviewModal(btn.dataset.reviewUid));
+      });
+    }
+
+    function openReviewModal(uid) {
+      const item = state.applications.find((x) => x.uid === uid);
+      if (!item) return;
+      state.selectedUid = uid;
+
+      els.revName.textContent = item.fullName;
+      els.revStatusBadge.textContent = item.status;
+      els.revStatusBadge.className = `text-[11px] px-2.5 py-0.5 rounded-full border font-medium capitalize ${statusBadgeClass(item.status)}`;
+      els.revEmailUid.textContent = `${item.email}  ·  UID: ${item.uid}`;
+
+      els.revAge.textContent = item.ageRange;
+      els.revFocus.textContent = item.primaryFocus;
+      els.revSubmitted.textContent = formatDateTime(item.submittedAtMs);
+      els.revExperience.textContent = item.priorTherapyExperience;
+      els.revReason.textContent = item.reasonForJoining;
+
+      els.revLegalPill.textContent = item.legalDisclaimerAccepted ? "Verified & Signed" : "Missing";
+      els.revLegalPill.className = item.legalDisclaimerAccepted
+        ? "text-[10px] px-2 py-0.5 rounded-full font-semibold bg-sage-light text-sage border border-sage-border"
+        : "text-[10px] px-2 py-0.5 rounded-full font-semibold bg-rose-bg text-rose-ink border border-rose-border";
+
+      els.revSignature.textContent = item.legalSignatureName;
+      els.revWaiverVersion.textContent = item.legalDisclaimerVersion;
+      els.revCommit.textContent = item.confirmedWeeklyCommitment ? "Confirmed (18+)" : "Not confirmed";
+      els.revSignedAt.textContent = formatDateTime(item.legalAcceptedAtMs);
+
+      els.revNotes.value = item.reviewerNotes || "";
+      els.revLastReviewed.textContent = item.reviewedAtMs
+        ? `Last updated ${formatDateTime(item.reviewedAtMs)} by ${item.reviewedBy || "Mindful HQ"}`
+        : "Not reviewed yet.";
+
+      els.reviewModal.classList.remove("hidden");
+    }
+
+    function closeReviewModal() {
+      state.selectedUid = null;
+      els.reviewModal.classList.add("hidden");
+    }
+
+    // =========================================================================
+    // 6. AUTHENTICATION & 6-DIGIT MINDFUL MFA VERIFICATION
+    // =========================================================================
+    function showAuthError(msg) {
+      els.authError.textContent = msg;
+      els.authError.classList.remove("hidden");
+    }
+
+    function showMfaError(msg) {
+      els.mfaError.textContent = msg;
+      els.mfaError.classList.remove("hidden");
+    }
+
+    function showMfaPromptForUser(user) {
+      els.shell.classList.add("hidden");
+      els.signinForm.classList.add("hidden");
+      els.mfaError.classList.add("hidden");
+      els.mfaCodeInput.value = "";
+      els.mfaAccount.textContent = user.email || user.uid;
+      els.authSubtitle.textContent = "Enter your 6-digit Mindful MFA code";
+      els.mfaForm.classList.remove("hidden");
+      els.authGate.classList.remove("hidden");
+      setTimeout(() => els.mfaCodeInput.focus(), 50);
+    }
+
+    async function unlockAdminDashboard(user) {
+      state.mfaVerified = true;
+      els.mfaCodeInput.value = "";
+      els.authGate.classList.add("hidden");
+      els.shell.classList.remove("hidden");
+      els.adminEmail.textContent = user.email || user.uid;
+      els.rulesCodeBlock.textContent = buildAdminRulesSnippet();
+      await loadApplications();
+    }
+
+    // Step 1: Email & Password Login -> Immediately prompt for 6-digit MFA code
+    els.signinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      els.authError.classList.add("hidden");
+
+      const email = els.emailInput.value.trim();
+      const password = els.passwordInput.value;
+      if (!email || !password) {
+        return showAuthError("Please enter your email and password.");
+      }
+
+      els.signinBtn.disabled = true;
+      els.signinBtn.textContent = "Logging In…";
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        state.adminUser = cred.user;
+        state.mfaVerified = false;
+        showMfaPromptForUser(cred.user);
+      } catch (err) {
+        showAuthError("Invalid email or password.");
+      } finally {
+        els.signinBtn.disabled = false;
+        els.signinBtn.textContent = "Log In";
+      }
+    });
+
+    // Keep MFA input strictly 6 numeric digits
+    els.mfaCodeInput.addEventListener("input", () => {
+      els.mfaCodeInput.value = els.mfaCodeInput.value.replace(/\D/g, "").slice(0, 6);
+      els.mfaError.classList.add("hidden");
+    });
+
+    async function fetchActiveMfaRecord(user) {
+      const emailKey = String(user.email || user.uid).trim().toLowerCase();
+      let record = null;
+
+      // Primary path written by Mindful MFA: users/{uid}/profile/mfa_code
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid, "profile", "mfa_code"));
+        if (snap.exists()) record = snap.data();
+      } catch (_) {}
+
+      // Fallback mirror path: mfa_codes/{emailLower}
+      if (!record) {
+        try {
+          const mirrorSnap = await getDoc(doc(db, "mfa_codes", emailKey));
+          if (mirrorSnap.exists()) record = mirrorSnap.data();
+        } catch (_) {}
+      }
+
+      return record;
+    }
+
+    // Step 2: Verify 6-digit Mindful MFA Code -> Unlock Mindful HQ
+    els.mfaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (state.verifyingMfa || !state.adminUser) return;
+      els.mfaError.classList.add("hidden");
+
+      const enteredCode = els.mfaCodeInput.value.replace(/\D/g, "").trim();
+      if (enteredCode.length !== 6) {
+        return showMfaError("Please enter the full 6-digit code from Mindful MFA.");
+      }
+
+      state.verifyingMfa = true;
+      els.mfaVerifyBtn.disabled = true;
+      els.mfaVerifyBtn.textContent = "Verifying…";
+
+      try {
+        const record = await fetchActiveMfaRecord(state.adminUser);
+        if (!record || !record.code) {
+          showMfaError("No active verification code found. Open Mindful MFA and sign in first.");
+          return;
+        }
+
+        const expectedCode = String(record.code).trim();
+        const expiresAtMs = Number(record.expiresAtMs || 0);
+        // 4s grace window for network/clock skew
+        const isExpired = expiresAtMs > 0 && Date.now() > expiresAtMs + 4000;
+
+        if (isExpired) {
+          showMfaError("That code has expired. Enter the new 6-digit code from Mindful MFA.");
+          els.mfaCodeInput.value = "";
+          els.mfaCodeInput.focus();
+          return;
+        }
+
+        if (enteredCode !== expectedCode) {
+          showMfaError("Code does not match. Access denied.");
+          els.mfaCodeInput.select();
+          return;
+        }
+
+        await unlockAdminDashboard(state.adminUser);
+      } catch (err) {
+        showMfaError(`Could not verify code (${err?.code || "error"}). Please try again.`);
+      } finally {
+        state.verifyingMfa = false;
+        els.mfaVerifyBtn.disabled = false;
+        els.mfaVerifyBtn.textContent = "Verify & Log In";
+      }
+    });
+
+    els.mfaCancelBtn.addEventListener("click", async () => {
+      state.mfaVerified = false;
+      els.mfaCodeInput.value = "";
+      els.mfaError.classList.add("hidden");
+      await signOut(auth);
+    });
+
+    els.signoutBtn.addEventListener("click", async () => {
+      closeReviewModal();
+      state.mfaVerified = false;
+      state.applications = [];
+      await signOut(auth);
+    });
+
+    // =========================================================================
+    // 7. DASHBOARD EVENT LISTENERS
+    // =========================================================================
+    els.refreshBtn.addEventListener("click", loadApplications);
+
+    els.filterTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        state.activeFilter = tab.dataset.filter;
+        els.filterTabs.forEach((t) => {
+          const active = t.dataset.filter === state.activeFilter;
+          t.className = active
+            ? "filter-tab px-3 py-1.5 rounded-lg text-xs font-medium bg-surface text-ink shadow-sm transition-all"
+            : "filter-tab px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink transition-all";
+        });
+        renderDashboard();
+      });
+    });
+
+    els.searchInput.addEventListener("input", () => {
+      state.searchQuery = els.searchInput.value;
+      renderDashboard();
+    });
+
+    // Review modal controls
+    els.reviewCloseBtn.addEventListener("click", closeReviewModal);
+    els.revApproveBtn.addEventListener("click", () => {
+      const item = state.applications.find((x) => x.uid === state.selectedUid);
+      if (item) updateApplicationDecision(item, "approved", els.revNotes.value);
+    });
+    els.revDeclineBtn.addEventListener("click", () => {
+      const item = state.applications.find((x) => x.uid === state.selectedUid);
+      if (item) updateApplicationDecision(item, "declined", els.revNotes.value);
+    });
+    els.revPendingBtn.addEventListener("click", () => {
+      const item = state.applications.find((x) => x.uid === state.selectedUid);
+      if (item) updateApplicationDecision(item, "pending", els.revNotes.value);
+    });
+
+    // Lookup by UID modal
+    const closeLookupModal = () => {
+      els.lookupModal.classList.add("hidden");
+      els.lookupError.classList.add("hidden");
+      els.lookupUidInput.value = "";
+    };
+    els.lookupBtn.addEventListener("click", () => els.lookupModal.classList.remove("hidden"));
+    els.lookupCloseBtn.addEventListener("click", closeLookupModal);
+    els.lookupCancelBtn.addEventListener("click", closeLookupModal);
+
+    els.lookupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      els.lookupError.classList.add("hidden");
+      const uid = els.lookupUidInput.value.trim();
+      if (!uid) return;
+
+      els.lookupSubmitBtn.disabled = true;
+      els.lookupSubmitBtn.textContent = "Searching…";
+
+      try {
+        let found = null;
+        try {
+          const snap1 = await getDoc(doc(db, "clinical_trial_applicants", uid));
+          if (snap1.exists()) found = normalizeApplication(snap1.data(), uid, "clinical_trial_applicants");
+        } catch (_) {}
+
+        if (!found) {
+          try {
+            const snap2 = await getDoc(doc(db, "users", uid, "profile", "clinical_trial_application"));
+            if (snap2.exists()) found = normalizeApplication(snap2.data(), uid, "users_profile");
+          } catch (_) {}
+        }
+
+        if (!found) {
+          els.lookupError.textContent = "No clinical trial application found for that UID.";
+          els.lookupError.classList.remove("hidden");
+          return;
+        }
+
+        const idx = state.applications.findIndex((x) => x.uid === found.uid);
+        if (idx >= 0) state.applications[idx] = found;
+        else state.applications.unshift(found);
+
+        renderDashboard();
+        closeLookupModal();
+        openReviewModal(found.uid);
+      } finally {
+        els.lookupSubmitBtn.disabled = false;
+        els.lookupSubmitBtn.textContent = "Find Application";
+      }
+    });
+
+    // Rules modal
+    const openRulesModal = () => {
+      els.rulesCodeBlock.textContent = buildAdminRulesSnippet();
+      els.rulesModal.classList.remove("hidden");
+    };
+    const closeRulesModal = () => els.rulesModal.classList.add("hidden");
+    els.rulesBtn.addEventListener("click", openRulesModal);
+    els.alertRulesBtn.addEventListener("click", openRulesModal);
+    els.rulesCloseBtn.addEventListener("click", closeRulesModal);
+    els.rulesDoneBtn.addEventListener("click", closeRulesModal);
+    els.rulesCopyBtn.addEventListener("click", () => {
+      copyTextFallback(els.rulesCodeBlock.textContent);
+      showToast("Firestore rules copied to clipboard.");
+    });
+    els.rulesRetryBtn.addEventListener("click", async () => {
+      closeRulesModal();
+      await loadApplications();
+      if (els.alertBanner.classList.contains("hidden")) {
+        showToast(`Connected — loaded ${state.applications.length} application(s).`);
+      }
+    });
+
+    // Global Escape key closes open modals
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!els.reviewModal.classList.contains("hidden")) closeReviewModal();
+      if (!els.lookupModal.classList.contains("hidden")) closeLookupModal();
+      if (!els.rulesModal.classList.contains("hidden")) closeRulesModal();
+    });
+
+    // =========================================================================
+    // 8. AUTH STATE BOOTSTRAP
+    // =========================================================================
+    onAuthStateChanged(auth, async (user) => {
+      state.adminUser = user;
+      if (!user) {
+        state.mfaVerified = false;
+        els.shell.classList.add("hidden");
+        els.mfaForm.classList.add("hidden");
+        els.signinForm.classList.remove("hidden");
+        els.authSubtitle.textContent = "Log in with your email and password";
+        els.authGate.classList.remove("hidden");
+        return;
+      }
+
+      if (!state.mfaVerified) {
+        showMfaPromptForUser(user);
+        return;
+      }
+
+      await unlockAdminDashboard(user);
+    });
+  </script>
+</body>
+</html>
