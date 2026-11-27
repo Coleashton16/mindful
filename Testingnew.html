@@ -68,9 +68,9 @@
         <p class="text-sm text-muted mt-1">Structured cognitive behavioral therapy</p>
       </div>
 
-      <div class="grid grid-cols-2 p-1 rounded-xl bg-stone mb-5">
-        <button id="auth-tab-signin" type="button" class="py-2 text-xs font-medium rounded-lg bg-surface text-ink shadow-sm transition-all">Sign In</button>
-        <button id="auth-tab-signup" type="button" class="py-2 text-xs font-medium rounded-lg text-muted hover:text-ink transition-all">Create Account</button>
+      <div class="grid grid-cols-2 p-1 rounded-xl bg-stone mb-6">
+        <button id="auth-tab-signin" type="button" class="py-2.5 text-xs font-medium rounded-lg bg-surface text-ink shadow-sm transition-all">Sign In</button>
+        <button id="auth-tab-signup" type="button" class="py-2.5 text-xs font-medium rounded-lg text-muted hover:text-ink transition-all">Create Account</button>
       </div>
 
       <button id="google-signin-btn" type="button" class="w-full py-2.5 px-4 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-sm font-medium text-ink flex items-center justify-center gap-2.5 transition-colors mb-4">
@@ -196,19 +196,23 @@
           <button data-tab="careplan" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Care Plan</button>
           <button data-tab="history" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">History</button>
           <button data-tab="settings" class="nav-tab px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Membership &amp; Chart</button>
-          <button id="nav-tab-engines" data-tab="engines" class="nav-tab hidden px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">Engines</button>
         </nav>
       </div>
     </header>
 
     <!-- Crisis Guardrail Banner -->
-    <div id="crisis-banner" class="hidden bg-rose-bg border-b border-rose-border px-4 py-3">
-      <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-rose-ink">
-        <div>
-          <strong class="font-semibold">Immediate human support is available right now.</strong>
-          If you are in crisis or thinking about hurting yourself, please call or text <strong>988</strong> (US/Canada), text <strong>HOME to 741741</strong>, or go to the nearest emergency room.
+    <div id="crisis-banner" class="hidden bg-rose-bg border-l-4 border-rose-ink px-4 py-3">
+      <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-rose-ink">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-5 h-5 rounded-full bg-rose-ink flex items-center justify-center mt-0.5">
+            <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+          <div>
+            <strong class="font-semibold">Immediate human support is available right now.</strong>
+            <p class="text-xs mt-0.5 leading-relaxed">If you are in crisis or thinking about hurting yourself, please call or text <strong>988</strong> (US/Canada), text <strong>HOME to 741741</strong>, or go to the nearest emergency room.</p>
+          </div>
         </div>
-        <button id="dismiss-crisis-btn" type="button" class="self-start sm:self-center px-2.5 py-1 rounded-lg border border-rose-border bg-surface text-rose-ink hover:bg-rose-bg">Dismiss</button>
+        <button id="dismiss-crisis-btn" type="button" class="self-start sm:self-center px-3 py-1.5 rounded-lg border border-rose-border bg-surface text-rose-ink text-xs font-medium hover:bg-rose-bg transition-colors">Dismiss</button>
       </div>
     </div>
 
@@ -219,7 +223,7 @@
         <!-- DASHBOARD OVERVIEW (SHOWN IN WAITING ROOM MODE) -->
         <div id="session-waiting-room" class="flex-1 p-4 sm:p-6 space-y-6">
           <!-- Welcome Header -->
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-hairline rounded-2xl p-5">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-hairline rounded-2xl p-5 hover:border-sage/30 transition-colors">
             <div>
               <div class="text-[11px] font-semibold uppercase tracking-wider text-sage">Patient Care Dashboard</div>
               <h1 id="dash-greeting" class="font-serif text-2xl sm:text-3xl text-ink mt-0.5">Welcome back</h1>
@@ -256,7 +260,7 @@
           </div>
 
           <!-- Main Patient Care 12-Col Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <!-- Left 7 Columns: Therapy Session Room + Quick Navigation -->
             <div class="lg:col-span-7 space-y-5">
               <div class="bg-surface border border-hairline rounded-2xl p-6 space-y-4">
@@ -429,7 +433,7 @@
           <p class="text-sm text-muted mt-1">Your evolving clinical formulation, active goals, and long-term progress.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div class="lg:col-span-7 space-y-5">
             <div class="rounded-2xl bg-surface border border-hairline p-5 space-y-4">
               <div class="flex flex-wrap items-center justify-between gap-2">
@@ -503,7 +507,7 @@
 
         <div id="settings-panel-chart" class="space-y-6">
           <!-- Top 12-Column Membership & Lifetime Value Bento Row -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Left 6 Columns: Insurance-Style Membership Card -->
             <div id="membership-card-slot" class="lg:col-span-6 flex flex-col"></div>
 
@@ -536,21 +540,16 @@
                   <p id="chart-intake-status" class="text-sm font-medium text-ink mt-1">Not completed yet</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-            <button id="waiting-schedule-btn" type="button" class="px-4 py-2.5 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">Book an Appointment</button>
-            <button id="waiting-urgent-btn" type="button" class="px-4 py-2.5 rounded-xl border border-amber-border bg-amber-bg text-amber-ink hover:opacity-90 text-xs font-medium transition-opacity">Request Urgent Session</button>
-            <button id="diag-override-session-btn" type="button" class="hidden px-4 py-2.5 rounded-xl border border-sage-border bg-sage-light text-sage hover:opacity-90 text-xs font-medium transition-opacity">Override: Start Session Now</button>
-          </div>
-        </div>
-
-        <!-- 4-Column Clinical Care KPI Row -->
-                  </button>
+                  <button id="export-pdf-btn" type="button" class="px-4 py-2.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Export Medical Record PDF</button>
+                  <button id="diag-override-session-btn" type="button" class="hidden px-4 py-2.5 rounded-xl border border-sage-border bg-sage-light text-sage hover:opacity-90 text-xs font-medium transition-opacity">Override: Start Session Now</button>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
           <!-- Middle 12-Column Clinical Chart Grid -->
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <!-- Left 7 Columns: Symptom Trajectory + Medical History + Labs -->
             <div class="lg:col-span-7 space-y-5">
               <div class="rounded-2xl bg-surface border border-hairline p-5 space-y-3">
@@ -629,6 +628,77 @@
             </label>
           </div>
         </div>
+
+        <!-- Diagnostics & Engine Tools (only visible when Diagnostics Mode is ON in Settings) -->
+        <div id="settings-diagnostics-section" class="hidden space-y-6">
+          <div class="rounded-2xl bg-surface border border-sage-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="text-xs font-semibold uppercase tracking-wider text-sage">Diagnostics &amp; Engine Tools</div>
+              <p class="text-xs text-muted mt-0.5">Technical controls for testing. Nothing here is saved to your chart while diagnostics is active.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="diag-settings-enable-all-btn" type="button" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">Enable All Diagnostics</button>
+              <button id="diag-settings-rx-testing-btn" type="button" class="px-3.5 py-2 rounded-xl border border-sage-border bg-sage-light text-sage text-xs font-medium hover:opacity-90 transition-opacity">Unlock All CBT Protocols</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="lg:col-span-7 space-y-5">
+              <div class="rounded-2xl bg-surface border border-hairline overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-hairline flex items-center justify-between gap-2">
+                  <div>
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Engine Cards</h2>
+                    <p class="text-[11px] text-muted mt-0.5">Live status of the 6 CBT engines.</p>
+                  </div>
+                </div>
+                <div id="settings-engine-cards" class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+              </div>
+
+              <div class="rounded-2xl bg-surface border border-hairline overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-hairline flex items-center justify-between gap-2">
+                  <div>
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Prompt Library</h2>
+                    <p class="text-[11px] text-muted mt-0.5">Backend prompts for Engines 1–6.</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button id="diag-settings-seed-prompts" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-paper text-muted hover:text-ink transition-colors">Reset Defaults</button>
+                    <button id="diag-settings-save-prompts" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg bg-sage text-white hover:bg-sage-hover transition-colors">Save Prompts</button>
+                  </div>
+                </div>
+                <div id="settings-prompt-library" class="p-4 space-y-2.5 bg-paper/40"></div>
+              </div>
+
+              <div class="rounded-2xl bg-surface border border-hairline overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-hairline flex items-center justify-between gap-2">
+                  <div>
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">QA Audit Log</h2>
+                    <p class="text-[11px] text-muted mt-0.5">Engine 6 session reviews.</p>
+                  </div>
+                  <button id="diag-settings-run-qa" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-hairline bg-paper text-ink hover:bg-stone transition-colors">Audit Latest Session</button>
+                </div>
+                <div id="settings-qa-log" class="p-4 space-y-2.5 text-xs text-muted bg-paper/40">No QA audits recorded yet.</div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5 space-y-5">
+              <div class="rounded-2xl bg-surface border border-hairline p-5 space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Telemetry Log</h2>
+                <div class="flex items-center gap-2">
+                  <button id="diag-settings-clear-log" type="button" class="text-xs text-muted hover:text-ink">Clear</button>
+                </div>
+                <div id="settings-telemetry-log" class="p-4 max-h-60 overflow-y-auto font-mono text-[11px] space-y-1 bg-paper/50 text-muted"></div>
+              </div>
+
+              <div class="rounded-2xl bg-surface border border-hairline p-5 space-y-3">
+                <h2 class="text-xs font-semibold uppercase tracking-wider text-muted">Session Overrides</h2>
+                <button id="diag-settings-override-session" type="button" class="w-full px-4 py-2.5 rounded-xl border border-sage-border bg-sage-light text-sage hover:opacity-90 text-xs font-medium transition-opacity">Override: Start Session Now</button>
+                <button id="diag-settings-open-intake" type="button" class="w-full px-4 py-2.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test Intake Gate</button>
+                <button id="diag-settings-open-triage" type="button" class="w-full px-4 py-2.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test Triage</button>
+                <button id="diag-settings-open-checkin" type="button" class="w-full px-4 py-2.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test PHQ-4 Check-In</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- VIEW 6: ENGINES, PROMPT LIBRARY & QA AUDIT (DIAGNOSTICS ONLY) -->
@@ -656,6 +726,7 @@
             <button id="diag-open-intake-btn" type="button" class="px-3 py-1.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test Intake</button>
             <button id="diag-open-triage-btn" type="button" class="px-3 py-1.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test Triage</button>
             <button id="diag-open-checkin-btn" type="button" class="px-3 py-1.5 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink hover:bg-stone transition-colors">Test PHQ-4 Modal</button>
+            <button id="diag-enable-rx-testing-btn" type="button" class="px-3 py-1.5 rounded-xl border border-sage-border bg-sage-light text-sage text-xs font-medium hover:opacity-90 transition-opacity">Enable Prescription Testing</button>
           </div>
         </div>
 
@@ -1055,6 +1126,7 @@ UPDATED_PROMPT:
       authMode: "signin",
       diagnosticsEnabled: false,
       allDiagnosticsUnlocked: false,
+      prescriptionTestMode: false,
       activeTab: "session",
       lastSaveSucceeded: true,
       engines: {
@@ -1090,10 +1162,17 @@ UPDATED_PROMPT:
       clearInterval(state.timerInterval);
       clearInterval(state.waitingRoomInterval);
       Object.assign(state, {
+        user: null,
         userProfile: { name: "", gender: "", photoDataUrl: "", memberId: "", memberSinceMs: 0 },
         pendingSignupPhotoDataUrl: null,
         pendingSignupProfile: null,
         pendingEditPhotoDataUrl: null,
+        authMode: "signin",
+        diagnosticsEnabled: false,
+        allDiagnosticsUnlocked: false,
+        prescriptionTestMode: false,
+        activeTab: "session",
+        lastSaveSucceeded: true,
         qaLogs: [],
         chart: null,
         carePlan: null,
@@ -1659,7 +1738,9 @@ UPDATED_PROMPT:
         completionCount: 0
       };
       state.prescriptions.unshift(rxRecord);
-      await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+      if (!state.prescriptionTestMode) {
+        await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+      }
       renderSessionView();
       renderCarePlan();
       renderMyChart();
@@ -1974,9 +2055,9 @@ UPDATED_PROMPT:
     function applyDiagnosticsVisibility() {
       const on = Boolean(state.diagnosticsEnabled);
       $("diagnostics-toggle").checked = on;
-      $("nav-tab-engines").classList.toggle("hidden", !on);
       $("active-engine1-label").classList.toggle("hidden", !on);
       if (!on && state.activeTab === "engines") switchTab("session");
+      renderSettingsDiagnosticsSection();
       renderHistory();
     }
 
@@ -1987,14 +2068,14 @@ UPDATED_PROMPT:
       document.querySelectorAll(".nav-tab").forEach((btn) => {
         if (btn.id === "nav-tab-engines" && !state.diagnosticsEnabled) return btn.classList.add("hidden");
         btn.className = btn.dataset.tab === tab
-          ? "nav-tab px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors"
+          ? "nav-tab px-3 py-1.5 rounded-lg text-xs font-medium bg-sage text-white shadow-sm transition-colors"
           : "nav-tab px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors";
       });
       if (tab === "session") renderSessionView();
       if (tab === "schedule") renderScheduleView();
       if (tab === "careplan") renderCarePlan();
       if (tab === "history") renderHistory();
-      if (tab === "settings") renderMyChart();
+      if (tab === "settings") { renderMyChart(); renderSettingsDiagnosticsSection(); }
       if (tab === "engines") { renderEngineCards(); renderPromptLibraryEditor(); renderQaAuditLog(); }
     }
 
@@ -2394,6 +2475,30 @@ UPDATED_PROMPT:
       updateDiagnosticsBannerUi();
     }
 
+    function renderSettingsDiagnosticsSection() {
+      const on = Boolean(state.diagnosticsEnabled);
+      $("settings-diagnostics-section")?.classList.toggle("hidden", !on);
+      if (!on) return;
+      $("settings-engine-cards").innerHTML = Object.values(state.engines).map((eng) => `
+        <div class="p-4 rounded-2xl bg-surface border border-hairline space-y-1.5">
+          <div class="flex items-center justify-between gap-2"><span class="text-xs font-semibold text-ink">${escapeHtml(eng.label)}</span><span class="text-[10px] px-2 py-0.5 rounded-full ${eng.loaded ? "bg-sage-light text-sage border border-sage-border" : "bg-rose-bg text-rose-ink border border-rose-border"}">${eng.loaded ? "Connected" : "Offline"}</span></div>
+          <p class="text-[11px] text-muted">${escapeHtml(eng.role)}</p>
+          <div class="text-[11px] font-mono text-ink/80 truncate pt-1">${escapeHtml(eng.slug || eng.error || "Not loaded")}</div>
+        </div>`).join("");
+      $("settings-prompt-library").innerHTML = Object.keys(DEFAULT_PROMPTS).map((slot) => `
+        <details class="rounded-xl bg-surface border border-hairline overflow-hidden">
+          <summary class="px-3.5 py-2.5 cursor-pointer flex items-center justify-between text-xs font-medium text-ink hover:bg-stone/40 select-none"><span>${escapeHtml(slot)} Prompt</span><span class="text-[11px] font-mono text-muted">${(state.promptLibrary[slot] || "").length} chars</span></summary>
+          <div class="p-3 border-t border-hairline bg-paper/50"><textarea data-prompt-slot="${escapeHtml(slot)}" rows="4" class="prompt-slot-textarea w-full p-2.5 rounded-lg bg-surface border border-hairline font-mono text-[11px] text-ink leading-relaxed focus:outline-none focus:border-sage/60">${escapeHtml(state.promptLibrary[slot] || "")}</textarea></div>
+        </details>`).join("");
+      $("settings-qa-log").innerHTML = state.qaLogs.length ? state.qaLogs.map((e) => `
+        <div class="p-3 rounded-xl bg-surface border border-hairline space-y-1">
+          <div class="flex items-center justify-between gap-2"><span class="font-medium text-ink">${escapeHtml(e.targetEngine === "NONE" ? "No Prompt Change Needed" : `Updated ${e.targetEngine}`)}</span><span class="text-[10px] font-mono text-muted">${escapeHtml(formatDateTime(e.timestampMs))}</span></div>
+          <p class="text-ink/85 leading-relaxed">${escapeHtml(e.auditSummary || "")}</p>
+          ${e.changeRationale ? `<p class="text-[11px] text-sage"><strong>Refinement:</strong> ${escapeHtml(e.changeRationale)}</p>` : ""}
+        </div>`).join("") : `<div>No QA audits recorded yet. Engine 6 automatically reviews transcripts after each completed session.</div>`;
+      $("settings-telemetry-log").innerHTML = $("telemetry-log")?.innerHTML || "";
+    }
+
     function updateDiagnosticsBannerUi() {
       const full = Boolean(state.allDiagnosticsUnlocked && state.diagnosticsEnabled);
       if ($("enable-all-diag-btn")) {
@@ -2412,11 +2517,13 @@ UPDATED_PROMPT:
     async function enableAllDiagnosticsMode() {
       state.diagnosticsEnabled = true;
       state.allDiagnosticsUnlocked = true;
+      state.prescriptionTestMode = true;
       localStorage.setItem("mindful_diagnostics", "1");
       localStorage.setItem("mindful_all_diag", "1");
       applyDiagnosticsVisibility();
       updateDiagnosticsBannerUi();
-      showToast("All diagnostics & therapist overrides enabled.");
+      await populateAllTestPrescriptions();
+      showToast("All diagnostics & therapist overrides enabled. All CBT protocols unlocked for testing.");
     }
 
     async function launchOverrideTherapySession() {
@@ -2462,11 +2569,12 @@ UPDATED_PROMPT:
     function renderPrescriptionsUI() {
       const activeRx = state.prescriptions.filter((rx) => rx.status === "active");
       const hasActive = activeRx.length > 0;
+      const showRx = hasActive || state.prescriptionTestMode;
 
       // Only show on Dashboard and Care Plan when actively prescribed
-      $("dash-prescriptions-section")?.classList.toggle("hidden", !hasActive);
-      $("careplan-prescriptions-card")?.classList.toggle("hidden", !hasActive);
-      if (!hasActive) return;
+      $("dash-prescriptions-section")?.classList.toggle("hidden", !showRx);
+      $("careplan-prescriptions-card")?.classList.toggle("hidden", !showRx);
+      if (!hasActive && !state.prescriptionTestMode) return;
 
       if ($("dash-rx-count-badge")) $("dash-rx-count-badge").textContent = `${activeRx.length} Active`;
 
@@ -2492,10 +2600,27 @@ UPDATED_PROMPT:
       };
 
       if ($("dash-prescriptions-list")) {
-        $("dash-prescriptions-list").innerHTML = activeRx.map((rx) => buildItemHtml(rx, false)).join("");
+        if (activeRx.length) {
+          $("dash-prescriptions-list").innerHTML = activeRx.map((rx) => buildItemHtml(rx, false)).join("");
+        } else if (state.prescriptionTestMode) {
+          $("dash-prescriptions-list").innerHTML = `
+            <div class="p-3.5 rounded-xl bg-paper border border-hairline flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="space-y-1">
+                <span class="text-xs font-semibold text-ink">No active prescriptions yet</span>
+                <p class="text-xs text-muted leading-relaxed">Use the button below to inject a sample CBT tool for testing the interactive workspace.</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button type="button" id="diag-add-test-rx-btn" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">Add Test Prescription</button>
+              </div>
+            </div>`;
+          const addBtn = $("diag-add-test-rx-btn");
+          if (addBtn) addBtn.onclick = addTestPrescription;
+        } else {
+          $("dash-prescriptions-list").innerHTML = "";
+        }
       }
       if ($("careplan-prescriptions-list")) {
-        $("careplan-prescriptions-list").innerHTML = activeRx.map((rx) => buildItemHtml(rx, true)).join("");
+        $("careplan-prescriptions-list").innerHTML = activeRx.length ? activeRx.map((rx) => buildItemHtml(rx, true)).join("") : "";
       }
 
       document.querySelectorAll(".open-rx-btn").forEach((btn) => {
@@ -2507,12 +2632,53 @@ UPDATED_PROMPT:
           if (!rx) return;
           rx.status = "completed";
           rx.completedAtMs = Date.now();
-          await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+          if (!state.prescriptionTestMode) {
+            await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+          }
           renderSessionView();
           renderCarePlan();
           renderMyChart();
           showToast("Protocol marked completed and archived in My Chart.");
         };
+      });
+    }
+
+    function addTestPrescription() {
+      const rx = {
+        id: `rx_test_${Date.now()}`,
+        type: "thought_record",
+        title: "Test: Guided Thought Record",
+        instructions: "This is a test prescription to verify the interactive CBT workspace. Complete the form below and save it to your chart.",
+        prescribedBy: "Diagnostics Test Mode",
+        prescribedAtMs: Date.now(),
+        status: "active",
+        completionCount: 0
+      };
+      state.prescriptions.unshift(rx);
+      renderSessionView();
+      renderCarePlan();
+      renderMyChart();
+      showToast("Test prescription added (in-memory only, not saved while diagnostics is on).");
+    }
+
+    async function populateAllTestPrescriptions() {
+      if (!state.prescriptionTestMode) return;
+      Object.entries(CBT_RX_CATALOG).forEach(([type, meta]) => {
+        const exists = state.prescriptions.some(
+          (rx) => rx.status === "active" && rx.type === type && rx.title === meta.label
+        );
+        if (!exists) {
+          state.prescriptions.unshift({
+            id: `rx_test_${type}_${Date.now()}`,
+            type,
+            title: meta.label,
+            instructions: meta.description,
+            prescribedBy: "Diagnostics Test Mode",
+            prescribedAtMs: Date.now(),
+            status: "active",
+            completionCount: 0
+          });
+        }
       });
     }
 
@@ -2655,7 +2821,9 @@ UPDATED_PROMPT:
       });
       rx.completionCount = (rx.completionCount || 0) + 1;
 
-      await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+      if (!state.prescriptionTestMode) {
+        await saveProfileDoc("prescriptions", { prescriptions: state.prescriptions, logs: state.rxLogs }, "prescriptions", false);
+      }
       $("rx-modal").classList.add("hidden");
       state.activeRxModalId = null;
       renderSessionView();
@@ -3086,7 +3254,10 @@ SUMMARY:
       e.preventDefault();
       $("auth-error").classList.add("hidden");
       const email = $("auth-email").value.trim(), password = $("auth-password").value;
-      $("auth-submit-btn").disabled = true;
+      const submitBtn = $("auth-submit-btn");
+      const originalLabel = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = state.authMode === "signup" ? "Creating Account…" : "Signing In…";
       try {
         if (state.authMode === "signup") {
           const name = $("signup-name").value.trim();
@@ -3098,7 +3269,10 @@ SUMMARY:
         state.pendingSignupProfile = null;
         $("auth-error").textContent = err.message || "Authentication failed.";
         $("auth-error").classList.remove("hidden");
-      } finally { $("auth-submit-btn").disabled = false; }
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
+      }
     };
 
     const handleSignOut = async () => { clearLiveDraft(); resetInMemoryUserState(); $("auth-form").reset(); $("auth-error").classList.add("hidden"); await signOut(auth); };
@@ -3221,17 +3395,57 @@ SUMMARY:
 
     $("diagnostics-toggle").onchange = () => {
       state.diagnosticsEnabled = $("diagnostics-toggle").checked;
-      if (!state.diagnosticsEnabled) state.allDiagnosticsUnlocked = false;
+      state.prescriptionTestMode = state.diagnosticsEnabled;
+      if (!state.diagnosticsEnabled) {
+        state.allDiagnosticsUnlocked = false;
+        // Clear in-memory test prescriptions/logs only; engine-prescribed records are preserved
+        state.prescriptions = state.prescriptions.filter((rx) => rx.prescribedBy !== "Diagnostics Test Mode");
+        state.rxLogs = state.rxLogs.filter((log) => !log.rxId?.startsWith("rx_test_"));
+      }
       localStorage.setItem("mindful_diagnostics", state.diagnosticsEnabled ? "1" : "0");
       localStorage.setItem("mindful_all_diag", state.allDiagnosticsUnlocked ? "1" : "0");
       applyDiagnosticsVisibility();
       updateDiagnosticsBannerUi();
+      renderSessionView();
+      renderCarePlan();
+      renderMyChart();
     };
     $("enable-all-diag-btn").onclick = enableAllDiagnosticsMode;
     $("diag-override-session-btn").onclick = launchOverrideTherapySession;
     $("diag-open-therapist-btn").onclick = async () => { await enableAllDiagnosticsMode(); await launchOverrideTherapySession(); };
     $("diag-open-intake-btn").onclick = () => openIntakeGate(true);
     $("diag-open-triage-btn").onclick = openTriageModal;
+    $("diag-enable-rx-testing-btn").onclick = async () => {
+      await enableAllDiagnosticsMode();
+      renderSessionView();
+      renderCarePlan();
+      showToast("Prescription testing mode enabled. All CBT protocols unlocked.");
+    };
+    $("diag-settings-enable-all-btn").onclick = enableAllDiagnosticsMode;
+    $("diag-settings-rx-testing-btn").onclick = async () => {
+      await enableAllDiagnosticsMode();
+      renderSessionView();
+      renderCarePlan();
+      showToast("Prescription testing mode enabled. All CBT protocols unlocked.");
+    };
+    $("diag-settings-override-session").onclick = launchOverrideTherapySession;
+    $("diag-settings-open-intake").onclick = () => openIntakeGate(true);
+    $("diag-settings-open-triage").onclick = openTriageModal;
+    $("diag-settings-open-checkin").onclick = () => {
+      $("phq4-questions").innerHTML = PHQ4_QUESTIONS.map((q) => `
+        <div class="space-y-1.5">
+          <div class="text-xs font-medium text-ink">${escapeHtml(q.text)}</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            ${PHQ4_OPTIONS.map((opt) => `<label class="cursor-pointer"><input type="radio" name="phq_${q.id}" value="${opt.val}" ${opt.val === 0 ? "checked" : ""} class="peer sr-only" /><div class="px-2.5 py-2 rounded-xl border border-hairline bg-paper text-[11px] text-center text-muted peer-checked:bg-sage-light peer-checked:text-sage peer-checked:border-sage-border peer-checked:font-medium transition-colors">${escapeHtml(opt.label)}</div></label>`).join("")}
+          </div>
+        </div>`).join("");
+      $("checkin-modal").classList.remove("hidden");
+    };
+    $("diag-settings-seed-prompts").onclick = $("seed-prompts-btn")?.onclick;
+    $("diag-settings-save-prompts").onclick = $("save-prompts-btn")?.onclick;
+    $("diag-settings-run-qa").onclick = $("run-manual-qa-btn")?.onclick;
+    $("diag-settings-clear-log").onclick = $("clear-log-btn")?.onclick;
+
     $("diag-open-checkin-btn").onclick = () => {
       $("phq4-questions").innerHTML = PHQ4_QUESTIONS.map((q) => `
         <div class="space-y-1.5">
@@ -3271,6 +3485,7 @@ SUMMARY:
 
     state.diagnosticsEnabled = localStorage.getItem("mindful_diagnostics") === "1";
     state.allDiagnosticsUnlocked = localStorage.getItem("mindful_all_diag") === "1" && state.diagnosticsEnabled;
+    state.prescriptionTestMode = state.diagnosticsEnabled;
     applyDiagnosticsVisibility();
     updateDiagnosticsBannerUi();
 
@@ -3289,6 +3504,7 @@ SUMMARY:
         state.pendingSignupProfile = null;
       }
       await Promise.all([loadEngineConfigsFromFirebase(), loadUserData()]);
+      if (state.prescriptionTestMode) await populateAllTestPrescriptions();
       renderAccountCard(); renderCarePlan(); renderHistory(); renderMyChart(); renderScheduleView(); renderPromptLibraryEditor(); renderQaAuditLog();
       startWaitingRoomWatcher();
 
