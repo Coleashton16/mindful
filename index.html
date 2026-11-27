@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#FAF9F6" />
-  <meta name="description" content="Mindful — Free, structured Cognitive Behavioral Therapy (CBT) with scheduled 45-minute sessions, personalized care plans, and easy-to-follow progress tracking." />
-  <title>Mindful — Structured CBT</title>
+  <title>Mindful — Structured Support, Built for Everyone</title>
 
-  <!-- Typography: Inter + Newsreader (Matches Mindful App Identity) -->
+  <!-- Typography: Inter + Newsreader -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,7 +34,10 @@
             'sage-border': '#CFE0D5',
             'amber-bg': '#FDF6E9',
             'amber-ink': '#8A5A12',
-            'amber-border': '#F0D9B1'
+            'amber-border': '#F0D9B1',
+            'rose-bg': '#FDF2F2',
+            'rose-ink': '#9B2C2C',
+            'rose-border': '#F5C6C6'
           }
         }
       }
@@ -45,38 +47,42 @@
 <body class="bg-paper text-ink font-sans antialiased selection:bg-sage-light selection:text-sage min-h-screen flex flex-col">
 
   <!-- ======================================================================= -->
-  <!-- NAVIGATION HEADER                                                       -->
-  <!-- Update the "/mindful/beta.html" hrefs below to match your hosted app filename     -->
+  <!-- DEVELOPMENT STATUS BANNER                                               -->
   <!-- ======================================================================= -->
-  <header class="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b border-hairline">
+  <div id="site-banner" class="bg-sage text-white text-center px-4 py-2 text-xs">
+    <span class="font-medium">Currently in Active Development</span>
+    <span class="opacity-90"> — Mindful is now accepting early applicants for our clinical trial.</span>
+    <button type="button" data-scroll="section-trial-apply" class="underline font-medium ml-1.5 hover:opacity-80">Apply below →</button>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- NAVIGATION HEADER                                                       -->
+  <!-- ======================================================================= -->
+  <header id="site-header" class="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b border-hairline">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-      <!-- Brand Logo -->
-      <a href="#home" data-nav="home" class="flex items-center gap-2.5 group">
+      <button type="button" data-nav="home" class="flex items-center gap-2.5 text-left group">
         <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-sage-light text-sage border border-sage-border group-hover:bg-sage group-hover:text-white transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
           </svg>
         </span>
         <span class="font-serif text-xl tracking-tight text-ink">Mindful</span>
-      </a>
+      </button>
 
-      <!-- Desktop Navigation -->
+      <!-- Desktop Nav -->
       <nav class="hidden md:flex items-center gap-1">
-        <a href="#home" data-nav="home" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors">Overview</a>
-        <a href="#how-it-works" data-scroll="section-how-it-works" class="scroll-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">How It Works</a>
-        <a href="#architecture" data-scroll="section-architecture" class="scroll-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">What's Inside</a>
-        <a href="#founder" data-nav="founder" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">About the Founder</a>
+        <button type="button" data-nav="home" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors">Overview</button>
+        <button type="button" data-scroll="section-how-it-works" class="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">How It Works</button>
+        <button type="button" data-scroll="section-why-mindful" class="px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">Why Mindful</button>
+        <button type="button" data-nav="founder" class="nav-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors">About the Founder</button>
       </nav>
 
-      <!-- Action Buttons + Mobile Menu Trigger -->
+      <!-- Right Action & Mobile Menu Toggle -->
       <div class="flex items-center gap-2">
-        <a href="/mindful/beta.html" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-xs font-medium text-ink transition-colors">
-          Sign In
-        </a>
-        <a href="/mindful/beta.html" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
-          Get Started
-        </a>
-        <button id="mobile-menu-btn" type="button" aria-label="Toggle navigation menu" class="md:hidden p-2 rounded-xl border border-hairline bg-surface text-muted hover:text-ink transition-colors">
+        <button type="button" data-scroll="section-trial-apply" class="px-3.5 py-2 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
+          Apply for Trial
+        </button>
+        <button id="mobile-menu-btn" type="button" aria-label="Toggle menu" class="md:hidden p-2 rounded-xl border border-hairline bg-surface text-ink">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
@@ -84,16 +90,12 @@
       </div>
     </div>
 
-    <!-- Mobile Navigation Drawer -->
+    <!-- Mobile Dropdown Nav -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-hairline bg-surface px-4 py-3 space-y-1">
-      <a href="#home" data-nav="home" class="block px-3 py-2 rounded-xl text-xs font-medium text-ink hover:bg-stone/60">Overview</a>
-      <a href="#how-it-works" data-scroll="section-how-it-works" class="scroll-link block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">How It Works</a>
-      <a href="#architecture" data-scroll="section-architecture" class="scroll-link block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">What's Inside</a>
-      <a href="#founder" data-nav="founder" class="block px-3 py-2 rounded-xl text-xs font-medium text-muted hover:text-ink hover:bg-stone/60">About the Founder</a>
-      <div class="pt-2 mt-2 border-t border-hairline flex items-center gap-2">
-        <a href="/mindful/beta.html" class="flex-1 text-center px-3 py-2 rounded-xl border border-hairline bg-paper text-xs font-medium text-ink">Sign In</a>
-        <a href="/mindful/beta.html" class="flex-1 text-center px-3 py-2 rounded-xl bg-sage text-white text-xs font-medium">Create Account</a>
-      </div>
+      <button type="button" data-nav="home" class="block w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-ink hover:bg-stone/60">Overview</button>
+      <button type="button" data-scroll="section-how-it-works" class="block w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-muted hover:bg-stone/60">How It Works</button>
+      <button type="button" data-scroll="section-why-mindful" class="block w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-muted hover:bg-stone/60">Why Mindful</button>
+      <button type="button" data-nav="founder" class="block w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-muted hover:bg-stone/60">About the Founder</button>
     </div>
   </header>
 
@@ -101,69 +103,59 @@
   <!-- VIEW 1: HOMEPAGE                                                        -->
   <!-- ======================================================================= -->
   <main id="view-home" class="flex-1">
+
     <!-- Hero Section -->
-    <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-14 pb-16 sm:pt-20 sm:pb-24">
+    <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-16 sm:pt-20 sm:pb-24">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
         <div class="lg:col-span-7 space-y-6">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-sage"></span>
-            Free, Structured Therapy Support
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-bg border border-amber-border text-amber-ink text-xs font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-ink"></span>
+            In Development · Clinical Trial Applications Open
           </div>
           <h1 class="font-serif text-4xl sm:text-5xl text-ink tracking-tight leading-[1.12]">
-            Thoughtful therapy with real structure, not endless chat.
+            Real, structured mental health support—at zero cost.
           </h1>
           <p class="text-base text-muted leading-relaxed max-w-xl">
-            Mindful brings the proven structure of Cognitive Behavioral Therapy (CBT) into a calm, private space—at zero cost. Enjoy scheduled 45-minute sessions, personalized goals, simple mood check-ins, and clear summaries you can keep.
+            Mindful is an AI-powered support platform built around proven, practical habits—scheduled 45-minute sessions, a personalized plan that remembers your story, and simple check-ins to help you see your progress over time.
           </p>
           <div class="flex flex-wrap items-center gap-3 pt-1">
-            <a href="/mindful/beta.html" class="px-6 py-3 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors shadow-sm">
-              Create Free Account
-            </a>
-            <a href="/mindful/beta.html" class="px-5 py-3 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-sm font-medium text-ink transition-colors">
-              Sign In
-            </a>
+            <button type="button" data-scroll="section-trial-apply" class="px-6 py-3 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors shadow-sm">
+              Apply for the Clinical Trial
+            </button>
+            <button type="button" data-nav="founder" class="px-5 py-3 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-sm font-medium text-ink transition-colors">
+              Meet the Founder
+            </button>
           </div>
-          <div class="pt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
-            <span class="inline-flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Scheduled 45-minute sessions
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              Considers your whole health picture
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-sage" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-              100% free &amp; printable summaries
-            </span>
-          </div>
+          <p class="text-xs text-muted leading-relaxed max-w-lg">
+            <strong>How access works:</strong> Anyone can create an account or sign in on the main Mindful site regardless of application status, but full therapy access is unlocked once your clinical trial application is approved.
+          </p>
         </div>
 
-        <!-- Static Session Preview Card -->
+        <!-- Friendly Session Preview Card -->
         <div class="lg:col-span-5">
           <div class="rounded-2xl bg-surface border border-hairline shadow-sm overflow-hidden">
             <div class="px-4 py-3 border-b border-hairline bg-paper/70 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-sage"></span>
-                <span class="text-xs font-medium text-ink">Weekly Session · 18 / 45 min</span>
+                <span class="text-xs font-medium text-ink">Guided Session · 18 / 45 min</span>
               </div>
               <span class="text-[11px] px-2 py-0.5 rounded-full bg-sage-light text-sage border border-sage-border">In Session</span>
             </div>
             <div class="p-4 space-y-3 text-xs leading-relaxed">
               <div class="flex justify-start">
                 <div class="max-w-[88%] rounded-2xl rounded-bl-sm bg-paper border border-hairline px-3.5 py-2.5 text-ink">
-                  You mentioned last week that Sunday evenings tend to trigger racing thoughts about the week ahead. How did that feel this past Sunday?
+                  Last week you mentioned Sunday nights usually bring on a wave of stress about the week ahead. How did this past Sunday feel for you?
                 </div>
               </div>
               <div class="flex justify-end">
                 <div class="max-w-[88%] rounded-2xl rounded-br-sm bg-sage text-white px-3.5 py-2.5">
-                  Better than before. I caught myself spiraling about Monday's meeting and tried the 3-minute breathing reset we planned.
+                  A lot calmer. I noticed my thoughts starting to spiral about Monday, took a few minutes to pause, and wrote down what was actually in my control.
                 </div>
               </div>
               <div class="pt-2 border-t border-hairline grid grid-cols-2 gap-2">
                 <div class="rounded-xl bg-paper border border-hairline p-2.5">
                   <div class="text-[10px] uppercase tracking-wider text-muted">Weekly Stress</div>
-                  <div class="text-sm font-semibold text-ink mt-0.5">Lower <span class="text-[11px] font-normal text-sage">↓ Improving</span></div>
+                  <div class="text-sm font-semibold text-ink mt-0.5">Trending Down <span class="text-[11px] font-normal text-sage">↓</span></div>
                 </div>
                 <div class="rounded-xl bg-paper border border-hairline p-2.5">
                   <div class="text-[10px] uppercase tracking-wider text-muted">Daily Coping</div>
@@ -176,13 +168,13 @@
       </div>
     </section>
 
-    <!-- Value Pillars -->
-    <section class="border-y border-hairline bg-surface">
+    <!-- Why Mindful -->
+    <section id="section-why-mindful" class="border-y border-hairline bg-surface">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
         <div class="max-w-2xl mb-10">
-          <h2 class="font-serif text-2xl sm:text-3xl text-ink">Why structured sessions work better than 24/7 AI chat</h2>
+          <h2 class="font-serif text-2xl sm:text-3xl text-ink">Built for steady progress, not endless scrolling</h2>
           <p class="text-sm text-muted mt-2 leading-relaxed">
-            Open-ended chatbots can feel repetitive and lose track of your story. Mindful is designed around healthy boundaries and steady, real-world progress.
+            Most chatbots stay open 24/7 with no structure and quickly forget what you worked on last week. Mindful is designed to feel calm, focused, and genuinely helpful.
           </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -190,27 +182,27 @@
             <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <h3 class="font-serif text-lg text-ink">A Healthy Rhythm</h3>
+            <h3 class="font-serif text-lg text-ink">Healthy, Scheduled Rhythm</h3>
             <p class="text-xs text-muted leading-relaxed">
-              Sessions happen during scheduled appointment times so you have space in daily life to practice what you've learned—with an urgent check-in option if a tough moment hits unexpectedly.
+              Book focused 45-minute sessions on your own schedule. Having dedicated time between sessions gives you space to breathe and try out new tools in real life.
             </p>
           </div>
           <div class="p-6 rounded-2xl bg-paper border border-hairline space-y-2.5">
             <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
             </div>
-            <h3 class="font-serif text-lg text-ink">Sees the Whole You</h3>
+            <h3 class="font-serif text-lg text-ink">Looks at the Whole Picture</h3>
             <p class="text-xs text-muted leading-relaxed">
-              Your physical health affects how you feel. A quick yearly check-in lets you note sleep habits, medications, and optional health records so your sessions stay grounded in your real life.
+              Sleep, everyday stress, health conditions, and routines all affect how we feel. Mindful keeps your background in mind so you never have to repeat your story from scratch.
             </p>
           </div>
           <div class="p-6 rounded-2xl bg-paper border border-hairline space-y-2.5">
             <div class="w-9 h-9 rounded-xl bg-sage-light text-sage border border-sage-border flex items-center justify-center">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
             </div>
-            <h3 class="font-serif text-lg text-ink">Clear Progress Over Time</h3>
+            <h3 class="font-serif text-lg text-ink">Clear, Personal Progress</h3>
             <p class="text-xs text-muted leading-relaxed">
-              Every session wraps up with an easy-to-read summary, a practical weekly exercise, and a clean printable PDF you can keep for yourself or share with your doctor anytime.
+              After each conversation, Mindful summarizes your takeaways, suggests one small practice for the week, and tracks how you're doing—all exportable as a clean PDF anytime.
             </p>
           </div>
         </div>
@@ -218,76 +210,254 @@
     </section>
 
     <!-- How It Works -->
-    <section id="section-how-it-works" class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 scroll-mt-16">
+    <section id="section-how-it-works" class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
       <div class="max-w-2xl mb-10">
         <div class="text-xs font-semibold uppercase tracking-wider text-sage mb-2">How It Works</div>
-        <h2 class="font-serif text-2xl sm:text-3xl text-ink">Simple, supportive steps from day one</h2>
+        <h2 class="font-serif text-2xl sm:text-3xl text-ink">Simple steps designed around real life</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
           <div class="text-xs font-mono text-sage font-semibold">01</div>
-          <h3 class="text-sm font-semibold text-ink">Quick Health Profile</h3>
-          <p class="text-xs text-muted leading-relaxed">Start with a friendly conversation about your sleep, everyday habits, medications, or optional health records so Mindful knows your full story.</p>
+          <h3 class="text-sm font-semibold text-ink">Getting-to-Know-You Chat</h3>
+          <p class="text-xs text-muted leading-relaxed">Start with a friendly one-time setup covering your routines, sleep, and general health so Mindful understands your context.</p>
         </div>
         <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
           <div class="text-xs font-mono text-sage font-semibold">02</div>
           <h3 class="text-sm font-semibold text-ink">Book Your Sessions</h3>
-          <p class="text-xs text-muted leading-relaxed">Pick a 45-minute appointment time that fits your week. Your private session room opens 10 minutes before you begin.</p>
+          <p class="text-xs text-muted leading-relaxed">Pick a day and time that fits your week. Your private session room opens 10 minutes before your scheduled start.</p>
         </div>
         <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
           <div class="text-xs font-mono text-sage font-semibold">03</div>
-          <h3 class="text-sm font-semibold text-ink">Check-In &amp; Recap</h3>
-          <p class="text-xs text-muted leading-relaxed">Finish each session with a 30-second mood check-in while Mindful saves a clear, easy-to-read summary of what you covered.</p>
+          <h3 class="text-sm font-semibold text-ink">Guided Conversation</h3>
+          <p class="text-xs text-muted leading-relaxed">Talk through what's on your mind at a comfortable pace, with thoughtful questions and practical coping strategies.</p>
         </div>
         <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-2">
           <div class="text-xs font-mono text-sage font-semibold">04</div>
-          <h3 class="text-sm font-semibold text-ink">Personal Care Plan</h3>
-          <p class="text-xs text-muted leading-relaxed">Watch your progress over time, review your personal goals, and try one small, realistic practice between appointments.</p>
+          <h3 class="text-sm font-semibold text-ink">Takeaways &amp; Growth</h3>
+          <p class="text-xs text-muted leading-relaxed">Wrap up with a 30-second check-in, review your personal summary and weekly practice, and watch your progress build.</p>
         </div>
       </div>
     </section>
 
-    <!-- Multi-Engine Overview (Plain Language) -->
-    <section id="section-architecture" class="border-t border-hairline bg-surface scroll-mt-16">
+    <!-- ===================================================================== -->
+    <!-- CLINICAL TRIAL APPLICATION SECTION                                    -->
+    <!-- ===================================================================== -->
+    <section id="section-trial-apply" class="border-t border-hairline bg-surface">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-        <div class="max-w-2xl mb-10">
-          <div class="text-xs font-semibold uppercase tracking-wider text-sage mb-2">What's Inside</div>
-          <h2 class="font-serif text-2xl sm:text-3xl text-ink">Six specialized AI systems working together for you</h2>
-          <p class="text-sm text-muted mt-2 leading-relaxed">
-            Instead of relying on one generic chatbot, Mindful uses six focused systems behind the scenes to keep your support thoughtful, consistent, and organized.
-          </p>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <!-- Left Info Column -->
+          <div class="lg:col-span-5 space-y-5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium">
+              Early Access · Clinical Trial
+            </div>
+            <h2 class="font-serif text-3xl text-ink tracking-tight">Apply to join the Mindful trial</h2>
+            <p class="text-sm text-muted leading-relaxed">
+              Mindful is currently in active development. We are inviting a small group of early participants to test the platform, experience structured weekly sessions at zero cost, and help shape the future of accessible mental health support.
+            </p>
+            <div class="rounded-2xl bg-paper border border-hairline p-5 space-y-3 text-xs text-ink/85 leading-relaxed">
+              <div class="font-semibold text-ink uppercase tracking-wider text-[11px]">What to Expect</div>
+              <ul class="space-y-2">
+                <li class="flex items-start gap-2">
+                  <span class="text-sage font-bold">•</span>
+                  <span><strong>100% Free:</strong> Trial participants receive full access at no cost.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-sage font-bold">•</span>
+                  <span><strong>Account Access:</strong> You can sign up or log in on the main site anytime, and full therapy access unlocks automatically once your application is approved.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-sage font-bold">•</span>
+                  <span><strong>Simple Review:</strong> Applications are reviewed directly by the Mindful team in the order received.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">01 · CONVERSATION</div>
-            <h3 class="text-sm font-semibold text-ink">Your Guided Therapist</h3>
-            <p class="text-xs text-muted leading-relaxed">Leads calm, paced 45-minute sessions tailored to your personal goals, story, and current week.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">02 · RECAP</div>
-            <h3 class="text-sm font-semibold text-ink">Session Summaries</h3>
-            <p class="text-xs text-muted leading-relaxed">Turns every session into a clear, organized note so you never have to start from scratch next time.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">03 · PROGRESS</div>
-            <h3 class="text-sm font-semibold text-ink">Care Plan &amp; Goals</h3>
-            <p class="text-xs text-muted leading-relaxed">Tracks how you're feeling over time, updates your goals, and suggests one simple exercise for the week ahead.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">04 · SUPPORT</div>
-            <h3 class="text-sm font-semibold text-ink">Health Profile &amp; Urgent Help</h3>
-            <p class="text-xs text-muted leading-relaxed">Walks you through your yearly health check-in and helps unlock an urgent session if you're having an especially hard day.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">05 · SCHEDULING</div>
-            <h3 class="text-sm font-semibold text-ink">Smart Pacing</h3>
-            <p class="text-xs text-muted leading-relaxed">Recommends a healthy session rhythm—offering extra support when things feel heavy and spacing out visits as you feel stronger.</p>
-          </div>
-          <div class="p-5 rounded-2xl bg-paper border border-hairline space-y-1.5">
-            <div class="text-[11px] font-mono text-sage">06 · QUALITY</div>
-            <h3 class="text-sm font-semibold text-ink">Ongoing Care Review</h3>
-            <p class="text-xs text-muted leading-relaxed">Reviews completed sessions behind the scenes to keep conversations natural, respectful, and consistently helpful.</p>
+          <!-- Right Form Column -->
+          <div class="lg:col-span-7">
+            <div class="rounded-2xl bg-paper border border-hairline p-6 sm:p-8 shadow-sm space-y-5">
+
+              <!-- 3-Step Flow Indicator -->
+              <div class="grid grid-cols-3 gap-2 pb-4 border-b border-hairline text-[11px] font-medium">
+                <div id="step-pill-1" class="flex items-center gap-1.5 text-sage">
+                  <span class="w-5 h-5 rounded-full bg-sage text-white inline-flex items-center justify-center text-[10px]">1</span>
+                  <span>Account</span>
+                </div>
+                <div id="step-pill-2" class="flex items-center gap-1.5 text-muted">
+                  <span class="w-5 h-5 rounded-full bg-stone text-muted inline-flex items-center justify-center text-[10px]">2</span>
+                  <span>Application</span>
+                </div>
+                <div id="step-pill-3" class="flex items-center gap-1.5 text-muted">
+                  <span class="w-5 h-5 rounded-full bg-stone text-muted inline-flex items-center justify-center text-[10px]">3</span>
+                  <span>Legal Waiver</span>
+                </div>
+              </div>
+
+              <!-- STEP 1: Account Creation / Sign-In Gate (Required for Firebase Access) -->
+              <div id="trial-auth-gate" class="space-y-4">
+                <div>
+                  <h3 class="font-serif text-xl text-ink">Step 1: Create Your Mindful Account</h3>
+                  <p class="text-xs text-muted mt-0.5 leading-relaxed">
+                    Create a free account (or sign in) first to unlock the clinical trial application. This same account will be used on the main Mindful platform once approved.
+                  </p>
+                </div>
+
+                <!-- Auth Mode Tabs -->
+                <div class="grid grid-cols-2 p-1 rounded-xl bg-stone">
+                  <button id="auth-tab-signup" type="button" class="py-2 text-xs font-medium rounded-lg bg-surface text-ink shadow-sm transition-all">Create Account</button>
+                  <button id="auth-tab-signin" type="button" class="py-2 text-xs font-medium rounded-lg text-muted hover:text-ink transition-all">Sign In</button>
+                </div>
+
+                <!-- Google Sign-In -->
+                <button id="trial-google-btn" type="button" class="w-full py-2.5 px-4 rounded-xl border border-hairline bg-surface hover:bg-stone/60 text-sm font-medium text-ink flex items-center justify-center gap-2.5 transition-colors">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.79-.07-1.54-.19-2.27h-11.3v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/>
+                    <path fill="#34A853" d="M12.255 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96h-3.98v3.09C3.515 21.3 7.565 24 12.255 24z"/>
+                    <path fill="#FBBC05" d="M5.525 14.29c-.25-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29V6.62h-3.98a11.86 11.86 0 000 10.76l3.98-3.09z"/>
+                    <path fill="#EA4335" d="M12.255 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C18.205 1.19 15.495 0 12.255 0c-4.69 0-8.74 2.7-10.71 6.62l3.98 3.09c.95-2.85 3.6-4.96 6.73-4.96z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                <div class="relative flex items-center justify-center">
+                  <div class="border-t border-hairline w-full"></div>
+                  <span class="bg-paper px-3 text-[11px] uppercase tracking-wider text-muted">or</span>
+                  <div class="border-t border-hairline w-full"></div>
+                </div>
+
+                <!-- Email / Password Auth Form -->
+                <form id="trial-auth-form" novalidate class="space-y-3.5">
+                  <div id="auth-name-wrap">
+                    <label for="auth-name" class="block text-xs font-medium text-muted mb-1">Full Name *</label>
+                    <input id="auth-name" type="text" placeholder="Your full name" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+                  </div>
+                  <div>
+                    <label for="auth-email" class="block text-xs font-medium text-muted mb-1">Email Address *</label>
+                    <input id="auth-email" type="email" placeholder="you@example.com" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+                  </div>
+                  <div>
+                    <label for="auth-password" class="block text-xs font-medium text-muted mb-1">Password * <span class="font-normal text-muted">(min. 6 characters)</span></label>
+                    <input id="auth-password" type="password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+                  </div>
+
+                  <p id="trial-auth-error" class="hidden text-xs text-rose-ink bg-rose-bg border border-rose-border rounded-xl px-3.5 py-2.5"></p>
+
+                  <button id="trial-auth-submit" type="submit" class="w-full py-3 px-5 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors disabled:opacity-60">
+                    Create Account &amp; Open Application →
+                  </button>
+                </form>
+              </div>
+
+              <!-- Signed-In Status Bar (Shown once authenticated) -->
+              <div id="trial-signedin-bar" class="hidden flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl bg-sage-light border border-sage-border text-xs">
+                <div class="text-ink min-w-0">
+                  <span class="text-sage font-semibold">Signed in:</span>
+                  <span id="signedin-email" class="font-medium truncate"></span>
+                </div>
+                <button id="trial-signout-btn" type="button" class="text-xs font-medium text-muted hover:text-rose-ink underline">
+                  Sign Out
+                </button>
+              </div>
+
+              <!-- Success / Existing Application State -->
+              <div id="trial-success-box" class="hidden text-center py-4 space-y-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-sage-light text-sage border border-sage-border mx-auto">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div class="space-y-1.5">
+                  <h3 class="font-serif text-2xl text-ink">Application Received</h3>
+                  <div id="trial-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-bg border border-amber-border text-amber-ink text-xs font-medium capitalize">
+                    Status: Pending Review
+                  </div>
+                </div>
+                <p class="text-sm text-muted max-w-md mx-auto leading-relaxed">
+                  Thank you for applying to the Mindful clinical trial. Your application and signed legal waiver are linked to your account. Once approved, your account will unlock full therapy access on the main Mindful site.
+                </p>
+              </div>
+
+              <!-- STEP 2: Application Form (Unlocked after authentication) -->
+              <form id="trial-form" novalidate class="hidden space-y-4">
+                <div>
+                  <h3 class="font-serif text-xl text-ink">Step 2: Clinical Trial Application</h3>
+                  <p class="text-xs text-muted mt-0.5">Complete the short questionnaire below, then review the mandatory legal waiver.</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label for="trial-name" class="block text-xs font-medium text-muted mb-1">Full Name *</label>
+                    <input id="trial-name" type="text" placeholder="Your full name" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60" />
+                  </div>
+                  <div>
+                    <label for="trial-email" class="block text-xs font-medium text-muted mb-1">Account Email *</label>
+                    <input id="trial-email" type="email" readonly class="w-full px-3.5 py-2.5 rounded-xl bg-stone/70 border border-hairline text-sm text-muted cursor-not-allowed" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label for="trial-age" class="block text-xs font-medium text-muted mb-1">Age Range *</label>
+                    <select id="trial-age" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60">
+                      <option value="">Select age range…</option>
+                      <option value="18-24">18 – 24</option>
+                      <option value="25-34">25 – 34</option>
+                      <option value="35-44">35 – 44</option>
+                      <option value="45-54">45 – 54</option>
+                      <option value="55-64">55 – 64</option>
+                      <option value="65+">65+</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="trial-focus" class="block text-xs font-medium text-muted mb-1">Primary Area of Interest *</label>
+                    <select id="trial-focus" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60">
+                      <option value="">Select one…</option>
+                      <option value="Everyday Stress & Burnout">Everyday Stress &amp; Burnout</option>
+                      <option value="Anxiety & Overthinking">Anxiety &amp; Overthinking</option>
+                      <option value="Low Mood & Motivation">Low Mood &amp; Motivation</option>
+                      <option value="Sleep & Routine Building">Sleep &amp; Routine Building</option>
+                      <option value="Life Transitions & Personal Growth">Life Transitions &amp; Personal Growth</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="trial-experience" class="block text-xs font-medium text-muted mb-1">Have you tried therapy or mental health apps before?</label>
+                  <select id="trial-experience" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60">
+                    <option value="No prior experience">No, this would be my first time</option>
+                    <option value="Used mental health apps">I've tried mental health apps before</option>
+                    <option value="Attended in-person/online therapy">I've worked with a therapist before</option>
+                    <option value="Currently seeing a therapist">I'm currently working with a therapist</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="trial-reason" class="block text-xs font-medium text-muted mb-1">What do you hope to get out of participating in the trial? *</label>
+                  <textarea id="trial-reason" rows="3" placeholder="Share a few sentences about your goals or why you're interested in trying Mindful…" class="w-full px-3.5 py-2.5 rounded-xl bg-surface border border-hairline text-sm text-ink focus:outline-none focus:border-sage/60 resize-y"></textarea>
+                </div>
+
+                <div class="space-y-2.5 pt-1">
+                  <label class="flex items-start gap-2.5 cursor-pointer text-xs text-ink/85 leading-relaxed">
+                    <input id="trial-commit" type="checkbox" class="mt-0.5 accent-[#3D6652]" />
+                    <span>I am 18 or older and able to try a structured weekly session and share occasional feedback during the trial.</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 cursor-pointer text-xs text-ink/85 leading-relaxed">
+                    <input id="trial-disclaimer" type="checkbox" class="mt-0.5 accent-[#3D6652]" />
+                    <span>I understand that Mindful is an AI-assisted tool currently in development, is not emergency care, and requires reviewing the mandatory legal disclaimer on the next step.</span>
+                  </label>
+                </div>
+
+                <p id="trial-error" class="hidden text-xs text-rose-ink bg-rose-bg border border-rose-border rounded-xl px-3.5 py-2.5"></p>
+
+                <button id="trial-submit-btn" type="submit" class="w-full py-3 px-5 rounded-xl bg-sage hover:bg-sage-hover text-white text-sm font-medium transition-colors disabled:opacity-60">
+                  Continue to Mandatory Legal Disclaimer →
+                </button>
+                <p class="text-[11px] text-center text-muted">
+                  Next step: Review and agree to the mandatory legal disclaimer &amp; liability waiver to finalize your application.
+                </p>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -302,20 +472,20 @@
             <span class="hidden">CA</span>
           </div>
           <div>
-            <div class="text-[11px] font-semibold uppercase tracking-wider text-sage">Built by Cole Ashton, RN</div>
-            <h3 class="font-serif text-xl text-ink mt-0.5">Closing the mental health accessibility gap</h3>
+            <div class="text-[11px] font-semibold uppercase tracking-wider text-sage">Created by Cole Ashton, RN</div>
+            <h3 class="font-serif text-xl text-ink mt-0.5">Mental health care shouldn't be a luxury</h3>
             <p class="text-xs text-muted mt-1 max-w-lg leading-relaxed">
-              Registered Nurse and founder of Allied Tech Services &amp; AlliedRNPrep—building structured, zero-cost AI therapeutic support at the intersection of healthcare and software.
+              Learn how a Registered Nurse and founder of Allied Technologies built Mindful to put meaningful, structured support within everyone's reach at zero cost.
             </p>
           </div>
         </div>
-        <a href="#founder" data-nav="founder" class="shrink-0 px-4 py-2.5 rounded-xl border border-hairline bg-paper hover:bg-stone text-xs font-medium text-ink transition-colors">
+        <button type="button" data-nav="founder" class="shrink-0 px-4 py-2.5 rounded-xl border border-hairline bg-paper hover:bg-stone text-xs font-medium text-ink transition-colors">
           About the Founder →
-        </a>
+        </button>
       </div>
 
       <div class="rounded-2xl bg-amber-bg/70 border border-amber-border p-5 text-xs text-amber-ink leading-relaxed">
-        <strong>Important Safety Note:</strong> Mindful is an AI-powered support tool built to help with reflection, everyday coping skills, and personal wellness tracking. It is not a replacement for a licensed doctor, therapist, or emergency care. If you are experiencing a crisis, please call or text <strong>988</strong> (US/Canada) or contact your local emergency services immediately.
+        <strong>Important Note:</strong> Mindful is an AI-assisted personal support tool currently in development. It is not a replacement for emergency services or licensed medical care. If you are in crisis or need immediate help, please call or text <strong>988</strong> (US/Canada) or contact your local emergency services right away.
       </div>
     </section>
   </main>
@@ -325,9 +495,9 @@
   <!-- ======================================================================= -->
   <main id="view-founder" class="hidden flex-1">
     <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 space-y-12">
-      <a href="#home" data-nav="home" class="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink transition-colors">
+      <button type="button" data-nav="home" class="inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink transition-colors">
         ← Back to Overview
-      </a>
+      </button>
 
       <!-- Founder Hero Card -->
       <div class="rounded-2xl bg-surface border border-hairline p-6 sm:p-10 flex flex-col md:flex-row items-start md:items-center gap-8">
@@ -337,25 +507,25 @@
         </div>
         <div class="space-y-3">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium">
-            Registered Nurse · Founder &amp; Architect
+            Registered Nurse · Founder of Allied Technologies
           </div>
           <h1 class="font-serif text-3xl sm:text-4xl text-ink tracking-tight">Cole Ashton</h1>
           <p class="text-sm text-muted leading-relaxed">
-            Registered Nurse and founder of <strong class="text-ink font-medium">Allied Tech Services</strong> and <strong class="text-ink font-medium">AlliedRNPrep</strong>. Building practical, clinically grounded software at the intersection of healthcare and modern AI.
+            Registered Nurse and founder of Allied Technologies, Allied Tech Services, and AlliedRNPrep—building practical software at the intersection of healthcare and everyday life.
           </p>
         </div>
       </div>
 
-      <!-- Story & Technical History -->
+      <!-- Story & Portfolio -->
       <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
         <div class="md:col-span-7 space-y-6">
           <div class="space-y-3">
             <h2 class="font-serif text-2xl text-ink">About the Creator</h2>
             <p class="text-sm text-ink/85 leading-relaxed">
-              I'm Cole Ashton, a Registered Nurse and founder of Allied Tech Services and AlliedRNPrep. I originally created Allied Technologies during my nursing school college career, and it has since flourished into a suite of multiple platforms built at the intersection of healthcare and software.
+              I'm Cole Ashton, a Registered Nurse and founder of Allied Technologies, Allied Tech Services, and AlliedRNPrep. I started Allied Technologies during my nursing school college career, and it has since flourished into multiple platforms built for real people.
             </p>
             <p class="text-sm text-ink/85 leading-relaxed">
-              Over the years, I've designed and launched a portfolio of practical applications built for the people who keep healthcare moving—including a comprehensive nursing study platform powered by a progressive CAT NCLEX engine, a bedside nurse aid for managing shift workflows, and a schedule-matching app built to keep busy friends connected.
+              My work sits at the intersection of healthcare and software. Over the years, I've designed and launched a portfolio of practical applications built for the people who keep healthcare moving—including a comprehensive nursing study platform powered by a progressive CAT NCLEX engine, a bedside nurse aid for managing shift workflows, and a schedule-matching app built to keep busy friends connected.
             </p>
           </div>
 
@@ -365,48 +535,43 @@
               Mindful is my most ambitious project yet. Powered by a custom multi-engine AI system, Mindful was built from the ground up to deliver responsive, structured therapeutic support at zero cost.
             </p>
             <p class="text-sm text-ink/85 leading-relaxed">
-              Mental health care shouldn't be a luxury reserved for those who can afford out-of-pocket sessions. My goal with Mindful is simple: harness modern AI to close the accessibility gap and put meaningful, clinically structured support within everyone's reach.
+              Mental health care shouldn't be a luxury reserved for those who can afford out-of-pocket sessions. My goal with Mindful is simple: harness modern AI to close the accessibility gap and put meaningful support within everyone's reach.
             </p>
           </div>
         </div>
 
-        <!-- Right Column: Portfolio & CTA -->
+        <!-- Right Sidebar -->
         <div class="md:col-span-5 space-y-4">
-          <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3.5">
-            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">Allied Technologies Portfolio</h3>
+          <div class="p-5 rounded-2xl bg-surface border border-hairline space-y-3">
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-muted">Platforms Built Under Allied Technologies</h3>
             <ul class="space-y-3 text-xs text-ink/85 leading-relaxed">
               <li class="flex items-start gap-2.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
-                <span><strong class="text-ink">Mindful:</strong> Custom multi-engine AI platform delivering structured therapy sessions, clear progress tracking, and personalized care plans at zero cost.</span>
+                <span><strong class="text-ink">AlliedRNPrep:</strong> A comprehensive nursing study platform powered by a progressive CAT NCLEX engine.</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
-                <span><strong class="text-ink">AlliedRNPrep:</strong> Comprehensive nursing study platform powered by a progressive CAT NCLEX engine.</span>
+                <span><strong class="text-ink">Bedside Nurse Aid:</strong> A practical tool built to help nurses organize and manage busy shift workflows.</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
-                <span><strong class="text-ink">Bedside Nurse Aid:</strong> Practical shift-workflow tool designed for nurses on the floor.</span>
+                <span><strong class="text-ink">Schedule-Matching App:</strong> Designed to make it effortless for busy friends to find overlapping free time and stay connected.</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-sage mt-1.5 shrink-0"></span>
-                <span><strong class="text-ink">Schedule-Matching App:</strong> Built to keep busy friends and shift workers connected across demanding schedules.</span>
+                <span><strong class="text-ink">Mindful (In Development):</strong> A custom multi-engine AI platform delivering structured therapeutic support at zero cost.</span>
               </li>
             </ul>
           </div>
 
           <div class="p-5 rounded-2xl bg-sage-light/60 border border-sage-border space-y-3">
-            <h3 class="text-xs font-semibold uppercase tracking-wider text-sage">Zero-Cost Structured Care</h3>
+            <h3 class="text-xs font-semibold uppercase tracking-wider text-sage">Join the Early Trial</h3>
             <p class="text-xs text-ink/85 leading-relaxed">
-              Start with a quick getting-to-know-you check-in and book your first structured 45-minute session—completely free.
+              Interested in trying Mindful while it's in development? Submit your clinical trial application to be considered for early access.
             </p>
-            <div class="flex flex-col gap-2 pt-1">
-              <a href="/mindful/beta.html" class="w-full text-center py-2.5 px-4 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
-                Create Free Account
-              </a>
-              <a href="/mindful/beta.html" class="w-full text-center py-2.5 px-4 rounded-xl bg-surface border border-sage-border hover:bg-paper text-ink text-xs font-medium transition-colors">
-                Sign In
-              </a>
-            </div>
+            <button type="button" data-scroll="section-trial-apply" class="w-full py-2.5 px-4 rounded-xl bg-sage hover:bg-sage-hover text-white text-xs font-medium transition-colors">
+              Apply for the Clinical Trial
+            </button>
           </div>
         </div>
       </div>
@@ -414,88 +579,632 @@
   </main>
 
   <!-- ======================================================================= -->
+  <!-- VIEW 3: MANDATORY LEGAL DISCLAIMER & WAIVER (PLAIN B&W + GRAY HEADERS)  -->
+  <!-- ======================================================================= -->
+  <main id="view-legal" class="hidden flex-1 bg-white text-black font-sans">
+    <div class="max-w-3xl mx-auto px-4 sm:px-8 py-10 sm:py-14 space-y-6">
+      <!-- Document Header -->
+      <div class="border-b-2 border-black pb-5 space-y-2">
+        <div class="text-[11px] font-semibold uppercase tracking-widest text-neutral-600">
+          Mandatory Pre-Submission Legal Notice &amp; Informed Waiver
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-black">
+          Legal Disclaimer, Informed Consent &amp; Release of Liability
+        </h1>
+        <p class="text-xs text-neutral-700 leading-relaxed">
+          <strong>Effective Version:</strong> 2026-11-v1 &nbsp;|&nbsp; <strong>Platform:</strong> Mindful (Pre-Release / Clinical Trial Software) &nbsp;|&nbsp; <strong>Operator:</strong> Allied Technologies / Allied Tech Services &amp; Cole Ashton
+        </p>
+        <p class="text-xs text-black font-medium pt-1">
+          PLEASE READ THIS ENTIRE DOCUMENT CAREFULLY. BY CHECKING THE BOX, ENTERING YOUR NAME, AND CLICKING "I AGREE &amp; SUBMIT APPLICATION," YOU LEGALLY ACKNOWLEDGE AND AGREE TO ALL TERMS, DISCLAIMERS, AND WAIVERS BELOW.
+        </p>
+      </div>
+
+      <!-- Legal Sections -->
+      <div class="space-y-5 text-xs sm:text-[13px] text-neutral-900 leading-relaxed">
+        <!-- Section 1 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            1. Not Medical Advice, Mental Health Treatment, or a Licensed Provider Relationship
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              Mindful is an experimental, artificial-intelligence-powered software application designed solely for informational, educational, and self-guided reflection purposes. <strong>Mindful is NOT a licensed healthcare provider, physician, psychiatrist, psychologist, psychotherapist, counselor, or medical clinic.</strong>
+            </p>
+            <p>
+              Nothing provided through Mindful—including text responses, summaries, progress charts, care plans, or exercises—constitutes medical advice, psychiatric diagnosis, psychotherapy, clinical treatment, or a substitute for professional medical or mental health care. Although the creator of Mindful, Cole Ashton, holds credentials as a Registered Nurse (RN), he is acting <strong>solely as an independent software developer</strong> in connection with Mindful. Applying for, accessing, or using Mindful does <strong>not</strong> create a doctor-patient, nurse-patient, therapist-client, or any other healthcare provider-patient relationship.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            2. Emergency &amp; Crisis Exclusion — Not Monitored for Safety
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              <strong>MINDFUL IS NOT AN EMERGENCY SERVICE AND IS NOT MONITORED IN REAL TIME BY HUMAN CLINICIANS.</strong> Do not use Mindful if you are experiencing a medical emergency, severe psychiatric crisis, psychosis, acute substance withdrawal, thoughts of self-harm or suicide, or thoughts of harming others.
+            </p>
+            <p>
+              If you are in immediate danger or crisis, stop using this website immediately and call <strong>911</strong> (or your local emergency number), call or text <strong>988</strong> (Suicide &amp; Crisis Lifeline in the US/Canada), text <strong>HOME to 741741</strong>, or go directly to the nearest hospital emergency room.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            3. Experimental Software &amp; Artificial Intelligence Limitations ("As-Is" Disclaimer)
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              Mindful is currently in active pre-release development and early testing. The platform relies on automated artificial intelligence models that can generate inaccurate, incomplete, misleading, repetitive, or unexpected outputs ("hallucinations"). You acknowledge that AI-generated content is not verified by a licensed clinician and may fail to recognize subtle medical, medication, or psychological risks.
+            </p>
+            <p>
+              THE PLATFORM AND ALL CONTENT ARE PROVIDED STRICTLY <strong>"AS IS"</strong> AND <strong>"AS AVAILABLE"</strong> WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, CLINICAL EFFICACY, NON-INFRINGEMENT, OR UNINTERRUPTED AVAILABILITY.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            4. Assumption of Risk, Full Release of Liability &amp; Indemnification
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              You voluntarily choose to apply for and potentially participate in this software trial with full knowledge of the risks involved. You assume 100% responsibility for your decisions, health choices, medications, and actions taken or not taken based on any interaction with Mindful. Always consult a qualified physician or licensed mental health professional before starting, stopping, or changing any medical or mental health treatment.
+            </p>
+            <p>
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, YOU HEREBY IRREVOCABLY RELEASE, WAIVE, DISCHARGE, AND HOLD HARMLESS <strong>COLE ASHTON, ALLIED TECHNOLOGIES, ALLIED TECH SERVICES, MINDFUL, AND ALL AFFILIATES, CONTRACTORS, AND CONTRIBUTORS</strong> FROM ANY AND ALL CLAIMS, DEMANDS, LAWSUITS, DAMAGES, LOSSES, LIABILITIES, COSTS, OR EXPENSES (INCLUDING DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EMOTIONAL, PERSONAL INJURY, OR PUNITIVE DAMAGES) ARISING OUT OF OR RELATED TO YOUR APPLICATION, ACCESS TO, USE OF, RELIANCE ON, OR INABILITY TO USE MINDFUL—EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+            </p>
+            <p>
+              You further agree to indemnify and defend the released parties against any third-party claims arising from your misuse of the platform or violation of these terms.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            5. Privacy, Data Storage &amp; Non-HIPAA Software Notice
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              Mindful is an independent software development project and is <strong>NOT</strong> a HIPAA-covered entity, business associate, or certified electronic health record system. Information you submit in this application—and any information later entered during trial use—is stored using third-party cloud infrastructure (including Google Firebase) and processed by third-party AI model providers.
+            </p>
+            <p>
+              While reasonable technical safeguards are used, no online system can guarantee absolute security. Do not submit sensitive personal or health information that you are not comfortable sharing in an early-stage software trial. You agree that de-identified feedback and usage patterns may be reviewed internally to evaluate and improve software quality.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 6 -->
+        <section class="border border-neutral-300">
+          <div class="bg-neutral-200 px-4 py-2 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-neutral-900">
+            6. Eligibility, Trial Selection &amp; Right to Terminate Access
+          </div>
+          <div class="p-4 space-y-2 bg-white">
+            <p>
+              You affirm that you are at least <strong>18 years of age</strong> and legally capable of entering into a binding agreement. Submitting an application does not guarantee acceptance into the clinical trial. Mindful reserves the sole right to approve, deny, suspend, or revoke access at any time, for any reason, without notice or liability.
+            </p>
+            <p>
+              If any provision of this disclaimer is held invalid or unenforceable by a court of competent jurisdiction, the remaining provisions shall remain in full force and effect to the fullest extent permitted by law.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Binding Agreement & Electronic Signature Form -->
+      <form id="legal-agree-form" novalidate class="border-2 border-black bg-neutral-50 p-5 sm:p-6 space-y-4">
+        <div class="bg-neutral-200 -mx-5 -mt-5 sm:-mx-6 sm:-mt-6 px-5 sm:px-6 py-2.5 border-b border-neutral-300 font-bold uppercase tracking-wider text-[11px] text-black">
+          Binding Acknowledgment &amp; Final Submission
+        </div>
+
+        <div id="legal-applicant-summary" class="text-xs text-neutral-700 bg-white border border-neutral-300 p-3"></div>
+
+        <label class="flex items-start gap-2.5 cursor-pointer text-xs text-black leading-relaxed">
+          <input id="legal-accept-checkbox" type="checkbox" class="mt-0.5 accent-black" />
+          <span>
+            <strong>I have read, understood, and voluntarily agree</strong> to every section of this Legal Disclaimer, Informed Consent, and Release of Liability. I understand that by continuing, I waive legal claims to the fullest extent permitted by law and confirm I am 18 years of age or older.
+          </span>
+        </label>
+
+        <div>
+          <label for="legal-signature" class="block text-xs font-bold uppercase tracking-wider text-neutral-800 mb-1">
+            Electronic Signature (Type Your Full Name)
+          </label>
+          <input id="legal-signature" type="text" placeholder="Type your full legal name to sign" class="w-full px-3.5 py-2.5 bg-white border border-neutral-400 text-sm text-black focus:outline-none focus:border-black" />
+        </div>
+
+        <div id="legal-error" class="hidden text-xs text-black bg-neutral-200 border border-black p-3 leading-relaxed"></div>
+
+        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+          <button id="legal-back-btn" type="button" class="px-5 py-2.5 border border-neutral-400 bg-white hover:bg-neutral-100 text-black text-xs font-semibold uppercase tracking-wider transition-colors">
+            ← Back to Edit Application
+          </button>
+          <button id="legal-confirm-btn" type="submit" class="px-6 py-3 bg-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50">
+            I Agree &amp; Submit Application
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- ======================================================================= -->
   <!-- FOOTER                                                                  -->
   <!-- ======================================================================= -->
-  <footer class="border-t border-hairline bg-surface/60 mt-auto">
+  <footer id="site-footer" class="border-t border-hairline bg-surface/60 mt-auto">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-sage"></span>
         <span class="font-serif text-sm text-ink">Mindful</span>
-        <span>· Structured CBT by Cole Ashton</span>
+        <span>· Built by Cole Ashton · Allied Technologies</span>
       </div>
       <div class="flex items-center gap-5">
-        <a href="#home" data-nav="home" class="hover:text-ink transition-colors">Overview</a>
-        <a href="#founder" data-nav="founder" class="hover:text-ink transition-colors">About the Founder</a>
-        <a href="/mindful/beta.html" class="hover:text-ink transition-colors">Sign In</a>
-        <a href="/mindful/beta.html" class="hover:text-ink transition-colors">Get Started</a>
+        <button type="button" data-nav="home" class="hover:text-ink transition-colors">Overview</button>
+        <button type="button" data-nav="founder" class="hover:text-ink transition-colors">About the Founder</button>
+        <button type="button" data-scroll="section-trial-apply" class="hover:text-ink transition-colors">Clinical Trial</button>
       </div>
     </div>
   </footer>
 
   <!-- ======================================================================= -->
-  <!-- LIGHTWEIGHT VIEW ROUTER (HOME <-> ABOUT THE FOUNDER)                    -->
+  <!-- PAGE NAVIGATION, LEGAL FLOW & FIREBASE SUBMISSION LOGIC                 -->
   <!-- ======================================================================= -->
-  <script>
-    (function () {
-      const viewHome = document.getElementById("view-home");
-      const viewFounder = document.getElementById("view-founder");
-      const navLinks = document.querySelectorAll(".nav-link");
-      const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-      const mobileMenu = document.getElementById("mobile-menu");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateProfile,
+      signOut,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      function showView(viewName, scrollTargetId = null) {
-        const isFounder = viewName === "founder";
-        viewHome.classList.toggle("hidden", isFounder);
-        viewFounder.classList.toggle("hidden", !isFounder);
-        mobileMenu.classList.add("hidden");
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtSUbIzU45-bf2gS2lbH5iJMeq2c6piLc",
+      authDomain: "mindful-cabbd.firebaseapp.com",
+      projectId: "mindful-cabbd",
+      storageBucket: "mindful-cabbd.firebasestorage.app",
+      messagingSenderId: "663102632335",
+      appId: "1:663102632335:web:a643dc1001616692c5dbfa",
+      measurementId: "G-LVH8053YLS"
+    };
 
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // Initialize Analytics safely so sandboxed previews or ad-blockers never break the page
+    isAnalyticsSupported()
+      .then((supported) => { if (supported) getAnalytics(app); })
+      .catch(() => {});
+
+    // ---- View Router (Home <-> About the Founder <-> Legal Disclaimer) ----
+    const siteBanner = document.getElementById("site-banner");
+    const siteHeader = document.getElementById("site-header");
+    const siteFooter = document.getElementById("site-footer");
+    const viewHome = document.getElementById("view-home");
+    const viewFounder = document.getElementById("view-founder");
+    const viewLegal = document.getElementById("view-legal");
+    const navLinks = document.querySelectorAll(".nav-link");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    function showView(viewName, scrollTargetId = null) {
+      const isLegal = viewName === "legal";
+      const isFounder = viewName === "founder";
+
+      siteBanner.classList.toggle("hidden", isLegal);
+      siteHeader.classList.toggle("hidden", isLegal);
+      siteFooter.classList.toggle("hidden", isLegal);
+      viewHome.classList.toggle("hidden", isFounder || isLegal);
+      viewFounder.classList.toggle("hidden", !isFounder);
+      viewLegal.classList.toggle("hidden", !isLegal);
+      mobileMenu.classList.add("hidden");
+
+      if (!isLegal) {
         navLinks.forEach((link) => {
           const active = link.dataset.nav === (isFounder ? "founder" : "home");
           link.className = active
             ? "nav-link px-3 py-1.5 rounded-lg text-xs font-medium bg-sage-light text-sage transition-colors"
             : "nav-link px-3 py-1.5 rounded-lg text-xs font-medium text-muted hover:text-ink hover:bg-stone/60 transition-colors";
         });
+      }
 
-        if (!isFounder && scrollTargetId) {
-          const target = document.getElementById(scrollTargetId);
-          if (target) {
-            target.scrollIntoView({ behavior: "smooth", block: "start" });
-            return;
-          }
+      if (!isFounder && !isLegal && scrollTargetId) {
+        const target = document.getElementById(scrollTargetId);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Bind navigation & smooth-scroll buttons
+    document.querySelectorAll("[data-nav]").forEach((btn) => {
+      btn.addEventListener("click", () => showView(btn.dataset.nav));
+    });
+
+    document.querySelectorAll("[data-scroll]").forEach((btn) => {
+      btn.addEventListener("click", () => showView("home", btn.dataset.scroll));
+    });
+
+    mobileMenuBtn.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // ---- Step Indicator Helper ----
+    const stepPill1 = document.getElementById("step-pill-1");
+    const stepPill2 = document.getElementById("step-pill-2");
+    const stepPill3 = document.getElementById("step-pill-3");
+
+    function updateStepPills(activeStep) {
+      const pills = [stepPill1, stepPill2, stepPill3];
+      pills.forEach((pill, index) => {
+        const num = index + 1;
+        const badge = pill.querySelector("span");
+        if (num <= activeStep) {
+          pill.className = "flex items-center gap-1.5 text-sage";
+          badge.className = "w-5 h-5 rounded-full bg-sage text-white inline-flex items-center justify-center text-[10px]";
+        } else {
+          pill.className = "flex items-center gap-1.5 text-muted";
+          badge.className = "w-5 h-5 rounded-full bg-stone text-muted inline-flex items-center justify-center text-[10px]";
+        }
+      });
+    }
+
+    // ---- STEP 1: Firebase Auth Gate (Create Account / Sign In) ----
+    const trialAuthGate = document.getElementById("trial-auth-gate");
+    const authTabSignup = document.getElementById("auth-tab-signup");
+    const authTabSignin = document.getElementById("auth-tab-signin");
+    const authNameWrap = document.getElementById("auth-name-wrap");
+    const authNameInput = document.getElementById("auth-name");
+    const authEmailInput = document.getElementById("auth-email");
+    const authPasswordInput = document.getElementById("auth-password");
+    const trialAuthForm = document.getElementById("trial-auth-form");
+    const trialAuthError = document.getElementById("trial-auth-error");
+    const trialAuthSubmit = document.getElementById("trial-auth-submit");
+    const trialGoogleBtn = document.getElementById("trial-google-btn");
+
+    const trialSignedinBar = document.getElementById("trial-signedin-bar");
+    const signedinEmail = document.getElementById("signedin-email");
+    const trialSignoutBtn = document.getElementById("trial-signout-btn");
+
+    const trialForm = document.getElementById("trial-form");
+    const trialError = document.getElementById("trial-error");
+    const trialSuccessBox = document.getElementById("trial-success-box");
+    const trialStatusBadge = document.getElementById("trial-status-badge");
+
+    const legalAgreeForm = document.getElementById("legal-agree-form");
+    const legalApplicantSummary = document.getElementById("legal-applicant-summary");
+    const legalAcceptCheckbox = document.getElementById("legal-accept-checkbox");
+    const legalSignatureInput = document.getElementById("legal-signature");
+    const legalError = document.getElementById("legal-error");
+    const legalBackBtn = document.getElementById("legal-back-btn");
+    const legalConfirmBtn = document.getElementById("legal-confirm-btn");
+
+    let authMode = "signup";
+    let currentUser = null;
+    let pendingApplication = null;
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      const isSignup = mode === "signup";
+      authNameWrap.classList.toggle("hidden", !isSignup);
+      trialAuthSubmit.textContent = isSignup
+        ? "Create Account & Open Application →"
+        : "Sign In & Open Application →";
+      authTabSignup.className = isSignup
+        ? "py-2 text-xs font-medium rounded-lg bg-surface text-ink shadow-sm transition-all"
+        : "py-2 text-xs font-medium rounded-lg text-muted hover:text-ink transition-all";
+      authTabSignin.className = !isSignup
+        ? "py-2 text-xs font-medium rounded-lg bg-surface text-ink shadow-sm transition-all"
+        : "py-2 text-xs font-medium rounded-lg text-muted hover:text-ink transition-all";
+      trialAuthError.classList.add("hidden");
+    }
+
+    authTabSignup.addEventListener("click", () => setAuthMode("signup"));
+    authTabSignin.addEventListener("click", () => setAuthMode("signin"));
+
+    function showAuthError(msg) {
+      trialAuthError.textContent = msg;
+      trialAuthError.classList.remove("hidden");
+    }
+
+    trialGoogleBtn.addEventListener("click", async () => {
+      trialAuthError.classList.add("hidden");
+      try {
+        await signInWithPopup(auth, googleProvider);
+      } catch (err) {
+        showAuthError(err?.message || "Google sign-in could not be completed.");
+      }
+    });
+
+    trialAuthForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      trialAuthError.classList.add("hidden");
+
+      const name = authNameInput.value.trim();
+      const email = authEmailInput.value.trim();
+      const password = authPasswordInput.value;
+
+      if (authMode === "signup" && !name) {
+        return showAuthError("Please enter your full name.");
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return showAuthError("Please enter a valid email address.");
+      }
+      if (password.length < 6) {
+        return showAuthError("Password must be at least 6 characters.");
       }
 
-      // View switcher links
-      document.querySelectorAll("[data-nav]").forEach((el) => {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          const targetView = el.dataset.nav;
-          history.replaceState(null, "", targetView === "founder" ? "#founder" : "#home");
-          showView(targetView);
-        });
-      });
+      trialAuthSubmit.disabled = true;
+      trialAuthSubmit.textContent = authMode === "signup" ? "Creating Account…" : "Signing In…";
 
-      // Smooth-scroll section links on the homepage
-      document.querySelectorAll("[data-scroll]").forEach((el) => {
-        el.addEventListener("click", (e) => {
-          e.preventDefault();
-          const sectionId = el.dataset.scroll;
-          history.replaceState(null, "", "#home");
-          showView("home", sectionId);
-        });
-      });
-
-      // Mobile menu toggle
-      mobileMenuBtn.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-      });
-
-      // Support direct links like homepage.html#founder
-      if (window.location.hash === "#founder") {
-        showView("founder");
+      try {
+        if (authMode === "signup") {
+          const cred = await createUserWithEmailAndPassword(auth, email, password);
+          if (name) {
+            await updateProfile(cred.user, { displayName: name });
+          }
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+        }
+      } catch (err) {
+        const code = err?.code || "";
+        if (code === "auth/email-already-in-use") {
+          showAuthError("An account with this email already exists. Switch to the Sign In tab above.");
+        } else if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
+          showAuthError("Incorrect email or password. Please try again.");
+        } else {
+          showAuthError(err?.message || "Authentication failed. Please try again.");
+        }
+      } finally {
+        trialAuthSubmit.disabled = false;
+        setAuthMode(authMode);
       }
-    })();
+    });
+
+    trialSignoutBtn.addEventListener("click", async () => {
+      pendingApplication = null;
+      await signOut(auth);
+    });
+
+    function renderStatusBadge(status) {
+      const normalized = String(status || "pending").toLowerCase();
+      if (normalized === "approved") {
+        trialStatusBadge.textContent = "Status: Approved — Full Access Unlocked";
+        trialStatusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sage-light border border-sage-border text-sage text-xs font-medium";
+      } else if (normalized === "declined" || normalized === "rejected") {
+        trialStatusBadge.textContent = "Status: Not Selected at This Time";
+        trialStatusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone border border-hairline text-muted text-xs font-medium";
+      } else {
+        trialStatusBadge.textContent = "Status: Pending Review";
+        trialStatusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-bg border border-amber-border text-amber-ink text-xs font-medium";
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+
+      if (!user) {
+        updateStepPills(1);
+        trialAuthGate.classList.remove("hidden");
+        trialSignedinBar.classList.add("hidden");
+        trialForm.classList.add("hidden");
+        trialSuccessBox.classList.add("hidden");
+        return;
+      }
+
+      trialAuthGate.classList.add("hidden");
+      trialSignedinBar.classList.remove("hidden");
+      signedinEmail.textContent = user.email || "Authenticated Account";
+
+      // Pre-fill account details into Step 2 application
+      const nameInput = document.getElementById("trial-name");
+      const emailInput = document.getElementById("trial-email");
+      if (!nameInput.value && user.displayName) {
+        nameInput.value = user.displayName;
+      }
+      emailInput.value = user.email || "";
+
+      // Check if this user already submitted a clinical trial application
+      let existingData = null;
+      try {
+        const userAppSnap = await getDoc(doc(db, "users", user.uid, "profile", "clinical_trial_application"));
+        if (userAppSnap.exists()) {
+          existingData = userAppSnap.data() || {};
+        }
+      } catch (err) {
+        console.warn("Could not check user profile application:", err?.code || err?.message);
+      }
+
+      if (!existingData) {
+        try {
+          const topSnap = await getDoc(doc(db, "clinical_trial_applicants", user.uid));
+          if (topSnap.exists()) {
+            existingData = topSnap.data() || {};
+          }
+        } catch (err) {
+          console.warn("Top-level clinical_trial_applicants read skipped:", err?.code || err?.message);
+        }
+      }
+
+      if (existingData) {
+        renderStatusBadge(existingData.status || "pending");
+        trialForm.classList.add("hidden");
+        trialSuccessBox.classList.remove("hidden");
+        updateStepPills(3);
+        return;
+      }
+
+      updateStepPills(2);
+      trialSuccessBox.classList.add("hidden");
+      trialForm.classList.remove("hidden");
+    });
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function showTrialError(message) {
+      trialError.textContent = message;
+      trialError.classList.remove("hidden");
+    }
+
+    // ---- STEP 2: Clinical Trial Application Form -> Mandatory Legal Disclaimer ----
+    trialForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      trialError.classList.add("hidden");
+
+      if (!currentUser) {
+        return showTrialError("Please sign in or create an account first.");
+      }
+
+      const fullName = document.getElementById("trial-name").value.trim();
+      const email = (currentUser.email || document.getElementById("trial-email").value).trim();
+      const ageRange = document.getElementById("trial-age").value;
+      const primaryFocus = document.getElementById("trial-focus").value;
+      const priorTherapyExperience = document.getElementById("trial-experience").value;
+      const reasonForJoining = document.getElementById("trial-reason").value.trim();
+      const confirmedWeeklyCommitment = document.getElementById("trial-commit").checked;
+      const agreedToTrialTerms = document.getElementById("trial-disclaimer").checked;
+
+      if (!fullName) return showTrialError("Please enter your full name.");
+      if (!ageRange) return showTrialError("Please select your age range.");
+      if (!primaryFocus) return showTrialError("Please select your primary area of interest.");
+      if (!reasonForJoining) return showTrialError("Please share a short note about what you hope to get out of the trial.");
+      if (!confirmedWeeklyCommitment || !agreedToTrialTerms) {
+        return showTrialError("Please check both confirmation boxes before continuing.");
+      }
+
+      pendingApplication = {
+        uid: currentUser.uid,
+        fullName,
+        email,
+        emailLower: email.toLowerCase(),
+        ageRange,
+        primaryFocus,
+        priorTherapyExperience,
+        reasonForJoining,
+        confirmedWeeklyCommitment,
+        agreedToTrialTerms
+      };
+
+      legalApplicantSummary.innerHTML = `<strong>Applicant:</strong> ${escapeHtml(fullName)} &nbsp;|&nbsp; <strong>Account Email:</strong> ${escapeHtml(email)} &nbsp;|&nbsp; <strong>Focus:</strong> ${escapeHtml(primaryFocus)}`;
+      legalAcceptCheckbox.checked = false;
+      legalSignatureInput.value = "";
+      legalError.classList.add("hidden");
+      updateStepPills(3);
+      showView("legal");
+    });
+
+    legalBackBtn.addEventListener("click", () => {
+      legalError.classList.add("hidden");
+      updateStepPills(2);
+      showView("home", "section-trial-apply");
+    });
+
+    // ---- STEP 3: Legal Disclaimer Signature -> Save to Firestore under User UID ----
+    legalAgreeForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      legalError.classList.add("hidden");
+
+      if (!currentUser || !pendingApplication) {
+        showView("home", "section-trial-apply");
+        return;
+      }
+
+      const signature = legalSignatureInput.value.trim();
+      if (!legalAcceptCheckbox.checked) {
+        legalError.textContent = "You must check the acknowledgment box above to agree to the legal disclaimer and submit your application.";
+        legalError.classList.remove("hidden");
+        return;
+      }
+      if (signature.length < 2) {
+        legalError.textContent = "Please type your full name as your electronic signature before submitting.";
+        legalError.classList.remove("hidden");
+        return;
+      }
+
+      legalConfirmBtn.disabled = true;
+      legalConfirmBtn.textContent = "Submitting Application…";
+
+      const submissionPayload = {
+        ...pendingApplication,
+        legalDisclaimerAccepted: true,
+        legalDisclaimerVersion: "2026-11-v1",
+        legalSignatureName: signature,
+        legalAcceptedAtMs: Date.now(),
+        status: "pending",
+        submittedAt: serverTimestamp(),
+        submittedAtMs: Date.now()
+      };
+
+      try {
+        let savedSomewhere = false;
+        let lastError = null;
+
+        // 1. Write to the user's own profile path (already permitted by standard users/{uid} rules)
+        try {
+          await setDoc(doc(db, "users", currentUser.uid, "profile", "clinical_trial_application"), submissionPayload);
+          savedSomewhere = true;
+        } catch (err) {
+          lastError = err;
+          console.warn("users/{uid}/profile write failed:", err?.code || err?.message);
+        }
+
+        // 2. Also mirror to top-level clinical_trial_applicants/{uid} when Firestore rules allow it
+        try {
+          await setDoc(doc(db, "clinical_trial_applicants", currentUser.uid), submissionPayload);
+          savedSomewhere = true;
+        } catch (err) {
+          if (!savedSomewhere) lastError = err;
+          console.warn("clinical_trial_applicants write skipped (check Firestore rules):", err?.code || err?.message);
+        }
+
+        if (!savedSomewhere) {
+          throw lastError || new Error("Permission denied by Firestore rules.");
+        }
+
+        pendingApplication = null;
+        trialForm.reset();
+        renderStatusBadge("pending");
+        trialForm.classList.add("hidden");
+        trialSuccessBox.classList.remove("hidden");
+        updateStepPills(3);
+        showView("home", "section-trial-apply");
+      } catch (err) {
+        console.error("Clinical trial submission error:", err);
+        const code = err?.code || "unknown";
+        legalError.textContent = `Could not submit your application (${code}: ${err?.message || "Please try again"}).`;
+        legalError.classList.remove("hidden");
+      } finally {
+        legalConfirmBtn.disabled = false;
+        legalConfirmBtn.textContent = "I Agree & Submit Application";
+      }
+    });
   </script>
 </body>
 </html>
