@@ -92,6 +92,42 @@
       scrollbar-width: none;
     }
 
+    /* Animated Typing Indicator */
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 0.875rem;
+      border-radius: 1rem 1rem 1rem 0.25rem;
+      background-color: #FFFFFF;
+      border: 1px solid #E6E3DC;
+      box-shadow: 0 1px 2px rgba(31, 36, 33, 0.04);
+    }
+    .typing-indicator .typing-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 9999px;
+      background-color: #3D6652;
+      opacity: 0.35;
+      animation: typing-bounce 1.25s infinite ease-in-out;
+    }
+    .typing-indicator .typing-dot:nth-child(2) { animation-delay: 0.16s; }
+    .typing-indicator .typing-dot:nth-child(3) { animation-delay: 0.32s; }
+    .typing-indicator .typing-label {
+      font-size: 0.6875rem;
+      line-height: 1;
+      color: #636B66;
+      margin-left: 0.25rem;
+      white-space: nowrap;
+    }
+    @keyframes typing-bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30% { transform: translateY(-0.25rem); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .typing-indicator .typing-dot { animation: none; opacity: 0.55; }
+    }
+
     /* Elevation & Surface Cards */
     .m-card {
       background: #FFFFFF;
@@ -1713,7 +1749,7 @@ UPDATED_PROMPT:
 
     function normalizeChartData(raw) {
       if (!raw || typeof raw !== "object") return null;
-      const completedAtMs = parseTimestampMs(raw.completedAtMs || raw.completedAt || raw.completed_at || raw.last_intake_date || raw.lastIntakeDate || raw.intakeCompletedAt || raw.updatedAt) || (Object.keys(raw).length ? Date.now() : 0);
+      const completedAtMs = parseTimestampMs(raw.completedAtMs || raw.completedAt || raw.completed_at || raw.last_intake_date || raw.lastIntakeDate || raw.intakeCompletedAt) || 0;
       const medHistory = [], seenCond = new Set();
       const pushCond = (item) => {
         if (!item) return;
@@ -2000,7 +2036,8 @@ UPDATED_PROMPT:
               "HTTP-Referer": window.location.origin || "https://mindful-cabbd.web.app",
               "X-Title": "Mindful Structured CBT"
             },
-            body: JSON.stringify({ model: eng.slug, messages, temperature })
+            body: JSON.stringify({ model: eng.slug, messages, temperature }),
+            signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(45000) : undefined
           });
           if (!res.ok) {
             const errText = await res.text().catch(() => "");
@@ -2354,8 +2391,17 @@ UPDATED_PROMPT:
     // =========================================================================
     // 7. DASHBOARD & MEMBERSHIP UI RENDERING
     // =========================================================================
-    function renderMessageBubbles(container, msgs, isCompact = false) {
+    function renderMessageBubbles(container, msgs, isCompact = false, typingLabel = "") {
       if (!container) return;
+      const typingHtml = typingLabel ? `
+          <div class="flex justify-start">
+            <div class="typing-indicator" role="status" aria-live="polite" aria-label="${escapeHtml(typingLabel)}">
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-dot"></span>
+              <span class="typing-label">${escapeHtml(typingLabel)}</span>
+            </div>
+          </div>` : "";
       container.innerHTML = msgs.map((m) => {
         const isUser = m.role === "user";
         return `
@@ -2368,13 +2414,13 @@ UPDATED_PROMPT:
               <div>${formatClinicalMarkdown(m.content)}</div>
             </div>
           </div>`;
-      }).join("");
+      }).join("") + typingHtml;
       container.scrollTop = container.scrollHeight;
     }
 
-    const renderChatMessages = () => renderMessageBubbles($("chat-messages"), state.messages);
-    const renderIntakeMessages = () => renderMessageBubbles($("intake-messages"), state.intakeMessages);
-    const renderTriageMessages = () => renderMessageBubbles($("triage-messages"), state.triageMessages, true);
+    const renderChatMessages = () => renderMessageBubbles($("chat-messages"), state.messages, false, state.busy.chat ? "Therapist is typing" : "");
+    const renderIntakeMessages = () => renderMessageBubbles($("intake-messages"), state.intakeMessages, false, state.busy.intake ? "Intake clinician is typing" : "");
+    const renderTriageMessages = () => renderMessageBubbles($("triage-messages"), state.triageMessages, true, state.busy.triage ? "Triage clinician is typing" : "");
 
     function applyDiagnosticsVisibility() {
       const on = Boolean(state.diagnosticsEnabled);
@@ -3201,6 +3247,7 @@ UPDATED_PROMPT:
       state.busy.chat = true;
       $("chat-send-btn").disabled = true;
       $("chat-send-btn").textContent = "…";
+      renderChatMessages();
       try {
         const rawReply = await callOpenRouter({
           engineKey: "conversation",
@@ -3210,10 +3257,10 @@ UPDATED_PROMPT:
           ],
           temperature: 0.65
         });
+        if (!state.user || !getActiveAppointment()) return;
         const reply = extractAndApplyLivePrescriptions(rawReply);
         state.messages.push({ role: "assistant", content: reply, timestamp: Date.now() });
         saveLiveDraft();
-        renderChatMessages();
       } catch (err) {
         logTelemetry(`Session chat error: ${err.message}`, "error");
         showToast("Could not send message. Please try again.");
@@ -3221,10 +3268,15 @@ UPDATED_PROMPT:
         state.busy.chat = false;
         $("chat-send-btn").disabled = false;
         $("chat-send-btn").textContent = "Send";
+        renderChatMessages();
       }
     }
 
     async function handleEndSessionClick() {
+      if (state.busy.chat) {
+        showToast("Please wait for the therapist to finish responding.");
+        return;
+      }
       if (!state.messages.some((m) => m.role === "user")) {
         if (!await showConfirm({ title: "Leave empty session?", body: "You haven't sent any messages yet. Leave the room without saving a clinical note?", okLabel: "Leave Without Saving", cancelLabel: "Stay in Session" })) return;
         const appt = getActiveAppointment();
@@ -3249,6 +3301,10 @@ UPDATED_PROMPT:
 
     async function completeSessionWithCheckin() {
       if (state.busy.saving) return;
+      if (state.busy.chat) {
+        showToast("Please wait for the therapist to finish responding.");
+        return;
+      }
       state.busy.saving = true;
       $("checkin-submit-btn").disabled = true;
       const getVal = (id) => parseInt(document.querySelector(`input[name="phq_${id}"]:checked`)?.value || "0", 10);
@@ -3340,6 +3396,7 @@ UPDATED_PROMPT:
 
       state.busy.intake = true;
       $("intake-send-btn").disabled = true;
+      renderIntakeMessages();
       try {
         const reply = await callOpenRouter({
           engineKey: "intake",
@@ -3352,10 +3409,10 @@ UPDATED_PROMPT:
           ],
           temperature: 0.45
         });
+        if (!state.user) return;
         state.intakeMessages.push({ role: "assistant", content: reply, timestamp: Date.now() });
-        renderIntakeMessages();
       } catch (err) { logTelemetry(`Intake message error: ${err.message}`, "error"); showToast("Could not reach intake clinician. Please try again."); }
-      finally { state.busy.intake = false; $("intake-send-btn").disabled = false; }
+      finally { state.busy.intake = false; $("intake-send-btn").disabled = false; renderIntakeMessages(); }
     }
 
     async function completeAndSaveIntake() {
@@ -3430,6 +3487,7 @@ SUMMARY:
     }
 
     function openTriageModal() {
+      if (state.busy.triage) return showToast("Please wait for the triage clinician to finish.");
       state.triageMessages = [{ role: "assistant", content: "I'm here to assess whether you need an urgent session right now. Briefly tell me what's happening and how intense your distress feels.", timestamp: Date.now() }];
       $("triage-outcome-bar").classList.add("hidden");
       $("triage-unlock-btn").classList.add("hidden");
@@ -3449,6 +3507,7 @@ SUMMARY:
 
       state.busy.triage = true;
       $("triage-send-btn").disabled = true;
+      renderTriageMessages();
       try {
         const raw = await callOpenRouter({
           engineKey: "intake",
@@ -3460,8 +3519,8 @@ SUMMARY:
         });
         const sec = parsePlainTextSections(raw, [{ key: "DECISION", aliases: ["OUTCOME"] }, { key: "CLINICAL_NOTE", aliases: ["NOTE", "SUMMARY"] }, { key: "RESPONSE", aliases: ["MESSAGE", "REPLY"] }]);
         const decision = (sec.DECISION || "NEED_MORE_INFO").toUpperCase();
+        if (!state.user) return;
         state.triageMessages.push({ role: "assistant", content: sec.RESPONSE || sec._raw, timestamp: Date.now() });
-        renderTriageMessages();
 
         if (/APPROVE_URGENT|DEFER|EMERGENCY/.test(decision)) {
           const granted = decision.includes("APPROVE_URGENT");
@@ -3481,7 +3540,7 @@ SUMMARY:
           renderMyChart(); renderScheduleView();
         }
       } catch (err) { logTelemetry(`Triage error: ${err.message}`, "error"); showToast("Could not complete triage right now."); }
-      finally { state.busy.triage = false; $("triage-send-btn").disabled = false; }
+      finally { state.busy.triage = false; $("triage-send-btn").disabled = false; renderTriageMessages(); }
     }
 
     function exportMedicalRecordPdf() {
@@ -3624,6 +3683,7 @@ SUMMARY:
     const handleSignOut = async () => {
       clearLiveDraft();
       resetInMemoryUserState();
+      ["checkin-modal", "saving-modal", "triage-modal", "edit-profile-modal", "confirm-modal", "rx-modal"].forEach((id) => $(id)?.classList.add("hidden"));
       $("auth-form").reset();
       $("auth-error").classList.add("hidden");
       await signOut(auth);
@@ -3706,7 +3766,7 @@ SUMMARY:
       e.preventDefault();
       const name = $("med-name").value.trim();
       if (!name) return;
-      if (!state.chart) state.chart = { completedAtMs: Date.now(), medical_history: [], medications: [], labs_and_baselines: "", summary: "" };
+      if (!state.chart) state.chart = { completedAtMs: 0, medical_history: [], medications: [], labs_and_baselines: "", summary: "" };
       state.chart.medications.push({ name, dosage: $("med-dosage").value.trim(), timing: $("med-timing").value.trim(), status: "Active" });
       $("med-name").value = $("med-dosage").value = $("med-timing").value = "";
       await saveProfileDoc("chart", state.chart, "chart", false);
@@ -3818,6 +3878,7 @@ SUMMARY:
       state.user = user;
       if (!user) {
         resetInMemoryUserState();
+        ["checkin-modal", "saving-modal", "triage-modal", "edit-profile-modal", "confirm-modal", "rx-modal"].forEach((id) => $(id)?.classList.add("hidden"));
         $("app-shell").classList.add("hidden");
         $("intake-gate").classList.add("hidden");
         $("auth-gate").classList.remove("hidden");
