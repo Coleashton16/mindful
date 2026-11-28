@@ -2,14 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FAF9F6" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mindful" />
+  <meta name="application-name" content="Mindful" />
   <title>Mindful — Structured CBT</title>
 
-  <!-- Inline PWA Manifest -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"Mindful — Structured CBT","short_name":"Mindful","start_url":".","display":"standalone","background_color":"#FAF9F6","theme_color":"#3D6652"}' />
+  <!-- PWA manifest: href is generated at runtime (same-origin blob) so Chrome treats this file as installable -->
+  <link id="pwa-manifest" rel="manifest" />
+  <script>
+    // =====================================================================
+    // PWA BOOTSTRAP — builds a real same-origin manifest + PNG icons in-memory
+    // (a single HTML file cannot ship separate manifest.json / icon files).
+    // =====================================================================
+    (function () {
+      var SAGE = "#3D6652", PAPER = "#FAF9F6";
+
+      function drawIcon(size, maskable) {
+        var c = document.createElement("canvas");
+        c.width = c.height = size;
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = SAGE;
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = PAPER;
+        if (maskable) {
+          // Keep artwork inside the maskable safe zone (80% center circle).
+          ctx.beginPath();
+          ctx.arc(size / 2, size / 2, size * 0.34, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          var pad = size * 0.14, w = size - pad * 2, r = size * 0.16;
+          ctx.beginPath();
+          ctx.moveTo(pad + r, pad);
+          ctx.arcTo(pad + w, pad, pad + w, pad + w, r);
+          ctx.arcTo(pad + w, pad + w, pad, pad + w, r);
+          ctx.arcTo(pad, pad + w, pad, pad, r);
+          ctx.arcTo(pad, pad, pad + w, pad, r);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = SAGE;
+        ctx.font = '600 ' + Math.round(size * 0.42) + 'px Georgia, "Times New Roman", serif';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("M", size / 2, size * 0.52);
+        return c.toDataURL("image/png");
+      }
+
+      try {
+        var startUrl = location.origin + location.pathname;
+        var scopeUrl = startUrl.replace(/[^/]*$/, "") || "/";
+        var icon192 = drawIcon(192, false);
+        var icon512 = drawIcon(512, false);
+        var iconMaskable = drawIcon(512, true);
+
+        var manifest = {
+          id: startUrl,
+          name: "Mindful — Structured CBT",
+          short_name: "Mindful",
+          description: "Structured CBT therapy sessions, PHQ-4 progress tracking, and between-session clinical tools.",
+          start_url: startUrl,
+          scope: scopeUrl,
+          display: "standalone",
+          display_override: ["standalone", "minimal-ui"],
+          orientation: "any",
+          background_color: PAPER,
+          theme_color: SAGE,
+          icons: [
+            { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+            { src: icon512, sizes: "512x512", type: "image/png", purpose: "any" },
+            { src: iconMaskable, sizes: "512x512", type: "image/png", purpose: "maskable" }
+          ]
+        };
+
+        var manifestUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
+        document.getElementById("pwa-manifest").href = manifestUrl;
+
+        var appleIcon = document.createElement("link");
+        appleIcon.rel = "apple-touch-icon";
+        appleIcon.href = icon192;
+        document.head.appendChild(appleIcon);
+      } catch (err) {
+        console.warn("Mindful PWA manifest could not be generated:", err);
+      }
+
+      // Capture the install prompt early; the app module reads this on boot.
+      window.__mindfulInstall = { deferredPrompt: null, installed: false };
+      window.addEventListener("beforeinstallprompt", function (e) {
+        e.preventDefault();
+        window.__mindfulInstall.deferredPrompt = e;
+        window.dispatchEvent(new Event("mindful-installable"));
+      });
+      window.addEventListener("appinstalled", function () {
+        window.__mindfulInstall.deferredPrompt = null;
+        window.__mindfulInstall.installed = true;
+        window.dispatchEvent(new Event("mindful-installed"));
+      });
+    })();
+  </script>
 
   <!-- Typography: Inter + Newsreader -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -267,10 +360,24 @@
       transform: rotate(180deg);
     }
 
-    /* Safe-area padding for mobile bottom tab bar */
+    /* Safe-area padding for mobile bottom tab bar (incl. installed/standalone mode) */
     @media (max-width: 1023px) {
       .mobile-bottom-spacer {
-        padding-bottom: 5.5rem;
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+      }
+      #mobile-tab-bar {
+        padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));
+      }
+    }
+    /* Installed app: keep the toast clear of the home indicator */
+    @media (display-mode: standalone) {
+      #toast-box {
+        bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+      }
+    }
+    @media (display-mode: standalone) and (min-width: 1024px) {
+      #toast-box {
+        bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
       }
     }
   </style>
@@ -532,7 +639,7 @@
     </header>
 
     <!-- MOBILE BOTTOM TAB BAR -->
-    <nav class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur border-t border-hairline grid grid-cols-5 px-1 py-1.5">
+    <nav id="mobile-tab-bar" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-surface/95 backdrop-blur border-t border-hairline grid grid-cols-5 px-1 py-1.5">
       <button data-tab="session" class="nav-tab flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-lg text-[10px] font-medium transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
         <span>Home</span>
@@ -995,6 +1102,7 @@
                   </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
+                  <button id="install-app-btn" type="button" class="m-btn-secondary !min-h-[38px] !border-sage-border !bg-sage-light !text-sage text-xs">Install App</button>
                   <button id="edit-profile-btn" type="button" class="m-btn-secondary !min-h-[38px] text-xs">Edit Profile</button>
                   <button id="signout-btn" type="button" class="min-h-[38px] px-3.5 py-2 rounded-xl border border-rose-border bg-rose-bg text-xs font-medium text-rose-ink hover:opacity-90 transition-opacity">Sign Out</button>
                 </div>
@@ -3776,6 +3884,46 @@ SUMMARY:
     $("rx-modal-close").onclick = $("rx-modal-cancel").onclick = closePrescriptionModal;
     $("rx-modal-form").onsubmit = handlePrescriptionFormSubmit;
     $("export-pdf-btn").onclick = exportMedicalRecordPdf;
+
+    // ---- PWA / Install-as-app controls ----
+    const isStandaloneApp = () => Boolean(window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true);
+    const installAppBtn = $("install-app-btn");
+
+    const refreshInstallButton = () => {
+      if (!installAppBtn) return;
+      installAppBtn.classList.toggle("hidden", isStandaloneApp());
+      installAppBtn.textContent = window.__mindfulInstall?.deferredPrompt ? "Install Mindful" : "Install App";
+    };
+    window.addEventListener("mindful-installable", refreshInstallButton);
+    window.addEventListener("mindful-installed", () => {
+      refreshInstallButton();
+      showToast("Mindful was installed as a standalone app.");
+    });
+    if (installAppBtn) {
+      installAppBtn.onclick = async () => {
+        if (isStandaloneApp()) return showToast("Mindful is already running as an installed app.");
+        const promptEvent = window.__mindfulInstall?.deferredPrompt;
+        if (promptEvent) {
+          try {
+            promptEvent.prompt();
+            const choice = await promptEvent.userChoice;
+            showToast(choice?.outcome === "accepted" ? "Installing Mindful…" : "Install dismissed. You can install anytime from this menu.");
+          } catch (_) {
+            showToast("Install prompt unavailable. Use the browser menu to install.");
+          }
+          window.__mindfulInstall.deferredPrompt = null;
+          refreshInstallButton();
+          return;
+        }
+        const ua = navigator.userAgent || "";
+        if (/iPhone|iPad|iPod/.test(ua)) {
+          showToast("On iPhone/iPad: tap Share → “Add to Home Screen” to install Mindful.", 6500);
+        } else {
+          showToast("In Chrome: open the ⋮ menu → “Cast, save, and share” → “Install page as app” (or click the install icon in the address bar).", 7000);
+        }
+      };
+    }
+    refreshInstallButton();
 
     $("edit-profile-btn").onclick = () => {
       $("edit-name").value = state.userProfile.name || "";
